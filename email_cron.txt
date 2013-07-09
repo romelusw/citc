@@ -1,0 +1,3 @@
+#  --- Cron Comment ---
+# Min - Hour - Dom - Mon - Dow - CMD
+* 13 12 06 * ~/Desktop/runner.sh 
