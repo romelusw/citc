@@ -2,7 +2,7 @@
 // Report running errors only (ignoring notices)
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
-include_once("functions.php");
+include_once("common_utils/functions.php");
 
 $u_firstName;
 $u_lastName;
@@ -12,7 +12,7 @@ $u_newAcct;
 $app;
 $token;
 $errMsgs = array();
-$config = parse_ini_file("citc_config.ini");
+$config = parse_ini_file("conf/citc_config.ini");
 
 // If there is a cookie stating you are already identified, redirect
 if(isset($_COOKIE["citc_rem"]) || $_SESSION["recognized"]) {
@@ -22,8 +22,8 @@ if(isset($_COOKIE["citc_rem"]) || $_SESSION["recognized"]) {
 // Handle submissions
 if ($_POST) {
     include_once("volunteerSignUp.php");
-    include_once("formValidator.php");
-    include_once("session.php");
+    include_once("common_utils/formValidator.php");
+    include_once("common_utils/session.php");
 
     // User Inputs
     $u_firstName = Utils::normalize($_POST["userFName"]);

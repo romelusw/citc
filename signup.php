@@ -2,7 +2,7 @@
 // Report running errors only (ignoring notices)
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
-include_once("functions.php");
+include_once("common_utils/functions.php");
 
 // Global Variables
 $errMsgs;
@@ -10,7 +10,7 @@ $show = "form";
 
 // Handle POST requests
 if ($_POST) {
-    include_once("formValidator.php");
+    include_once("common_utils/formValidator.php");
     include_once("volunteerSignUp.php");
 
     $vol_firstName = Utils::normalize($_POST["vol_firstName"]);

@@ -2,14 +2,14 @@
 // Report simple running errors
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
-include_once("functions.php");
-include_once("session.php");
+include_once("common_utils/functions.php");
+include_once("common_utils/session.php");
 include_once("volunteerSignUp.php");
 
 // Global variables
 $isAdmin;
 $app;
-$config = parse_ini_file("citc_config.ini");
+$config = parse_ini_file("conf/citc_config.ini");
 $sess = new Session("citc_s");
 
 if (isset($_SESSION["recognized"])) {

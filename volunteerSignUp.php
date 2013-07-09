@@ -1,5 +1,5 @@
 <?php 
-include_once("functions.php");
+include_once("common_utils/functions.php");
 
 define("admin", 0);
 define("norm_users", 1);
