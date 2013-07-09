@@ -29,7 +29,7 @@ if (isset($_GET["u_email"]) && isset($_GET["rec_key"])) {
 if ($_POST) {
     include_once("common_utils/fformValidator.php");
     include_once("volunteerSignUp.php");
-    
+
     $sess = new Session("citc_rec");
     $userEmail = isset($_SESSION["u_email"]) ? $_SESSION["u_email"]: "";
     $userQA = isset($_SESSION["u_qa"]) ? $_SESSION["u_qa"]: "";

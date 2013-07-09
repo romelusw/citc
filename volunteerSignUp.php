@@ -149,7 +149,8 @@ class VolunteerAppCreator {
      */
     function retrieveUsers() {
         return $this->connection->runQuery("SELECT fname, lname, email, created,
-                lastloggedin, usertype FROM users "); 
+            lastloggedin, usertype FROM users
+            ORDER BY created"); 
     }
 
     /**
@@ -163,9 +164,9 @@ class VolunteerAppCreator {
         $email = $this->connection->cleanSQLInputs($email);
 
         return $this->connection->runQuery("SELECT count(*) 
-                FROM   users 
-                WHERE  email = '$email' 
-                LIMIT  1")->fetch_row()[0] > 0;
+            FROM   users 
+            WHERE  email = '$email' 
+            LIMIT  1")->fetch_row()[0] > 0;
     }
 
     /**
@@ -178,9 +179,9 @@ class VolunteerAppCreator {
         $email = $this->connection->cleanSQLInputs($uemail);
 
         $this->connection->runQuery("UPDATE users 
-                SET lastloggedin = '". date("Y-m-d H:i:s") . 
-                "' WHERE  email = '" . $email . "' 
-                LIMIT 1");
+            SET lastloggedin = '". date("Y-m-d H:i:s") . 
+            "' WHERE  email = '" . $email . "' 
+            LIMIT 1");
     }
 
     /**
@@ -196,10 +197,10 @@ class VolunteerAppCreator {
         $token = $this->connection->cleanSQLInputs($utoken);
 
         return $this->connection->runQuery("SELECT count(*) 
-                FROM   users 
-                WHERE  email = '$email' 
-                AND token = '$token' 
-                LIMIT  1")->fetch_row()[0] == 1;
+            FROM   users 
+            WHERE  email = '$email' 
+            AND token = '$token' 
+            LIMIT  1")->fetch_row()[0] == 1;
     } 
 
     /**
@@ -214,9 +215,9 @@ class VolunteerAppCreator {
         $token = $this->connection->cleanSQLInputs($utoken);
 
         $this->connection->runQuery("UPDATE users 
-                SET    token = '$token' 
-                WHERE  email = '$email' 
-                LIMIT 1"); 
+            SET    token = '$token' 
+            WHERE  email = '$email' 
+            LIMIT 1"); 
     }
 
     /**
@@ -230,9 +231,9 @@ class VolunteerAppCreator {
         $email = $this->connection->cleanSQLInputs($email);
 
         return $this->connection->runQuery("SELECT security_q, security_a 
-                FROM   users 
-                WHERE  email = '$email' 
-                LIMIT  1");
+            FROM   users 
+            WHERE  email = '$email' 
+            LIMIT  1");
     }
 
     /**
@@ -344,9 +345,9 @@ class VolunteerAppCreator {
         $email = $this->connection->cleanSQLInputs($uemail);
 
         return $this->connection->runQuery("SELECT usertype 
-                FROM   users 
-                WHERE  email = '$email' 
-                LIMIT  1")->fetch_row()[0] == admin;
+            FROM   users 
+            WHERE  email = '$email' 
+            LIMIT  1")->fetch_row()[0] == admin;
     }
 
     /**
@@ -387,7 +388,9 @@ class VolunteerAppCreator {
         $date = $this->connection->cleanSQLInputs($udate);
 
         return $this->connection->runQuery("SELECT fname, lname, email, phone,
-            time_in, time_out, accepted FROM volunteers WHERE volunteer_day = '$date' ");
+            time_in, time_out, accepted FROM volunteers 
+            WHERE volunteer_day = '$date'
+            ORDER BY lname");
     }
 
     /**
@@ -413,7 +416,8 @@ class VolunteerAppCreator {
      */
     function retrieveVolunteerDatesInfo() {
         return $this->connection->runQuery("SELECT vol_day, curr_registered,
-            max_registered FROM volunteer_audit");
+            max_registered FROM volunteer_audit
+            ORDER BY vol_day");
     }
 
     /**
@@ -438,6 +442,17 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Retrieves all past volunteer event years
+     *
+     * @return (MySQLi_Result) the result of the query
+     */
+    function retrievePastEventYears() {
+        return $this->connection->runQuery("SELECT DISTINCT Year(vol_day)
+            FROM volunteer_audit
+            WHERE Year(vol_day) < Year(now())");
+    }
+
+    /**
      * Builds an HTML table Calendar for volunteers who have registered
      *
      * @param (String) $month the month to render the calendar
@@ -450,12 +465,12 @@ class VolunteerAppCreator {
         $month = $this->connection->cleanSQLInputs($month);
         $year = $this->connection->cleanSQLInputs($year);
 
-        // Unix timestamp for the next event
+        // Unix timestamp for the event month
         $eventTimestamp = mktime(0,0,0,$month,1,$year);
         // Number of days in the month
         $daysInMonth = date("t", $eventTimestamp);
         // First Day of the month in numeric form
-        $firstDay = getdate($eventTimestamp)['wday'];
+        $firstNumericDayOfMonth = getdate($eventTimestamp)['wday'];
         $rendereredTable ="<table><tr><th colspan='7'>" .
             date('F', $eventTimestamp) . " $year </th></tr>";
 
@@ -465,22 +480,28 @@ class VolunteerAppCreator {
             ."</td></tr>";
 
         // Build Rows
-        for ($i = 0; $i < $daysInMonth + $firstDay; $i++) {
-            $currDay = $i - $firstDay + 1;
-            if($i % 7 == 0 ) $resultTable .= "<tr>";
-            if($i < $firstDay) $resultTable .= "<td>&nbsp;</td>";
-            else {
-                $day = $currDay;
-                $date = date("Y-m-d",  mktime(0,0,0,$month,$currDay,$year));
-                if (in_array($date, $eventDays)) { 
-                    $rendereredTable .= "<td class='active'>".
-                    "<a href=".$_SERVER['PHP_SELF']."?specificDate=$date>$day"
-                    . "</a></td>";
+        $numOfCellsNeeded = $daysInMonth + $firstNumericDayOfMonth;
+        for ($i = 0; $i < $numOfCellsNeeded; $i++) {
+            // Begining of the month
+            if($i % 7 == 0 ) $rendereredTable .= "<tr>";
+
+            // Haven't reached first day yet
+            if($i < $firstNumericDayOfMonth) {
+                $rendereredTable .= "<td>&nbsp;</td>";
+            } else {
+                $todayTimeStamp = mktime(0,0,0,$month,$i - $firstNumericDayOfMonth + 1,$year);
+                $today = date("j", $todayTimeStamp);
+                $todayDate = date("Y-m-d", $todayTimeStamp);
+
+                if (in_array($todayDate, $eventDays)) { 
+                    $rendereredTable .= "<td class='active'><a href='"
+                    .$_SERVER['PHP_SELF']. "?specificDate=" .$todayDate.
+                    "'>" .$today. "</a></td>";
                 } else {
-                    $rendereredTable .= "<td>$day</td>";
+                    $rendereredTable .= "<td>$today</td>";
                 }
+                if($i % 7 == 6 || $today == $daysInMonth) $rendereredTable .= "</tr>";
             }
-            if($i % 7 == 6 || $currDay == $daysInMonth) $rendereredTable .= "</tr>";
         }
         $rendereredTable .=  "</table>";
         return $rendereredTable;
