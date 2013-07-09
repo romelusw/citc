@@ -84,7 +84,7 @@ class Utils {
      * @param (String) $str2 string to compare
      * @return (Boolean) flag indicating equality check
      */
-    function equalIgnoreCase($str1, $str2) {
+    public static function equalIgnoreCase($str1, $str2) {
         return strcasecmp($str1, $str2) == 0;
     }
 
@@ -94,7 +94,7 @@ class Utils {
      * @return (Array) containing the prevalent info of the requested URL
      */
     public static function retrieveRequestInfo() {
-        parse_str(parse_url($_SERVER["REQUEST_URI"])["query"], $result);
+        parse_str(urldecode(parse_url($_SERVER["REQUEST_URI"])["query"]), $result);
         $result["method"] = $_SERVER['REQUEST_METHOD'];
         $result["uri"] = $_SERVER["REQUEST_URI"];
         return $result;

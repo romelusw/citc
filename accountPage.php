@@ -41,9 +41,7 @@ if (isset($_SESSION["recognized"])) {
         <a href="logout.php" title="Logout">Logout</a>
         <div id="content">
 <? echo $app->buildVolunteerCalendar(12, 2013, $app->retrieveVolunteerDates(date("Y"))); if ($isAdmin): ?>
-<? 
-global $app;
-if (isset($_POST["pdate"]) && isset($_POST["pmaxreg"])) {
+<? if (isset($_POST["pdate"]) && isset($_POST["pmaxreg"])) {
     $app->insertVolunteerDate($_POST["pdate"], $_POST["pmaxreg"]);
 }
 ?>
@@ -56,9 +54,7 @@ if (isset($_POST["pdate"]) && isset($_POST["pmaxreg"])) {
 <table class="selectable">
     <tr><th colspan="3">Volunteer Dates</th></tr>
     <tr><td>Volunteer Day</td><td>Currently Registered</td><td>Maximum registered</td></tr>
-<?php
-global $app;
-$result = $app->retrieveVolunteerDatesInfo();
+<? $result = $app->retrieveVolunteerDatesInfo();
 
 while ($row = $result->fetch_row()) {
     $date = date("l", strtotime($row[0]));
@@ -76,7 +72,7 @@ while ($row = $result->fetch_row()) {
             </ol>
             <ul class="actions">
                 <li>
-                    <button class="actionButton">Edit</button>
+                    <button data-reqType="post" data-action="editVolunteerDates" class="actionButton">Edit</button>
                 </li>
             </ul>
             <span class="clear"></span>
@@ -130,8 +126,8 @@ while ($row = $result->fetch_row()) {
             </ol>
             <ul class="actions">
                 <li>
-                    <button class="actionButton">Accept</button>
-                    <button class="actionButton">Deny</button>
+                    <button data-reqType="post" data-action="acceptUsers" class="actionButton">Accept</button>
+                    <button data-reqType="delete" data-action="denyUsers" class="actionButton">Deny</button>
                 </li>
             </ul>
             <span class="clear"></span>

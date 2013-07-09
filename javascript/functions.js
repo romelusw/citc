@@ -38,19 +38,27 @@ $(document).ready(function () {
     $(".actionButton").click(function () {
         var parent = $(this).parents(".actionContainer");
         var itemsToModify = $(parent).children(".itemsToModify").children("li");
-        console.log(itemsToModify);
+
+        var actionItems = "";
+        var action = $(this).attr("data-action");
+        var reqType = $(this).attr("data-reqType");
+        $(itemsToModify).each(function(i, val) {
+            var elem = $.trim($(val).text());
+            actionItems += (i == itemsToModify.length - 1) ? elem : elem + "|";
+        });
 
         // Make ajax request
-        // $.ajax({
-        //     url: "volunteerModify.php?user=" + $(this).attr("data-user"),
-        //     context: $("#holder"),
-        //     data: "",
-        //     success: function(result,textStatus) {
-        //         // $('#row'+row).fadeOut('fast');
-        //         console.log("the data" + data + textStatus);
-        //         // location.reload();
-        //     }
-        // });
+        var sendUrl = "volunteerModify.php?" + encodeURIComponent(action + "=" + actionItems);
+        $.ajax({
+            url: sendUrl,
+            context: $(parent),
+            type: reqType,
+            success: function(result, textStatus) {
+                // $('#row'+row).fadeOut('fast');
+                console.log(result + " \nStatus: " + textStatus);
+                // location.reload();
+            }
+        });
     });
     // Wait Function
     $.fn.wait = function (callback, time) {
