@@ -90,11 +90,13 @@ button:focus, button:hover, button:active {
 
 .disabled {
     background: #dddddd !important;
+    cursor: default !important;
     color: #aaa;
 }
 
 .disabled:hover {
     background: #dddddd !important;
+    cursor: default;
 }
 
 .active a {
@@ -151,9 +153,18 @@ button:focus, button:hover, button:active {
     font-weight: 700;
 }
 
-.highlight {
-    background: #e5f1d8!important;
-    border: 1px solid #9cc867;
+.selectable tr.granted {
+    background-color: #e2f2d5 !important;
+}
+
+.selectable tr.granted:hover {
+    cursor: default !important;
+    background-color: #e2f2d5 !important;
+}
+
+.selectable tr.highlight {
+    background: #fcfce2 !important;
+    border: 1px solid #9cc867 !important;
 }
 
 .list {
@@ -336,11 +347,11 @@ th {
     text-transform: uppercase;
 }
 
-tr:not(:first-child) + :hover {
-    background-color: #ececec!important;
+.selectable tr:not(:first-child) + :hover {
+    background-color: #ececec;
 }
 
-tr:not(:first-child) + :nth-of-type(odd) {
+.selectable tr:not(:first-child) + :nth-of-type(odd) {
     background-color: #f4f4f4;
 }
 

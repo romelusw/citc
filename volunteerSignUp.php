@@ -49,7 +49,7 @@ class VolunteerAppCreator {
            `volunteer_day` date NOT NULL,
            `time_in` time NOT NULL,
            `time_out` time NOT NULL,
-           `accepted` int(2) NOT NULL DEFAULT 0,
+           `accepted` int(1) NOT NULL DEFAULT 0,
            UNIQUE KEY `distinct_users_key` (`email`, `volunteer_day`),
            PRIMARY KEY (`vol_id`))");
 
@@ -375,6 +375,22 @@ class VolunteerAppCreator {
             (fname, lname, email, phone, volunteer_day, time_in, time_out)
             VALUES ('$fname', '$lname', '$email', '$phone', '$v_day', '$tin',
             '$tout') "); 
+    }
+
+    /**
+     * Accepts/Rejects a volunteer for the day they signed up for
+     *
+     * @param (String) $uemail the user's email address
+     * @param (Boolean) $flag indicating to accept or reject the volunteer
+     * @return (MySQli_Result) the query result
+     */
+    function processVolunteer($uemail, $flag) {
+        // Sanitize the input value
+        $email = $this->connection->cleanSQLInputs($uemail);
+        return $this->connection->runQuery("UPDATE volunteers
+            SET accepted = $flag
+            WHERE email = '$uemail'
+            AND Year(volunteer_day) = Year(now())");
     }
 
     /**

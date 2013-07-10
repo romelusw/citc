@@ -107,18 +107,34 @@ if (isset($_SESSION["recognized"])) {
                     </div>
                     <div id="specificDate">
                         <? if (isset($_GET["specificDate"])) {
-                            $resultTable = "<table class='selectable'><th colspan='7'>" .$_GET["specificDate"]
-                            . " &middot; Volunteers</th><tr><td>Name</td><td>Email</td><td>Phone</td>"
-                            . "<td>Time in</td><td>Time Out</td></tr>";
+                            $resultTable = "<table class='selectable'><tr><th colspan='7'>" .$_GET["specificDate"]
+                            . " &middot; Volunteers</th></tr><tr><td>Name</td><td>Email</td><td>Phone</td>"
+                            . "<td>Time in</td><td>Time Out</td><td>Status</td></tr>";
                             $result = $app->findRegisteredDateUsers($_GET["specificDate"]);
                             while ($row = $result->fetch_row()) {
-                                $volunteerAccepted = $row[6];
-                                $resultTable .= "<tr data-dataElem='$row[2]' data-box='vol_itemsToModify'>
+                                $volunteerAccepted;
+                                $class;
+                                switch ($row[6]) {
+                                    case -1:
+                                        $class = "";
+                                        $volunteerAccepted = "Pending ...";
+                                        break;
+                                    case 0:
+                                        $class = "class='disabled'";
+                                        $volunteerAccepted = "Denied";
+                                        break;
+                                    case 1:
+                                        $class = "class='granted'";
+                                        $volunteerAccepted = "Accepted";
+                                        break;
+                                }
+                                $resultTable .= "<tr $class data-dataElem='$row[2]' data-box='vol_itemsToModify'>
                                      <td class='special'>" .ucwords($row[0]) ." ". ucwords($row[1]) . "</td>
                                      <td>" .$row[2]. "</td>
                                      <td>" .$row[3]. "</td>
                                      <td>" .$row[4]. "</td>
-                                     <td>" .$row[5]. "</td></tr>";
+                                     <td>" .$row[5]. "</td>
+                                     <td>" .$volunteerAccepted. "</td></tr>";
                             }
                             $resultTable .= "</table>";
                             echo $resultTable;

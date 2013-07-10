@@ -8,7 +8,7 @@ $(document).ready(function () {
     });
 
     // Toggles selected row and adds it to the appropriate action div
-    $(".selectable tr:not(:has(th)):not(:nth-child(2)):not('.disabled')").click(function () {
+    $(".selectable tr:not(:has(th)):not(:nth-child(2)):not('.disabled'):not('.granted')").click(function () {
 
         var dataBox = $(this).attr("data-box");
         var data = $(this).attr("data-dataElem");
