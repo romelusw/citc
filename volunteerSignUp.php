@@ -427,12 +427,15 @@ class VolunteerAppCreator {
 
     /**
      * Retrieves volunteer days as well as their current registration info
+     * for a specific year
      *
+     * @param (String) $year the year to retrieve volunteer info for
      * @return (MySqli_Result) the query result
      */
-    function retrieveVolunteerDatesInfo() {
+    function retrieveVolunteerDatesInfo($year) {
         return $this->connection->runQuery("SELECT vol_day, curr_registered,
             max_registered FROM volunteer_audit
+            WHERE Year(vol_day) = $year
             ORDER BY vol_day");
     }
 
@@ -447,9 +450,7 @@ class VolunteerAppCreator {
         $year = $this->connection->cleanSQLInputs($year);
 
         $result = array();
-        $vol_days = $this->connection->runQuery("SELECT DISTINCT vol_day 
-            FROM   volunteer_audit 
-            WHERE  Year(vol_day) = '$year'");
+        $vol_days = $this->retrieveEventDates($year);
 
         while ($row = $vol_days->fetch_array()) {
             array_push($result, $row["vol_day"]);
@@ -458,14 +459,135 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Displays a list of all the past events by year
+     *
+     * @return (String) the volunteer events list
+     */
+    function displayPastEventByYear() {
+        $result;
+        $row = $this->retrievePastEventYears();
+        while($ans = $row->fetch_row()) {
+            $result .= "<li data-date='$ans[0]'>" .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+        }
+        return $result;
+    }
+
+    /**
+     * Displays a list of all the past events by year
+     *
+     * @return (String) the volunteer events list
+     */
+    function displayCurrentYearsEvent() {
+        $result;
+        $row = $this->retrieveEventDates(date("Y"));
+        while($ans = $row->fetch_row()) {
+            $result .= "<li data-date='$ans[0]'>" .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+        }
+        return $result;
+    }
+
+    /**
+     * Displays a table showing all the volunteers dates for a specific year
+     *
+     * @param (String) $year the year to filter the dates against
+     * @return (String) the volunteer dates table
+     */
+    function displayVolunteerDates($year) {
+        // Sanitize the user input
+        $year = $this->connection->cleanSQLInputs($year);
+
+        $result = "<table class='selectable vol_table'><tr class='def_cursor'><th colspan='3'>
+        Volunteer Dates</th></tr><tr class='def_cursor'><td>Volunteer Day</td>
+        <td>Currently Registered</td><td>Maximum registered</td></tr>";
+
+        $volDates = $this->retrieveVolunteerDatesInfo($year);
+        while ($row = $volDates->fetch_row()) {
+            $date = date("l", strtotime($row[0]));
+            $date2 = date("F jS, Y", strtotime($row[0]));
+
+            $result .= "<tr data-box='volDates_itemsToModify'
+            data-dataElem='$date2'><td class='special'>$date
+            <span class='td_metadata'>$date2</span></td><td>" .$row[1]. "</td>
+            <td>" .$row[2]. "</td></tr>";
+        }
+        $result .= "</table>";
+        return $result;
+    }
+
+    /**
+     * Displays a table of the registered volunteers for a specific date
+     *
+     * @param (String) $date the date to find volunteers for
+     * @return (String) a table representation of the volunteers for the
+     *                  specified data
+     */
+    function displayVolunteersByDate($date) {
+        // Sanitize the user input
+        $date = $this->connection->cleanSQLInputs($date);
+
+        $resultTable = "<table id='vol_spec_date' class='selectable vol_table'>
+        <tr class='def_cursor'><th colspan='7'>$date &middot; Volunteers</th>
+        </tr><tr class='def_cursor'><td>Name</td><td>Email</td><td>Phone</td>
+        <td>Time in</td><td>Time Out</td><td>Status</td></tr>";
+
+        $result = $this->findRegisteredDateUsers($date);
+        while ($row = $result->fetch_row()) {
+            $volunteerAccepted;
+            $class;
+
+            switch ($row[6]) {
+                case -1:
+                    $class = "";
+                    $volunteerAccepted = "Pending ...";
+                    break;
+                case 0:
+                    $class = "class='disabled'";
+                    $volunteerAccepted = "Denied";
+                    break;
+                case 1:
+                    $class = "class='granted'";
+                    $volunteerAccepted = "Accepted";
+                    break;
+            }
+            error_log($row[3]);
+
+            $resultTable .= "<tr $class data-dataElem='$row[2]'
+            data-box='vol_itemsToModify' data-dateVol='$date'>
+            <td class='special'>" .ucwords($row[0]) ." ". ucwords($row[1])
+            . "</td><td>" .$row[2]. "</td><td>(" .substr($row[3],0,3).") "
+            .substr($row[3],3,3)."-".substr($row[3],6,4). "</td><td>"
+            .date("g:i A", strtotime($row[4])). "</td><td>"
+            .date("g:i A", strtotime($row[5])). "</td><td>"
+            .$volunteerAccepted. "</td></tr>";
+        }
+        $resultTable .= "</table>";
+        return $resultTable;
+    }
+
+    /**
      * Retrieves all past volunteer event years
      *
      * @return (MySQLi_Result) the result of the query
      */
     function retrievePastEventYears() {
-        return $this->connection->runQuery("SELECT DISTINCT Year(vol_day)
+        return $this->connection->runQuery("SELECT DISTINCT vol_day
             FROM volunteer_audit
             WHERE Year(vol_day) < Year(now())");
+    }
+
+    /**
+     * Retrieves all of this years volunteer events
+     *
+     * @param (String) $year the year to filter the dates against
+     * @return (MySQLi_Result) the result of the query
+     */
+    function retrieveEventDates($year) {
+        // Sanitize the user input
+        $year = $this->connection->cleanSQLInputs($year);
+
+        return $this->connection->runQuery("SELECT DISTINCT vol_day
+            FROM volunteer_audit
+            WHERE Year(vol_day) = '$year'");
     }
 
     /**
@@ -473,10 +595,9 @@ class VolunteerAppCreator {
      *
      * @param (String) $month the month to render the calendar
      * @param (String) $year the year to render the calendar
-     * @param (Array) $eventDays the days there are events
      * @return (String) the calendar represented in string format
      */
-    function buildVolunteerCalendar($month, $year, $eventDays) {
+    function buildVolunteerCalendar($month, $year) {
         // Sanitize the user input
         $month = $this->connection->cleanSQLInputs($month);
         $year = $this->connection->cleanSQLInputs($year);
@@ -487,8 +608,8 @@ class VolunteerAppCreator {
         $daysInMonth = date("t", $eventTimestamp);
         // First Day of the month in numeric form
         $firstNumericDayOfMonth = getdate($eventTimestamp)['wday'];
-        $rendereredTable ="<table><tr><th colspan='7'>" .
-            date('F', $eventTimestamp) . " $year </th></tr>";
+        $rendereredTable ="<table id='vol_cal' class='vol_table'><tr>
+            <th colspan='7'>" . date('F', $eventTimestamp) . " $year </th></tr>";
 
         // Column Headers
         $rendereredTable .= "<tr><td>Sunday</td><td>Monday</td><td>Tuesday</td>"
@@ -497,6 +618,7 @@ class VolunteerAppCreator {
 
         // Build Rows
         $numOfCellsNeeded = $daysInMonth + $firstNumericDayOfMonth;
+        $eventDays = $this->retrieveVolunteerDates($year);
         for ($i = 0; $i < $numOfCellsNeeded; $i++) {
             // Begining of the month
             if($i % 7 == 0 ) $rendereredTable .= "<tr>";
@@ -510,9 +632,7 @@ class VolunteerAppCreator {
                 $todayDate = date("Y-m-d", $todayTimeStamp);
 
                 if (in_array($todayDate, $eventDays)) { 
-                    $rendereredTable .= "<td class='active'><a href='"
-                    .$_SERVER['PHP_SELF']. "?specificDate=" .$todayDate.
-                    "'>" .$today. "</a></td>";
+                    $rendereredTable .= "<td class='active'>$today</td>";
                 } else {
                     $rendereredTable .= "<td>$today</td>";
                 }

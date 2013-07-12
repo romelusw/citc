@@ -7,25 +7,6 @@ $(document).ready(function () {
         $(".optional").toggle();
     });
 
-    // Toggles selected row and adds it to the appropriate action div
-    $(".selectable tr:not(:has(th)):not(:nth-child(2)):not('.disabled'):not('.granted')").click(function () {
-
-        var dataBox = $(this).attr("data-box");
-        var data = $(this).attr("data-dataElem");
-
-        // Add/Remove element
-        if ($(this).hasClass("highlight")) {
-            var item = $("#" + dataBox + " li:contains(" + data + ")");
-            item.attr("class", "popin").wait(function () {
-                $(item).remove();
-                $("#" + dataBox).trigger("modified");
-            }, 250);
-        } else {
-            $("#" + dataBox).append("<li class='popout'>" + data + "</li>").trigger("modified");
-        }
-        $(this).toggleClass('highlight');
-    });
-
     // Publish-Subcribe pattern
     $(".actionContainer").on("modified", function () {
         if ($(this).children(".itemsToModify").children("li").length < 1) {
@@ -35,31 +16,83 @@ $(document).ready(function () {
         }
     });
 
-    $(".actionButton").click(function () {
+    $("#close_form").on("click", function() {
+        $("#newPartyForm").fadeOut();
+        $("#overlay").fadeOut();
+    });
+
+    $("#add_event").on("click", function () {
+        $("#newPartyForm").fadeIn();
+        $("#overlay").fadeIn();
+    });
+    //specificDate
+    $(".sidebar_list li").on("click", function() {
+        var date = $(this).attr("data-date");
+        $.ajax({
+            url: document.URL + "?specificDate=" + date,
+            context: $("#specificDate"),
+            type: "GET",
+            success: function(result, textStatus) {
+                $(this).html(result);
+            }
+        });
+    });
+
+    // Toggles selected row and adds it to the appropriate action div
+    $(".selectable").on("click", "tr:not('.def_cursor'):not('.disabled'):not('.granted')", function() {
+        console.log("click");
+        var dataBox = $(this).attr("data-box");
+        var data = $(this).attr("data-dataElem");
+        var dayVol = $(this).attr("data-datevol");
+
+        // Add/Remove element
+        if ($(this).hasClass("highlight")) {
+            var item = $("#" + dataBox + " li:contains(" + data + ")");
+            item.attr("class", "popin").wait(function () {
+                $(item).remove();
+                $("#" + dataBox).trigger("modified");
+            }, 250);
+        } else {
+            $("#" + dataBox).append("<li data-dayvol='" +dayVol+ "' class='popout'>" + data + "</li>").trigger("modified");
+        }
+        $(this).toggleClass('highlight');
+    });
+
+
+    $(".actionButton").on("click", function () {
         var parent = $(this).parents(".actionContainer");
         var itemsToModify = $(parent).children(".itemsToModify").children("li");
 
         var actionItems = "";
         var action = $(this).attr("data-action");
         var reqType = $(this).attr("data-reqType");
+        var dayVol;
+
         $(itemsToModify).each(function(i, val) {
+            dayVol = $(this).attr("data-dayvol");
             var elem = $.trim($(val).text());
             actionItems += (i == itemsToModify.length - 1) ? elem : elem + "|";
         });
 
         // Make ajax request
-        var sendUrl = "volunteerModify.php?" + encodeURIComponent(action + "=" + actionItems);
+        var sendUrl = "volunteerModify.php?" + encodeURIComponent(action + "="
+            + actionItems + "&volunteerDate=" + dayVol);
         $.ajax({
             url: sendUrl,
             context: $(parent),
             type: reqType,
             success: function(result, textStatus) {
-                // $('#row'+row).fadeOut('fast');
-                console.log(result + " \nStatus: " + textStatus);
-                // location.reload();
+                $('#vol_spec_date').html(result);
+                $(this.children(".itemsToModify").children("li")).each(
+                    function() {
+                        $(this).remove();
+                    }
+                );
+                $(parent).trigger("modified");
             }
         });
     });
+
     // Wait Function
     $.fn.wait = function (callback, time) {
         window.setTimeout(callback, time);

@@ -13,7 +13,7 @@ $userLink;
 // Handle GET requests
 if (isset($_GET["u_email"]) && isset($_GET["rec_key"])) {
     include_once("volunteerSignUp.php");
-    $app = new VolunteerAppCreator(date("Y"));
+    $app = new VolunteerAppCreator();
 
     if ($app->recoveryEntryExists($_GET["u_email"], $_GET["rec_key"])) {
         $userEmail = $_GET["u_email"];
@@ -45,7 +45,7 @@ if ($_POST) {
             );
 
             if(validateFields($fields)) {
-                $app = new VolunteerAppCreator(date("Y"));
+                $app = new VolunteerAppCreator();
 
                 if ($app->findUser($u_email)) {
                     $step = 1;
@@ -67,7 +67,7 @@ if ($_POST) {
             if(validateFields($fields)) {
                 $u_answer = Utils::normalize($_POST["sec_a"]); 
                 if (Utils::equalIgnoreCase($u_answer, $userQA["security_a"])) {
-                    $app = new VolunteerAppCreator(date("Y"));
+                    $app = new VolunteerAppCreator();
                     $key = Utils::genUniqKey($userEmail);
                     $app->insertUserRecEntry($userEmail, $key, date("Y-m-d h:i:s", strtotime("+1 hours")));
                     $userLink = "?u_email=$userEmail&rec_key=$key";

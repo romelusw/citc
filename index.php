@@ -70,7 +70,7 @@ function establishConnection() {
     if(isset($app)){
         return $app;
     }else{
-        return new VolunteerAppCreator(date("Y"));
+        return new VolunteerAppCreator();
     }
 }
 
@@ -174,5 +174,4 @@ function createNewAcct() {
                 <input type="submit" value="submit"/>
             </form>
         </div>
-    </body>
-</html>
+<? include("footer.php"); ?>

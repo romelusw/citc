@@ -11,26 +11,30 @@ $app;
 switch($reqInfo["method"]) {
     case "POST":
         if (isset($reqInfo["editVolunteerDates"])) {
-            $app = new VolunteerAppCreator(date("Y"));
+            $app = new VolunteerAppCreator();
             Utils::printCode(print_r($reqInfo["editVolunteerDates"], true));
         } else if (isset($reqInfo["acceptUsers"])) {
-            $app = new VolunteerAppCreator(date("Y"));
+            $app = new VolunteerAppCreator();
             $users = explode("|", $reqInfo["acceptUsers"]);
+            $volDay = strtotime($reqInfo["volunteerDate"]);
             foreach ($users as $uemail) {
                 // Send Email
                 $app->processVolunteer($uemail, 1);
             }
+            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
         }
     break;
 
     case "DELETE":
         if (isset($reqInfo["denyUsers"])) {
-            $app = new VolunteerAppCreator(date("Y"));
+            $app = new VolunteerAppCreator();
             $users = explode("|", $reqInfo["denyUsers"]);
+            $volDay = strtotime($reqInfo["volunteerDate"]);
             foreach ($users as $uemail) {
                 // Send Email
                 $app->processVolunteer($uemail, 0);
             }
+            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
         }
     break;
 

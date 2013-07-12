@@ -30,7 +30,7 @@ if ($_POST) {
     );
 
     if($validator->validate($fields)) {
-        $app = new VolunteerAppCreator(date("Y"));
+        $app = new VolunteerAppCreator();
         $result = $app->insertVolunteer($vol_firstName, $vol_lastName,
             $vol_email, $vol_volPhone, $vol_volDay, $vol_checkIn, $vol_checkOut);
 

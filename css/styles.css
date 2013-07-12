@@ -84,7 +84,7 @@ button:focus, button:hover, button:active {
     padding: 7px;
 }
 
-.active {
+table.vol_table .active {
     padding: 0;
 }
 
@@ -99,20 +99,14 @@ button:focus, button:hover, button:active {
     cursor: default;
 }
 
-.active a {
-    background: #e5f1d8;
+table.vol_table .active {
+    background-color: #cde3b2;
     border: 1px solid #9cc867;
     color: inherit;
     display: block;
     padding: 10px;
     text-align: center;
     text-decoration: none;
-}
-
-.active a:hover {
-    background-color: #cde3b2;
-    color: #344a1b;
-    font-weight: 700;
 }
 
 .animate {
@@ -147,6 +141,10 @@ button:focus, button:hover, button:active {
     display: block;
 }
 
+.selectable tr.def_cursor:hover {
+    cursor: default;
+}
+
 .error_msg {
     color: red;
     font-size: 12px;
@@ -165,6 +163,12 @@ button:focus, button:hover, button:active {
 .selectable tr.highlight {
     background: #fcfce2 !important;
     border: 1px solid #9cc867 !important;
+}
+
+#newPartyForm {
+    display: none;
+    position: relative;
+    top:20%;
 }
 
 .list {
@@ -312,28 +316,43 @@ label,input:not([type='checkbox']) {
     display: block;
 }
 
-table {
+table.vol_table{
     background: #FFF;
     border: 1px solid #d3d3d3;
     border-collapse: collapse;
-    margin: 10px;
-    min-width: 500px;
+    width: 100%;
+}
+#volCalendar, #volunteerDates, #specificDate{
     float: left;
+    margin-right: 10px;
+    width: 100%;
 }
 
-td {
+#overlay {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    background: #000;
+    background: rgba(0,0,0,.4);
+    z-index: 100;
+    display: none;
+    top: 0;
+    left: 0;
+}
+
+table.vol_table td {
     border: 1px solid #d3d3d3;
     padding: 10px;
     text-align: left;
 }
 
-td.special {
+table.vol_table td.special {
     background-color: #e7ecf1;
     border-bottom: 1px solid #cbd7e2;
     color: #446DB2;
 }
 
-th {
+table.vol_table th {
     -moz-box-shadow: 0 1px 3px 0 rgba(0,0,0,0.25);
     -webkit-box-shadow: 0 1px 3px 0 rgba(0,0,0,0.25);
     background: #5e82c2;
