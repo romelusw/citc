@@ -49,7 +49,7 @@ class VolunteerAppCreator {
            `volunteer_day` date NOT NULL,
            `time_in` time NOT NULL,
            `time_out` time NOT NULL,
-           `accepted` int(1) NOT NULL DEFAULT 0,
+           `accepted` int(1) NOT NULL DEFAULT -1,
            UNIQUE KEY `distinct_users_key` (`email`, `volunteer_day`),
            PRIMARY KEY (`vol_id`))");
 
@@ -427,10 +427,16 @@ class VolunteerAppCreator {
      * @return (String) the volunteer events list
      */
     function displayPastEventByYear() {
-        $result;
+        $result = "<ul>";
         $row = $this->retrievePastEventYears();
-        while($ans = $row->fetch_row()) {
-            $result .= "<li data-date='$ans[0]'>" .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+        if($row->num_rows > 0) {
+            while($ans = $row->fetch_row()) {
+                $result .= "<li data-date='$ans[0]'>"
+                .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+            }
+            $result .= "</ul>";
+        } else {
+            $result = "<p class='message'><span class='caveat'>*</span> No Past Events</p>";
         }
         return $result;
     }
@@ -441,10 +447,16 @@ class VolunteerAppCreator {
      * @return (String) the volunteer events list
      */
     function displayCurrentYearsEvent() {
-        $result;
+        $result = "<ul>";
         $row = $this->retrieveEventDates(date("Y"));
-        while($ans = $row->fetch_row()) {
-            $result .= "<li data-date='$ans[0]'>" .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+        if($row->num_rows > 0) {
+            while($ans = $row->fetch_row()) {
+                $result .= "<li data-date='$ans[0]'>"
+                .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+            }
+            $result .= "</ul>";
+        } else {
+            $result = "<p class='message'><span class='caveat'>*</span> No Current Events</p>";
         }
         return $result;
     }
@@ -541,14 +553,44 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Diplays the list of available dates for volunteers to choose from
+     *
+     * @return (String) the html representation of the date in an options list.
+     */
+    function displaySignUpDates() {
+        $result = "<option>--</option>";
+        $row = $this->retrieveEventDates(date("Y"));
+        while($ans = $row->fetch_row()) {
+            $result .= "<option>" . date("l, F j Y", strtotime($ans[0])) . "</option>";
+        }
+        return $result;
+    }
+
+    /**
+     * Determines if there are any available volunteer dates left for the current
+     * year
+     *
+     * @return (Boolean) flag indicating if there are any available slots left.
+     */
+    function checkForAvailableVolDates() {
+        return $this->connection->runQuery("SELECT vol_day
+            FROM volunteer_audit
+            WHERE curr_registered < max_registered
+            AND Year(vol_day) = Year(NOW())")->num_rows == 0;
+    }
+
+    /**
      * Retrieves all past volunteer event years
      *
      * @return (MySQLi_Result) the result of the query
      */
-    function retrievePastEventYears() {
-        return $this->connection->runQuery("SELECT DISTINCT vol_day
+    function retrievePastEventYears($flag = false) {
+        $query = "SELECT DISTINCT vol_day
             FROM volunteer_audit
-            WHERE Year(vol_day) < Year(now())");
+            WHERE Year(vol_day) < Year(now()) ";
+        $query = ($flag == true) ? $query .= "GROUP BY MONTH(vol_day)" : $query;
+
+        return $this->connection->runQuery($query);
     }
 
     /**
@@ -610,7 +652,7 @@ class VolunteerAppCreator {
                 if (in_array($todayDate, $eventDays)) { 
                     $rendereredTable .= "<td class='active'>$today</td>";
                 } else {
-                    $rendereredTable .= "<td>$today</td>";
+                    $rendereredTable .= "<td class='fade'>$today</td>";
                 }
                 if($i % 7 == 6 || $today == $daysInMonth) $rendereredTable .= "</tr>";
             }

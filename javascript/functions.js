@@ -25,15 +25,15 @@ $(document).ready(function () {
         $("#newPartyForm").fadeIn();
         $("#overlay").fadeIn();
     });
-    //specificDate
+
     $(".sidebar_list li").on("click", function() {
         var date = $(this).attr("data-date");
         $.ajax({
             url: document.URL + "?specificDate=" + date,
-            context: $("#specificDate"),
             type: "GET",
             success: function(result, textStatus) {
-                $(this).html(result);
+                $("#volCalendar").replaceWith($(result).filter("#volCalendar"));
+                $("#specificDate").replaceWith($(result).filter("#specificDate"));
             }
         });
     });
@@ -58,7 +58,6 @@ $(document).ready(function () {
         $(this).toggleClass('highlight');
     });
 
-
     $(".actionButton").on("click", function () {
         var parent = $(this).parents(".actionContainer");
         var itemsToModify = $(parent).children(".itemsToModify").children("li");
@@ -75,7 +74,7 @@ $(document).ready(function () {
         });
 
         // Make ajax request
-        var sendUrl = "volunteerModify.php?" + encodeURIComponent(action + "="
+        var sendUrl = "volunteerREST.php?" + encodeURIComponent(action + "="
             + actionItems + "&volunteerDate=" + dayVol);
         $.ajax({
             url: sendUrl,

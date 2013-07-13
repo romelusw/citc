@@ -124,21 +124,21 @@ function validateFields($fields) {
 }
 ?>
 
-    <?php include("header.php"); ?>
+    <?php $pageTitle = "Volunteer Forgot Password"; include("header.php"); ?>
 
     <body>
         <?php switch($step) { case 0: ?>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
             <p>Forgot your password eh? Please let me know your email address to help you reset your password.</p>
             <?= "<p class='error_msg'>".$errMsgs['User Email']."</p>" ?>
-            <label>Email address:<input type="text" name="u_email"/></label>
+            <label>Email address:<span class="caveat">*</span><input type="text" name="u_email"/></label>
             <input type="submit" value="Submit"/>
         </form> 
         <?php break; case 1: ?>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
             <p>Please answer the security question: <span class="sec_q"><?= ucwords($userQA["security_q"]); ?></span></p>
             <?= "<p class='error_msg'>".$errMsgs['Answer']."</p>" ?>
-            <label>Answer:<input type="text" name="sec_a"/></label>
+            <label>Answer:<span class="caveat">*</span><input type="text" name="sec_a"/></label>
             <input type="submit" value="Submit"/>
         </form> 
         <?php break; case 2: ?>
@@ -148,8 +148,8 @@ function validateFields($fields) {
         <?php break; case 3: ?>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
             <?= "<p class='error_msg'>".$errMsgs['Password']."</p>" ?>
-            <label>New Password:<input type="password" name="n_pass"/></label>     
-            <label>Confirm New Password:<input type="password"/></label>     
+            <label>New Password:<span class="caveat">*</span><input type="password" name="n_pass"/></label>     
+            <label>Confirm New Password:<span class="caveat">*</span><input type="password"/></label>     
             <input type="submit" value="Submit"/>
         </form> 
         <?php break; } ?>

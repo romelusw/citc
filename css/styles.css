@@ -1,33 +1,66 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300,600);
 
 html {
-    padding: 10px;
-    border: 1px solid green;
-}
-
-html, body {
-    height: 100%;
+    /*border: 1px solid red;*/
     margin: 0px;
 }
 
-#activeBody {
+h1, h2, h3, h4, h5 {
+    margin: 0px;
+}
+
+body {
+    margin: 0px;
+    height: 100%;
+}
+
+#mainbody {
     float: right;
-    height: inherit;
     width: 80%;
-    /*border: 1px solid blue;*/
+    /*border: 1px solid red;*/
+    overflow: hidden;
+}
+
+#left{
+    float: left;
+    /*border: 1px solid red;*/
+    width:70%;
+}
+
+#right {
+    float: right;
+    /*border: 1px solid red;*/
+    width:29%;
+}
+
+#headerbar {
+    background: #f2f2f2;
+    background: -webkit-linear-gradient(top, #fff 0%, #f2f2f2 100%);
+    background: -moz-linear-gradient(top, #fff 0%, #f2f2f2 100%);
+    background: -ms-linear-gradient(top, #fff 0%, #f2f2f2 100%);
+    background: -o-linear-gradient(top, #fff 0%, #f2f2f2 100%);
+    background: linear-gradient(to bottom, #fff 0%, #f2f2f2 100%);
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+#headerbar p{
+    float: right;
 }
 
 #content {
     /*border: 1px solid red;*/
-    height: inherit;
     margin: 7px auto;
-    min-width: 200px;
+    width: 97%;
+}
+
+#min_pane {
+    /*border:1px solid red;*/
 }
 
 #sidebar {
     float: left;
     /*border: 1px solid red;*/
-    height: 100%;
     width: 19%;
 }
 
@@ -60,11 +93,10 @@ button {
     text-shadow: 0 1px 0 rgba(255,255,255,.5);
     cursor: pointer;
     height: 20px;
-    max-width: 98%;
     overflow: hidden;
 }
 
-button:focus, button:hover, button:active {
+button:focus, button:hover, button:active, .button{
     border-color: #bbb;
     background-color: #f8f8f8;
     background-image: -webkit-gradient(linear,left top,left bottom,from(#f8f8f8),to(#d9d9d9));
@@ -103,7 +135,6 @@ table.vol_table .active {
     background-color: #cde3b2;
     border: 1px solid #9cc867;
     color: inherit;
-    display: block;
     padding: 10px;
     text-align: center;
     text-decoration: none;
@@ -133,7 +164,35 @@ table.vol_table .active {
 }
 
 .caveat {
+    vertical-align: middle;
     color: #5ea9f5;
+    display: inline-block;
+    -webkit-animation: spin 4s infinite linear;
+}
+
+/* '➦' */
+.icon-forward-1:before {
+  content: '\e818';
+}
+
+@-ms-keyframes spin {
+    from { -ms-transform: rotate(0deg); }
+    to { -ms-transform: rotate(360deg); }
+}
+
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    from { transform:rotate(0deg); }
+    to { transform:rotate(360deg); }
 }
 
 .clear {
@@ -259,10 +318,10 @@ table.vol_table .active {
 }
 
 .sidebar_list {
-    border: 1px solid #ececec;
+    /*border: 1px solid red;*/
 }
 
-.sidebar_list li {
+.sidebar_list li{
     -webkit-box-shadow:  0px 1px 3px 0px rgba(0, 0, 0, .10);
     box-shadow:  0px 1px 3px 0px rgba(0, 0, 0, .10);
     list-style-type: none;
@@ -271,8 +330,11 @@ table.vol_table .active {
     padding: 7px;
     border: 1px solid #ececec;
 }
+.fade {
+    opacity: .2;
+}
 
-.sidebar_list li:hover {
+.sidebar_list li:hover, .selectedli {
     background-color: #007fff;
     color: white;
     cursor: pointer;
@@ -322,10 +384,9 @@ table.vol_table{
     border-collapse: collapse;
     width: 100%;
 }
-#volCalendar, #volunteerDates, #specificDate{
-    float: left;
-    margin-right: 10px;
-    width: 100%;
+
+#specificDate {
+    margin-top:10px;
 }
 
 #overlay {

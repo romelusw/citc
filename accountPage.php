@@ -11,11 +11,13 @@ $isAdmin;
 $app;
 $config = parse_ini_file("conf/citc_config.ini");
 $sess = new Session("citc_s");
+$u_email;
 
 if (isset($_SESSION["recognized"])) {
+    $u_email = $_SESSION["user"];
     $app = new VolunteerAppCreator();
     $isAdmin = $_SESSION["admin"];
-    $app->updateUserLastLogin($_SESSION["user"]);
+    $app->updateUserLastLogin($u_email);
 } elseif (isset($_COOKIE["citc_rem"])) {
     session_destroy();
     setcookie(session_name(), "", time() - 3600);
@@ -36,7 +38,12 @@ if (isset($_SESSION["recognized"])) {
     Utils::redirect("index.php");
 }
 if (isset($_GET["specificDate"])) {
-    $result = $app->displayVolunteersByDate($_GET["specificDate"]);
+    $dateTime = strtotime($_GET["specificDate"]);
+    $result = "<div id='volCalendar'>";
+    $result .= $app->buildVolunteerCalendar(date("m", $dateTime), date("Y", $dateTime));
+    $result .= "</div>";
+    $result .= "<div id='specificDate'>";
+    $result .= $app->displayVolunteersByDate(date("Y-m-d", $dateTime));
     $result .= "<div class='actionContainer' id='volList'>
                     <ol class='itemsToModify list' id='vol_itemsToModify'></ol>
                     <ul class='actions'>
@@ -47,79 +54,79 @@ if (isset($_GET["specificDate"])) {
                     </ul>
                     <span class='clear'></span><div id='test'></div>
                 </div>";
+    $result .= "</div>";
     echo $result;
     exit();
 }
 ?>
 
-<?php include("header.php"); ?>
+<?php $pageTitle = "Volunteer Administation"; include("header.php"); ?>
     <body>
         <div id="content">
             <? if (!$isAdmin): ?>
             <?php endif; ?>
+            <div id="overlay">
+                <div id="newPartyForm">
+                   <? if (isset($_POST["pdate"]) && isset($_POST["pmaxreg"])) {
+                        $app->insertVolunteerDate($_POST["pdate"], $_POST["pmaxreg"]);
+                      }
+                   ?>
+                   <script type="text/javascript">
+                        $(function() {
+                            var disabledDays = "<?= $app->getDate(); ?>".split(" ");
+                            $( "#dateCal" ).datepicker({
+                                dateFormat: "yy-mm-dd",
+                                minDate: new Date(<?= time() * 1000 ?>),
+                                constrainInput: true,
+                                beforeShowDay: undefinedEventDay
+                            });
 
-            <div id="sidebar">
+                            function undefinedEventDay(date) {
+                                var d = new Date(date);
+                                var formattedDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+                                if(disabledDays.indexOf(formattedDate) > -1){
+                                    return[false];
+                                } else {
+                                    return [true];
+                                }
+                            }
+                        });
+                   </script>
+
+                   <form class="card animate" action="<?= $_SERVER['PHP_SELF']?>" method="post">
+                      <label>Insert Volunteer Date</label>
+                      <input type="text" name="pdate" id="dateCal" readonly='true' placeholder="Click to choose date"/>
+                      <input type="number" name="pmaxreg" min="1" max="1000"/>
+                      <input type="submit" value="submit"/>
+                      <button id="close_form" onclick="return false;">Close</button>
+                   </form>
+                </div>
+            </div>
+            <section id="headerbar">
+                <p>Welcome, <?= $u_email; ?> <i class="icon-forward-1"></i><a href="logout.php" title="Logout" class="button">Logout</a></p>
+                <span class="clear"></span>
+            </section>
+            <section id="sidebar">
                 <div class="sidebar_list">
                     <h3>Past Volunteer Events</h3>
-                    <ul>
-                        <?= $app->displayPastEventByYear(); ?>
-                    </ul>
+                    <?= $app->displayPastEventByYear(); ?>
                 </div>
                 <div class="sidebar_list">
                     <h3>Current Volunteer Events</h3>
-                    <ul>
-                        <?= $app->displayCurrentYearsEvent(); ?>
-                    </ul>
+                    <?= $app->displayCurrentYearsEvent(); ?>
                     <button style="width:100%" id="add_event">+ Add</button>
                 </div>
-            </div>
-
-            <div id="activeBody">
-                <!--<a href="logout.php" title="Logout">Logout</a>-->
-                <div class="">
-                    <div id="overlay">
-                    <div id="newPartyForm">
-                        <? if (isset($_POST["pdate"]) && isset($_POST["pmaxreg"])) {
-                            $app->insertVolunteerDate($_POST["pdate"], $_POST["pmaxreg"]);
-                        }?>
-                        <script type="text/javascript">
-                            $(function() {
-                                var disabledDays = "<?= $app->getDate(); ?>".split(" ");
-                                $( "#dateCal" ).datepicker({
-                                    dateFormat: "yy-mm-dd",
-                                    minDate: new Date(<?= time() * 1000 ?>),
-                                    constrainInput: true,
-                                    beforeShowDay: undefinedEventDay
-                                });
-
-                                function undefinedEventDay(date) {
-                                    var d = new Date(date);
-                                    var formattedDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
-                                    if(disabledDays.indexOf(formattedDate) > -1){
-                                        return[false];
-                                    } else {
-                                        return [true];
-                                    }
-                                }
-                            });
-                        </script>
-                        <form class="card animate" action="<?= $_SERVER['PHP_SELF']?>" method="post">
-                            <label>Insert Volunteer Date</label>
-                            <input type="text" name="pdate" id="dateCal" readonly='true' placeholder="Click to choose date"/>
-                            <input type="number" name="pmaxreg" min="1" max="1000"/>
-                            <input type="submit" value="submit"/>
-                            <button id="close_form" onclick="return false;">Close</button>
-                        </form>
-                    </div>
-                </div>
-                    <div style="width:60%; float:left;">
+            </section>
+            <section id="mainbody">
+                <div id="left">
                     <div id="volCalendar">
                         <?= $app->buildVolunteerCalendar(12, 2013); ?>
                     </div>
                     <div id='specificDate'></div>
                     <span class="clear"></span><div id="test"></div>
                 </div>
-                    <div id="volunteerDates" style="width: 403px;">
+                <div id="right">
+                    <div id="volunteerDates">
                         <?= $app->displayVolunteerDates(2013); ?>
                         <div class="actionContainer">
                             <ol class="itemsToModify list" id="volDates_itemsToModify">
@@ -133,7 +140,7 @@ if (isset($_GET["specificDate"])) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
             <span class="clear"></span>
         </div>
 <? include("footer.php"); ?>

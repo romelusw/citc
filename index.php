@@ -120,7 +120,7 @@ function createNewAcct() {
     }
 }
 ?>
-    <?php include("header.php"); ?>
+    <?php $pageTitle = "Volunteer Admin Sign In"; include("header.php"); ?>
     <body>
         <div class="loginForm">
             <?php echo "<p class='error_msg'>" . $errMsgs['exists'] ."</p>" . PHP_EOL; ?>

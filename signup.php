@@ -3,15 +3,17 @@
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 include_once("common_utils/functions.php");
+include_once("volunteerSignUp.php");
 
 // Global Variables
 $errMsgs;
 $show = "form";
+$app = new VolunteerAppCreator();
 
+if($app->checkForAvailableVolDates()) $show = "noparty";
 // Handle POST requests
 if ($_POST) {
     include_once("common_utils/formValidator.php");
-    include_once("volunteerSignUp.php");
 
     $vol_firstName = Utils::normalize($_POST["vol_firstName"]);
     $vol_lastName = Utils::normalize($_POST["vol_lastName"]);
@@ -30,7 +32,6 @@ if ($_POST) {
     );
 
     if($validator->validate($fields)) {
-        $app = new VolunteerAppCreator();
         $result = $app->insertVolunteer($vol_firstName, $vol_lastName,
             $vol_email, $vol_volPhone, $vol_volDay, $vol_checkIn, $vol_checkOut);
 
@@ -54,7 +55,7 @@ if ($_POST) {
     }
 }
 ?>
-    <?php include("header.php"); ?>
+    <?php $pageTitle = "Volunteer Sign Up Form"; include("header.php"); ?>
 
     <body>
         <? switch($show) { case "form": ?>
@@ -85,7 +86,9 @@ if ($_POST) {
             <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Day'] ."</p>" . PHP_EOL; ?>
             <label>Volunteer Day
                 <span class="caveat">*</span>
-                <input type="date" name="volDay"/>
+                <select>
+                    <?= $app->displaySignUpDates(); ?>
+                </select>
             </label>
 
             <label>Check In
@@ -101,14 +104,16 @@ if ($_POST) {
             <input type="submit" value="submit"/>
         </form>
         <? break; case "spaceAvailable": ?>
-        <p>Thank you for signing up! We will be getting back to you shortly informing you whether you have been chosen as a volunteer for this years party.</p>
-        <p>Please be on the lookout for an email in your inbox!</p>
+        <p class='message'>Thank you for signing up! We will be getting back to you shortly informing you whether you have been chosen as a volunteer for this years party.</p>
+        <p class='message'>Please be on the lookout for an email in your inbox!</p>
         <? break; case "spaceNotAvailable": ?>
-        <p>Unfortunately the party date chosen is full. Please try another date or come back next year.</p>
+        <p class='message'>Unfortunately the party date chosen is full. Please try another date or come back next year.</p>
         <? break; case "invalidPartyDate" ?>
-        <p>The Date specified is not a valid party date.</p>
+        <p class='message'>The Date specified is not a valid party date.</p>
         <? break; case "dupRegistration" ?>
-        <p>You have already registered for this date. Please choose another party date that you have not yet registered for.</p>
+        <p class='message'>You have already registered for this date. Please choose another party date that you have not yet registered for.</p>
+        <? break; case "noparty" ?>
+        <p class='message'>Unfortunately there are no volunteer spots left this year. We thank you for your support and hope to have you retry for next year</p>
         <? break; } ?>
     </body>
 </html>
