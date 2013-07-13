@@ -1,6 +1,5 @@
 citc
 ====
-
 Christmas in the City Volunteer Signup Application
 
 todo
