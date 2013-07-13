@@ -3,7 +3,7 @@
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 include_once("common_utils/functions.php");
-include_once("common_utils/fsession.php");
+include_once("common_utils/session.php");
 
 // Global variables
 $app;
@@ -27,7 +27,7 @@ if (isset($_GET["u_email"]) && isset($_GET["rec_key"])) {
 
 // Handle POST requests
 if ($_POST) {
-    include_once("common_utils/fformValidator.php");
+    include_once("common_utils/formValidator.php");
     include_once("volunteerSignUp.php");
 
     $sess = new Session("citc_rec");
@@ -80,7 +80,7 @@ if ($_POST) {
                     // refreshes
                     if (!isset($_SESSION["emailsent"]) && $_SESSION["emailsent"] == false) {
                         // Send email
-                        include_once("email.php");
+                        include_once("common_utils/email.php");
                         $emailer = new EmailTransport("Test Email", "Hello World", "test@gmail.com");
                         $emailer->sendMail("romelus.w@gmail.com");
                         $sess->emailsent = true;

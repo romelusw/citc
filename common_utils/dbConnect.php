@@ -36,6 +36,61 @@ class DatabaseConnector {
     }
 
     /**
+     * Executes a Prepared SQL Query against the '$connection' database resource
+     * 
+     * @param (String) $query the statement to execute
+     * @param (String) $params the paramaters to bind within the query
+     * @return (mysqli_result) resultant object
+     */
+    public function runPreparedQuery($query, $params) {
+        // Create Prepared Statement
+        $pStatement = $this->connection->prepare($query);
+        // Place the datatypes string in the beginning of the array
+        array_unshift($params, $this->resolveTypes($params));
+        // On the prepare statement, invoke 'bind_param' using the referenced paramaters
+        call_user_func_array(array($pStatement, 'bind_param'), $this->referenceArrayValues($params));
+
+        return $pStatement->execute();
+    }
+
+    /**
+     * Determines the Prepared Statement datatypes {i => "Integer", s => "String",
+     * d => "Double", b => "Blob"} for the given data parameters
+     *
+     * @param (Array) $datum the data to inspect and find the datatype
+     * @return (String) containing all the types found
+     */
+    private function resolveTypes($datum) {
+        $types = '';
+        foreach($datum as $para) {
+            if(is_int($para)) {
+                $types .= 'i';
+            } elseif (is_float($para)) {
+                $types .= 'd';
+            } elseif (is_string($para)) {
+                $types .= 's';
+            } else {
+                $types .= 'b';
+            }
+        }
+        return $types;
+    }
+
+    /**
+     * Creates a reference array of the values within an array
+     *
+     * @param (Array) $arr the array to reference
+     * @return (Array) the referenced array.
+     */
+    private function referenceArrayValues(&$arr) {
+        $refs = array();
+        foreach($arr as $key => $value) {
+            $refs[$key] = &$arr[$key];
+        }
+        return $refs;
+    }
+
+    /**
      * Closes the database connection.
      *
      * @return (Boolean) flag depending if it was successful or not.

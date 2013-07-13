@@ -126,21 +126,13 @@ class VolunteerAppCreator {
      * @return (MySqli_Result) the result of the query
      */
     function insertNewUser($fname, $lname, $email, $passw, $secQ, $secA, $token) {
-        // Sanitize the input value
-        $fname = $this->connection->cleanSQLInputs($fname);
-        $lname = $this->connection->cleanSQLInputs($lname);
-        $email = $this->connection->cleanSQLInputs($email);
-        $pass = $this->connection->cleanSQLInputs($passw);
-        $secQ = $this->connection->cleanSQLInputs($secQ);
-        $secA = $this->connection->cleanSQLInputs($secA);
 
         $now = date("Y-m-d H:i:s");
         $pass = Utils::hashPassword($passw);
-        return $this->connection->runQuery("INSERT INTO users 
-            (fname, lname, email, password, security_q, security_a, created,
-             lastloggedin, token) 
-            VALUES ('$fname', '$lname', '$email', '$pass', '$secQ','$secA',
-            '$now', '$now', '$token')");
+        return $this->connection->runPreparedQuery("INSERT INTO users (fname,
+            lname, email, password, security_q, security_a, created, lastloggedin, token) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", array($fname, $lname, $email,
+                $pass, $secQ, $secA, $now, $now, $token));
     }
 
     /**
@@ -149,7 +141,8 @@ class VolunteerAppCreator {
      */
     function retrieveUsers() {
         return $this->connection->runQuery("SELECT fname, lname, email, created,
-            lastloggedin, usertype FROM users
+            lastloggedin, usertype
+            FROM users
             ORDER BY created"); 
     }
 
@@ -165,7 +158,7 @@ class VolunteerAppCreator {
 
         return $this->connection->runQuery("SELECT count(*) 
             FROM   users 
-            WHERE  email = '$email' 
+            WHERE  email = '$email'
             LIMIT  1")->fetch_row()[0] > 0;
     }
 
@@ -175,13 +168,9 @@ class VolunteerAppCreator {
      * @param (String) $uemail the user's email
      */
     function updateUserLastLogin($uemail) {
-        // Sanitize the input value
-        $email = $this->connection->cleanSQLInputs($uemail);
-
-        $this->connection->runQuery("UPDATE users 
-            SET lastloggedin = '". date("Y-m-d H:i:s") . 
-            "' WHERE  email = '" . $email . "' 
-            LIMIT 1");
+        $this->connection->runPreparedQuery("UPDATE users 
+            SET lastloggedin = '". date("Y-m-d H:i:s")
+            . "' WHERE  email = ? LIMIT 1", array($uemail));
     }
 
     /**
@@ -191,15 +180,15 @@ class VolunteerAppCreator {
      * @param (String) $utoken the token for the user.
      * @return a flag indicating if the user is registered.
      */
-    function userTokenIsValid($uemail, $utoken) { 
+    function userTokenIsValid($uemail, $utoken) {
         // Sanitize the input value
-        $email = $this->connection->cleanSQLInputs($uemail);
-        $token = $this->connection->cleanSQLInputs($utoken);
+        $uemail = $this->connection->cleanSQLInputs($uemail);
+        $utoken = $this->connection->cleanSQLInputs($utoken);
 
         return $this->connection->runQuery("SELECT count(*) 
             FROM   users 
-            WHERE  email = '$email' 
-            AND token = '$token' 
+            WHERE  email = '$uemail'
+            AND token = '$utoken'
             LIMIT  1")->fetch_row()[0] == 1;
     } 
 
@@ -210,14 +199,10 @@ class VolunteerAppCreator {
      * @param (String) $utoken the new token to set
      */
     function updateUserToken($uemail, $utoken) {
-        // Sanitize the input value
-        $email = $this->connection->cleanSQLInputs($uemail);
-        $token = $this->connection->cleanSQLInputs($utoken);
-
-        $this->connection->runQuery("UPDATE users 
-            SET    token = '$token' 
-            WHERE  email = '$email' 
-            LIMIT 1"); 
+        return $this->connection->runPreparedQuery("UPDATE users
+            SET    token = ? 
+            WHERE  email = ? 
+            LIMIT 1", array($utoken, $uemail)); 
     }
 
     /**
@@ -232,7 +217,7 @@ class VolunteerAppCreator {
 
         return $this->connection->runQuery("SELECT security_q, security_a 
             FROM   users 
-            WHERE  email = '$email' 
+            WHERE  email = '$email'
             LIMIT  1");
     }
 
@@ -244,19 +229,19 @@ class VolunteerAppCreator {
      * @return flag indicating if the user is proper
      */
     function userIsValid($uemail, $upass) {
-        // Sanitize the input value
-        $email = $this->connection->cleanSQLInputs($uemail);
-        $passw = $this->connection->cleanSQLInputs($upass);
-        $passw = Utils::hashPassword($passw); 
+        // Sanitize the user input
+        $uemail = $this->connection->cleanSQLInputs($uemail);
+        $upass = $this->connection->cleanSQLInputs($upass);
+        $upass = Utils::hashPassword($upass); 
 
         // If there is at least a user with that email we can continue prodding
-        if($this->findUser($email)) {
+        if($this->findUser($uemail)) {
             // Find a match for the email and password
             $result = $this->connection->runQuery("SELECT email, password 
-                FROM   users 
-                WHERE  email = '$email' 
-                AND password = '$passw' 
-                LIMIT  1");
+                FROM   users
+                WHERE  email = '$uemail'
+                AND password = '$upass'
+                LIMIT 1");
             return $result->num_rows == 1;
         }
     }
@@ -271,15 +256,15 @@ class VolunteerAppCreator {
     function insertUserRecEntry($email, $key, $expires) {
         $email = $this->connection->cleanSQLInputs($email);
 
-        $this->connection->runQuery("INSERT INTO pass_rec 
-            (email, keyval, expires) 
+        $this->connection->runQuery("INSERT INTO pass_rec (email, keyval, expires)
             VALUES ('$email', '$key', '$expires') ON DUPLICATE KEY
-            UPDATE keyval=values(keyval), expires=values(expires)"); 
+            UPDATE keyval = values(keyval), expires = values(expires)");
 
         // Since MySQL cannot execute delete statements on the table that we are 
         // inserting on, a trigger is not a possibility. So we manually run this 
         // purging of old records query after each insert
-        $this->connection->runQuery("DELETE FROM pass_rec WHERE expires <= DATE_FORMAT(NOW(), '%Y-%m-%d %l:%i:%s');");
+        $this->connection->runQuery("DELETE FROM pass_rec WHERE expires <=
+            DATE_FORMAT(NOW(), '%Y-%m-%d %l:%i:%s');");
     }
 
     /**
@@ -288,17 +273,14 @@ class VolunteerAppCreator {
      * @param (String) $newpass the new password to set
      */
     function recoverUpdatePassword($email, $newpass) {
-        // Sanitize the input value
-        $email = $this->connection->cleanSQLInputs($email);
-        $newpass = $this->connection->cleanSQLInputs($newpass);
         $newpass = Utils::hashPassword($newpass);
 
-        $this->connection->runQuery("DELETE FROM pass_rec
-            WHERE  email = '$email' ");
-        $this->connection->runQuery("UPDATE users 
-            SET    password = '$newpass' 
-            WHERE  email = '$email' 
-            LIMIT 1 ");
+        $this->connection->runPreparedQuery("DELETE FROM pass_rec
+            WHERE  email = ?", array($email));
+        $this->connection->runPreparedQuery("UPDATE users
+            SET    password = ?
+            WHERE  email = ?
+            LIMIT 1 ", array($email, $newpass));
     }
 
     /**
@@ -311,11 +293,10 @@ class VolunteerAppCreator {
     function recoveryEntryExists($email, $key) {
         // Sanitize the input value
         $email = $this->connection->cleanSQLInputs($email);
-        $key = $this->connection->cleanSQLInputs($key);
 
         return $this->connection->runQuery("SELECT count(*) 
             FROM   pass_rec 
-            WHERE  email = '$email' 
+            WHERE  email = '$email'
             AND keyval = '$key' LIMIT 1")->fetch_row()[0] == 1;
     }
 
@@ -325,13 +306,10 @@ class VolunteerAppCreator {
      * @param (String) $uemail the user's email
      */
     function makeUserAdmin($uemail) {
-        // Sanitize the user input
-        $email = $this->connection->cleanSQLInputs($uemail);
-
-        $this->connection->runQuery("UPDATE users 
+        return $this->connection->runPreparedQuery("UPDATE users
             SET    usertype = ".admin." 
-            WHERE  email = '$email' 
-            LIMIT 1"); 
+            WHERE  email = ?
+            LIMIT 1", array($uemail)); 
     }
 
     /**
@@ -342,11 +320,11 @@ class VolunteerAppCreator {
      */
     function isUserAdmin($uemail) {
         // Sanitize the input value
-        $email = $this->connection->cleanSQLInputs($uemail);
+        $uemail = $this->connection->cleanSQLInputs($uemail);
 
         return $this->connection->runQuery("SELECT usertype 
-            FROM   users 
-            WHERE  email = '$email' 
+            FROM   users
+            WHERE  email = '$uemail'
             LIMIT  1")->fetch_row()[0] == admin;
     }
 
@@ -362,19 +340,10 @@ class VolunteerAppCreator {
      * @return (Mysqli_result) the result of the query
      */
     function insertVolunteer($fname, $lname, $email, $phone, $v_day, $tin, $tout) {
-        // Sanitize the input value
-        $fname = $this->connection->cleanSQLInputs($fname);
-        $lname = $this->connection->cleanSQLInputs($lname);
-        $email = $this->connection->cleanSQLInputs($email);
-        $phone = $this->connection->cleanSQLInputs($phone);
-        $v_day = $this->connection->cleanSQLInputs($v_day);
-        $tin = $this->connection->cleanSQLInputs($tin);
-        $tout = $this->connection->cleanSQLInputs($tout);
-
-        return $this->connection->runQuery("INSERT INTO volunteers 
+        return $this->connection->runPreparedQuery("INSERT INTO volunteers 
             (fname, lname, email, phone, volunteer_day, time_in, time_out)
-            VALUES ('$fname', '$lname', '$email', '$phone', '$v_day', '$tin',
-            '$tout') "); 
+            VALUES (?, ?, ?, ?, ?, ?, ?)", array($fname, $lname, $email, $phone,
+                $v_day, $tin, $tout)); 
     }
 
     /**
@@ -385,12 +354,10 @@ class VolunteerAppCreator {
      * @return (MySQli_Result) the query result
      */
     function processVolunteer($uemail, $flag) {
-        // Sanitize the input value
-        $email = $this->connection->cleanSQLInputs($uemail);
-        return $this->connection->runQuery("UPDATE volunteers
-            SET accepted = $flag
-            WHERE email = '$uemail'
-            AND Year(volunteer_day) = Year(now())");
+        return $this->connection->runPreparedQuery("UPDATE volunteers
+            SET accepted = ?
+            WHERE email = ?
+            AND Year(volunteer_day) = Year(now())", array($flag, $uemail));
     }
 
     /**
@@ -400,12 +367,12 @@ class VolunteerAppCreator {
      * @return (MySqli_Result) the query result
      */
     function findRegisteredDateUsers($udate) {
-        // Sanitize the input value
-        $date = $this->connection->cleanSQLInputs($udate);
+        // Sanitize the user input
+        $udate = $this->connection->cleanSQLInputs($udate);
 
-        return $this->connection->runQuery("SELECT fname, lname, email, phone,
-            time_in, time_out, accepted FROM volunteers 
-            WHERE volunteer_day = '$date'
+        return $this->connection->runQuery("SELECT fname, lname, email,
+            phone, time_in, time_out, accepted FROM volunteers 
+            WHERE volunteer_day = '$udate'
             ORDER BY lname");
     }
 
@@ -416,13 +383,9 @@ class VolunteerAppCreator {
      * @param (int) $ucount the number of maximum registered guests
      */
     function insertVolunteerDate($udate, $ucount) {
-        // Sanitize the user input
-        $date = $this->connection->cleanSQLInputs($udate);
-        $count = $this->connection->cleanSQLInputs($ucount);
-
-        $this->connection->runQuery("INSERT INTO volunteer_audit 
+        $this->connection->runPreparedQuery("INSERT INTO volunteer_audit 
             (vol_day, max_registered) 
-            VALUES ('$date', '$count')");
+            VALUES (?, ?)", array($udate, $ucount));
     }
 
     /**
@@ -433,9 +396,12 @@ class VolunteerAppCreator {
      * @return (MySqli_Result) the query result
      */
     function retrieveVolunteerDatesInfo($year) {
+        // Sanitize the user input
+        $year = $this->connection->cleanSQLInputs($year);
+
         return $this->connection->runQuery("SELECT vol_day, curr_registered,
             max_registered FROM volunteer_audit
-            WHERE Year(vol_day) = $year
+            WHERE Year(vol_day) = '$year'
             ORDER BY vol_day");
     }
 
@@ -446,9 +412,6 @@ class VolunteerAppCreator {
      * @return (Array) the list of volunteer dates for the given year
      */
     function retrieveVolunteerDates($year) {
-        // Sanitize the user input
-        $year = $this->connection->cleanSQLInputs($year);
-
         $result = array();
         $vol_days = $this->retrieveEventDates($year);
 
@@ -515,6 +478,20 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Displays the 
+     */
+    function getDate() {
+        $return;
+        $result = $this->connection->runQuery("select vol_day from volunteer_audit
+            where Year(vol_day) = Year(now())");
+
+        while ($row = $result->fetch_row()) {
+            $return .= $row[0] . " ";
+        }
+        return trim($return);
+    }
+
+    /**
      * Displays a table of the registered volunteers for a specific date
      *
      * @param (String) $date the date to find volunteers for
@@ -549,7 +526,6 @@ class VolunteerAppCreator {
                     $volunteerAccepted = "Accepted";
                     break;
             }
-            error_log($row[3]);
 
             $resultTable .= "<tr $class data-dataElem='$row[2]'
             data-box='vol_itemsToModify' data-dateVol='$date'>

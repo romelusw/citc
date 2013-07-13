@@ -84,11 +84,24 @@ if (isset($_GET["specificDate"])) {
                         }?>
                         <script type="text/javascript">
                             $(function() {
+                                var disabledDays = "<?= $app->getDate(); ?>".split(" ");
                                 $( "#dateCal" ).datepicker({
                                     dateFormat: "yy-mm-dd",
-                                    minDate: new Date("<?= date('Y-m-d'); ?>")
+                                    minDate: new Date(<?= time() * 1000 ?>),
+                                    constrainInput: true,
+                                    beforeShowDay: undefinedEventDay
                                 });
-                              });
+
+                                function undefinedEventDay(date) {
+                                    var d = new Date(date);
+                                    var formattedDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+                                    if(disabledDays.indexOf(formattedDate) > -1){
+                                        return[false];
+                                    } else {
+                                        return [true];
+                                    }
+                                }
+                            });
                         </script>
                         <form class="card animate" action="<?= $_SERVER['PHP_SELF']?>" method="post">
                             <label>Insert Volunteer Date</label>
