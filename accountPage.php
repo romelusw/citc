@@ -103,7 +103,21 @@ if (isset($_GET["specificDate"])) {
                 </div>
             </div>
             <section id="headerbar">
-                <p>Welcome, <?= $u_email; ?> <i class="icon-forward-1"></i><a href="logout.php" title="Logout" class="button">Logout</a></p>
+                <? $message = "";
+                   $hour = date("G");
+                    switch ($hour) {
+                        case $hour <= 11: // 12am - 11am
+                            $message = "Good Morning, ";
+                        break;
+                        case $hour <= 17: // 12pm - 5pm
+                            $message = "Good Afternoon, ";
+                        break;
+                        case $hour <= 23: // 6pm - 11pm
+                            $message = "Good Evening, ";
+                        break;
+                    }
+                ?>
+                <p><?= $message . "<span style='font-weight:bold;'>" . $u_email . "</span>" ?> <i class="icon-forward-1"></i><a href="logout.php" title="Logout" class="button">Logout</a></p>
                 <span class="clear"></span>
             </section>
             <section id="sidebar">
@@ -120,14 +134,14 @@ if (isset($_GET["specificDate"])) {
             <section id="mainbody">
                 <div id="left">
                     <div id="volCalendar">
-                        <?= $app->buildVolunteerCalendar(12, 2013); ?>
+                        <?= $app->buildVolunteerCalendar(date("m"), date("Y")); ?>
                     </div>
                     <div id='specificDate'></div>
                     <span class="clear"></span><div id="test"></div>
                 </div>
                 <div id="right">
                     <div id="volunteerDates">
-                        <?= $app->displayVolunteerDates(2013); ?>
+                        <?= $app->displayVolunteerDates(date("Y")); ?>
                         <div class="actionContainer">
                             <ol class="itemsToModify list" id="volDates_itemsToModify">
                             </ol>

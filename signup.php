@@ -86,7 +86,8 @@ if ($_POST) {
             <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Day'] ."</p>" . PHP_EOL; ?>
             <label>Volunteer Day
                 <span class="caveat">*</span>
-                <select>
+                <select name="volDay">
+                    <option>--</option>
                     <?= $app->displaySignUpDates(); ?>
                 </select>
             </label>

@@ -17,9 +17,10 @@ switch($reqInfo["method"]) {
             $app = new VolunteerAppCreator();
             $users = explode("|", $reqInfo["acceptUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
+            error_log("VolDay: $volDay");
             foreach ($users as $uemail) {
                 // Send Email
-                $app->processVolunteer($uemail, 1);
+                // $app->processVolunteer($uemail, $volDay, 1);
             }
             echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
         }
@@ -30,9 +31,10 @@ switch($reqInfo["method"]) {
             $app = new VolunteerAppCreator();
             $users = explode("|", $reqInfo["denyUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
+            error_log("VolDay: $volDay");
             foreach ($users as $uemail) {
                 // Send Email
-                $app->processVolunteer($uemail, 0);
+                // $app->processVolunteer($uemail, $volDay, 0);
             }
             echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
         }

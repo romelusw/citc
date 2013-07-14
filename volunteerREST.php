@@ -19,7 +19,7 @@ switch($reqInfo["method"]) {
             $volDay = strtotime($reqInfo["volunteerDate"]);
             foreach ($users as $uemail) {
                 // Send Email
-                $app->processVolunteer($uemail, 1);
+                $app->processVolunteer($uemail, date("Y-m-d", $volDay), 1);
             }
             echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
         }
@@ -32,7 +32,7 @@ switch($reqInfo["method"]) {
             $volDay = strtotime($reqInfo["volunteerDate"]);
             foreach ($users as $uemail) {
                 // Send Email
-                $app->processVolunteer($uemail, 0);
+                $app->processVolunteer($uemail, date("Y-m-d", $volDay), 0);
             }
             echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
         }

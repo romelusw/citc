@@ -350,14 +350,15 @@ class VolunteerAppCreator {
      * Accepts/Rejects a volunteer for the day they signed up for
      *
      * @param (String) $uemail the user's email address
+     * @param (String) $vday volunteers volunteer day
      * @param (Boolean) $flag indicating to accept or reject the volunteer
      * @return (MySQli_Result) the query result
      */
-    function processVolunteer($uemail, $flag) {
+    function processVolunteer($uemail, $vday, $flag) {
         return $this->connection->runPreparedQuery("UPDATE volunteers
             SET accepted = ?
             WHERE email = ?
-            AND Year(volunteer_day) = Year(now())", array($flag, $uemail));
+            AND volunteer_day = ?", array($flag, $uemail, $vday));
     }
 
     /**
@@ -471,6 +472,10 @@ class VolunteerAppCreator {
         // Sanitize the user input
         $year = $this->connection->cleanSQLInputs($year);
 
+        if($this->retrieveEventDates($year)->num_rows < 1) {
+            return "<p>No Events Scheduled</p>";
+        }
+
         $result = "<table class='selectable vol_table'><tr class='def_cursor'><th colspan='3'>
         Volunteer Dates</th></tr><tr class='def_cursor'><td>Volunteer Day</td>
         <td>Currently Registered</td><td>Maximum registered</td></tr>";
@@ -523,7 +528,6 @@ class VolunteerAppCreator {
         while ($row = $result->fetch_row()) {
             $volunteerAccepted;
             $class;
-
             switch ($row[6]) {
                 case -1:
                     $class = "";
@@ -558,10 +562,11 @@ class VolunteerAppCreator {
      * @return (String) the html representation of the date in an options list.
      */
     function displaySignUpDates() {
-        $result = "<option>--</option>";
+        $result = "";
         $row = $this->retrieveEventDates(date("Y"));
         while($ans = $row->fetch_row()) {
-            $result .= "<option>" . date("l, F j Y", strtotime($ans[0])) . "</option>";
+            $evtDate = strtotime($ans[0]);
+            $result .= "<option value='" .date("Y-m-d", $evtDate)."'>" . date("l, F jS, Y", $evtDate) . "</option>";
         }
         return $result;
     }
@@ -619,6 +624,10 @@ class VolunteerAppCreator {
         // Sanitize the user input
         $month = $this->connection->cleanSQLInputs($month);
         $year = $this->connection->cleanSQLInputs($year);
+
+        if($this->retrieveEventDates($year)->num_rows < 1) {
+            return "<p>No Events Scheduled</p>";
+        }
 
         // Unix timestamp for the event month
         $eventTimestamp = mktime(0,0,0,$month,1,$year);
