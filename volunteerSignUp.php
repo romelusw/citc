@@ -33,7 +33,7 @@ class VolunteerAppCreator {
     function buildVolunteerMgmtTables() {
        // TABLES
        $this->connection->runQuery("CREATE TABLE IF NOT EXISTS `pass_rec` (
-           `rec_id` int(11) NOT NULL AUTO_INCREMENT,
+           `rec_id` int NOT NULL AUTO_INCREMENT,
            `email` varchar(60) NOT NULL,
            `keyval` varchar(32) NOT NULL,
            `expires` datetime NOT NULL,
@@ -41,7 +41,7 @@ class VolunteerAppCreator {
            PRIMARY KEY (`rec_id`))");
 
        $this->connection->runQuery("CREATE TABLE IF NOT EXISTS `volunteers` (
-           `vol_id` int(11) NOT NULL AUTO_INCREMENT,
+           `vol_id` int NOT NULL AUTO_INCREMENT,
            `fname` varchar(15) NOT NULL,
            `lname` varchar(20) NOT NULL,
            `email` varchar(254) NOT NULL,
@@ -49,20 +49,22 @@ class VolunteerAppCreator {
            `volunteer_day` date NOT NULL,
            `time_in` time NOT NULL,
            `time_out` time NOT NULL,
-           `accepted` int(1) NOT NULL DEFAULT -1,
+           `accepted` tinyint NOT NULL DEFAULT -1,
+           `is_group` tinyint NOT NULL DEFAULT 0,
+           `group_size` int NOT NULL DEFAULT -1,
            UNIQUE KEY `distinct_users_key` (`email`, `volunteer_day`),
            PRIMARY KEY (`vol_id`))");
 
        $this->connection->runQuery("CREATE TABLE IF NOT EXISTS `volunteer_audit` (
-           `aud_id` int(11) NOT NULL AUTO_INCREMENT,
+           `aud_id` int NOT NULL AUTO_INCREMENT,
            `vol_day` date NOT NULL,
-           `curr_registered` int(4) NOT NULL DEFAULT 0,
-           `max_registered` int(4) NOT NULL DEFAULT 100,
+           `curr_registered` int NOT NULL DEFAULT 0,
+           `max_registered` int NOT NULL DEFAULT 100,
            PRIMARY KEY (`aud_id`),
        UNIQUE KEY `vol_day` (`vol_day`))");
 
        $this->connection->runQuery("CREATE TABLE IF NOT EXISTS `users` (
-           `uid` int(11) NOT NULL AUTO_INCREMENT,
+           `uid` int NOT NULL AUTO_INCREMENT,
            `fname` varchar(100) NOT NULL,
            `lname` varchar(100) NOT NULL,
            `email` varchar(60) NOT NULL,
@@ -72,7 +74,7 @@ class VolunteerAppCreator {
            `created` datetime NOT NULL,
            `lastloggedin` datetime NOT NULL,
            `token` varchar(60) NOT NULL DEFAULT '',
-           `usertype` int(11) NOT NULL DEFAULT " .norm_users. ",
+           `usertype` int NOT NULL DEFAULT " .norm_users. ",
            PRIMARY KEY (`uid`),
        UNIQUE KEY `email` (`email`))");
        

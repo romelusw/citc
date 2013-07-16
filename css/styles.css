@@ -20,7 +20,7 @@ body {
 
 #mainbody {
     float: right;
-    width: 80%;
+    width: 79%;
     /*border: 1px solid red;*/
     overflow: hidden;
 }
@@ -28,13 +28,15 @@ body {
 #left{
     float: left;
     /*border: 1px solid red;*/
-    width:70%;
+    width:66%;
+    margin:0px 5px;
 }
 
 #right {
     float: right;
     /*border: 1px solid red;*/
-    width:29%;
+    width:31%;
+    margin:0px 5px;
 }
 
 #headerbar {
@@ -82,6 +84,7 @@ body {
     float: left;
     /*border: 1px solid red;*/
     width: 20%;
+    margin:0px 5px;
 }
 
 .itemsToModify {

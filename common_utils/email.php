@@ -25,13 +25,6 @@ class EmailTransport {
         $this->bcc = $bcarbon;
     }
 
-    // Getters
-    public function getSubject() { return $this->subject; } 
-    public function getMessage() { return $this->message; } 
-    public function getFrom() { return $this->from; } 
-    public function getCc() { return $this->cc; } 
-    public function getBcc() { return $this->bcc; } 
-
     /**
      * Sends an email message to the specified email address(es)
      *
@@ -52,5 +45,15 @@ class EmailTransport {
             "CC: " . $this->getCc() . "\r\n" . 
             "BCC: " . $this->getBcc() . "\r\n" .
             "Date: " . date("d M y");
+    }
+
+    /**
+     * Getter for email properties.
+     *
+     * @param (String) $prop the property to retrieve.
+     * @return (String) the value of the email property
+     */
+    function __get($prop) {
+        return $this->$prop; 
     }
 }

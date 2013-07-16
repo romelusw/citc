@@ -61,6 +61,14 @@ if ($_POST) {
         <? switch($show) { case "form": ?>
         <form class="card" action="<? $_SERVER["PHP_SELF"] ?>" method="post">
             <?php echo "<p class='error_msg'>" . $errMsgs['First Name'] ."</p>" . PHP_EOL; ?>
+            <label>Coming as a group?
+                <input type="checkbox" name="vol_isGroup" value="<?= $_POST["vol_isGroup"]; ?>"/>
+            </label>
+
+            <label>Number of volunteers within the group:
+                <input type="number" name="vol_groupSize" value="<?= $_POST["vol_groupSize"]; ?>"/>
+            </label>
+
             <label>First Name
                 <span class="caveat">*</span>
                 <input type="text" name="vol_firstName" value="<?= $_POST["vol_firstName"]; ?>"/>

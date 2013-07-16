@@ -117,7 +117,7 @@ if (isset($_GET["specificDate"])) {
                         break;
                     }
                 ?>
-                <p><?= $message . "<span style='font-weight:bold;'>" . $u_email . "</span>" ?> <i class="icon-forward-1"></i><a href="logout.php" title="Logout" class="button">Logout</a></p>
+                <p><?= $message . "<span style='font-weight:bold;'>" . $u_email . "</span>" ?> <a href="logout.php" title="Logout" class="button">Logout</a></p>
                 <span class="clear"></span>
             </section>
             <section id="sidebar">
