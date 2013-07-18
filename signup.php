@@ -122,7 +122,10 @@ if ($_POST) {
         <? break; case "dupRegistration" ?>
         <p class='message'>You have already registered for this date. Please choose another party date that you have not yet registered for.</p>
         <? break; case "noparty" ?>
-        <p class='message'>Unfortunately there are no volunteer spots left this year. We thank you for your support and hope to have you retry for next year</p>
+        <div class="disclaimer">
+            <h3>All Filled Up</h3>
+            <p>Unfortunately there are no volunteer spots left this year. We thank you for your support and hope to have you retry for next year</p>
+        </div>
         <? break; } ?>
     </body>
 </html>

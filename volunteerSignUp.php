@@ -77,6 +77,12 @@ class VolunteerAppCreator {
            `usertype` int NOT NULL DEFAULT " .norm_users. ",
            PRIMARY KEY (`uid`),
        UNIQUE KEY `email` (`email`))");
+
+       $this->connection->runQuery("CREATE TABLE IF NOT EXISTS `volunteer_positions` (
+           `pid` int NOT NULL AUTO_INCREMENT,
+           `title` varchar(100) NOT NULL,
+           `description` tinytext NOT NULL,
+           PRIMARY KEY (`pid`))");
        
        // TRIGGERS
        // PHP 5.4.10 does not support the use of 'DELIMITER' such that we can
@@ -139,6 +145,7 @@ class VolunteerAppCreator {
 
     /**
      * Retrieves the list of registered users
+     *
      * @return (MySqli_Result) the query result
      */
     function retrieveUsers() {
@@ -270,7 +277,36 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Changes the user type to admin
+     *
+     * @param (String) $uemail the user's email
+     */
+    function makeUserAdmin($uemail) {
+        return $this->connection->runPreparedQuery("UPDATE users
+            SET    usertype = ".admin." 
+            WHERE  email = ?
+            LIMIT 1", array($uemail)); 
+    }
+
+    /**
+     * Determines if a user has admin priveleges
+     *
+     * @param (String) $uemail the user's email
+     * @return a flag indicating if the user is of admin type
+     */
+    function isUserAdmin($uemail) {
+        // Sanitize the input value
+        $uemail = $this->connection->cleanSQLInputs($uemail);
+
+        return $this->connection->runQuery("SELECT usertype 
+            FROM   users
+            WHERE  email = '$uemail'
+            LIMIT  1")->fetch_row()[0] == admin;
+    }
+
+    /**
      * Updates a user's password upon successful recovery
+     *
      * @param (String) $email the users email address
      * @param (String) $newpass the new password to set
      */
@@ -303,35 +339,8 @@ class VolunteerAppCreator {
     }
 
     /**
-     * Changes the user type to admin
-     *
-     * @param (String) $uemail the user's email
-     */
-    function makeUserAdmin($uemail) {
-        return $this->connection->runPreparedQuery("UPDATE users
-            SET    usertype = ".admin." 
-            WHERE  email = ?
-            LIMIT 1", array($uemail)); 
-    }
-
-    /**
-     * Determines if a user has admin priveleges
-     *
-     * @param (String) $uemail the user's email
-     * @return a flag indicating if the user is of admin type
-     */
-    function isUserAdmin($uemail) {
-        // Sanitize the input value
-        $uemail = $this->connection->cleanSQLInputs($uemail);
-
-        return $this->connection->runQuery("SELECT usertype 
-            FROM   users
-            WHERE  email = '$uemail'
-            LIMIT  1")->fetch_row()[0] == admin;
-    }
-
-    /**
      * Inserts new volunteers
+     *
      * @param (String) $fname the users first name
      * @param (String) $lname the users last name
      * @param (String) $email the users email
@@ -369,14 +378,14 @@ class VolunteerAppCreator {
      * @param (Date) $udate the date to reference
      * @return (MySqli_Result) the query result
      */
-    function findRegisteredDateUsers($udate) {
+    function findRegisteredDateUsers($udate, $strt, $end) {
         // Sanitize the user input
         $udate = $this->connection->cleanSQLInputs($udate);
 
         return $this->connection->runQuery("SELECT fname, lname, email,
             phone, time_in, time_out, accepted FROM volunteers 
             WHERE volunteer_day = '$udate'
-            ORDER BY lname");
+            ORDER BY lname LIMIT $strt, $end");
     }
 
     /**
@@ -389,6 +398,48 @@ class VolunteerAppCreator {
         $this->connection->runPreparedQuery("INSERT INTO volunteer_audit 
             (vol_day, max_registered) 
             VALUES (?, ?)", array($udate, $ucount));
+    }
+
+    /**
+     * Inserts new volunteer positions
+     *
+     * @param (String) $title the title for the position
+     * @param (String) $description the desciprition for the position
+     */
+    function insertNewVolPosition($title, $description) {
+        $this->connection->runPreparedQuery("INSERT INTO volunteer_positions
+            (title, description) VALUES (? ?)", array($title, $description));
+    }
+
+    /**
+     * Displays the volunteer positions
+     *
+     * @return (String) the HTML representation for all the positions
+     */
+    function displayVolPositions() {
+        $result;
+        $row = $this->connection->runQuery("SELECT title, description
+            FROM volunteer_positions
+            ORDER BY title");
+
+        if ($row->num_rows < 1) {
+            return $this->displayNotice("No Positions created");
+        }
+
+        $result = "<table class='selectable vol_table'><tr class='def_cursor'>
+            <th colspan='3'>Volunteer Positions</th></tr><tr class='def_cursor'>
+            <td>Title</td><td>Description</td></tr>";
+
+        while($ans = $row->fetch_row()) {
+            $title = $ans[0];
+            $desc = $ans[1];
+
+            $result .= "<tr data-box='volDates_itemsToModify' data-dataElem='$date2'>
+            <td class='special'>$title</td><td>$desc</td></tr>";
+        }
+
+        $result .= "</table>";
+        return $result;
     }
 
     /**
@@ -435,11 +486,11 @@ class VolunteerAppCreator {
         if($row->num_rows > 0) {
             while($ans = $row->fetch_row()) {
                 $result .= "<li data-date='$ans[0]'>"
-                .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+                .date("l F jS, Y", strtotime($ans[0])). "</li>";
             }
             $result .= "</ul>";
         } else {
-            $result = "<p class='message'><span class='caveat'>*</span> No Past Events</p>";
+            $result = $this->displayNotice("No Past Events");
         }
         return $result;
     }
@@ -455,44 +506,12 @@ class VolunteerAppCreator {
         if($row->num_rows > 0) {
             while($ans = $row->fetch_row()) {
                 $result .= "<li data-date='$ans[0]'>"
-                .date("l ♩ F jS, Y", strtotime($ans[0])). "</li>";
+                .date("l -- F jS, Y", strtotime($ans[0])). "</li>";
             }
             $result .= "</ul>";
         } else {
-            $result = "<p class='message'><span class='caveat'>*</span> No Current Events</p>";
+            $result = $this->displayNotice("No Current Events");
         }
-        return $result;
-    }
-
-    /**
-     * Displays a table showing all the volunteers dates for a specific year
-     *
-     * @param (String) $year the year to filter the dates against
-     * @return (String) the volunteer dates table
-     */
-    function displayVolunteerDates($year) {
-        // Sanitize the user input
-        $year = $this->connection->cleanSQLInputs($year);
-
-        if($this->retrieveEventDates($year)->num_rows < 1) {
-            return "<p>No Events Scheduled</p>";
-        }
-
-        $result = "<table class='selectable vol_table'><tr class='def_cursor'><th colspan='3'>
-        Volunteer Dates</th></tr><tr class='def_cursor'><td>Volunteer Day</td>
-        <td>Currently Registered</td><td>Maximum registered</td></tr>";
-
-        $volDates = $this->retrieveVolunteerDatesInfo($year);
-        while ($row = $volDates->fetch_row()) {
-            $date = date("l", strtotime($row[0]));
-            $date2 = date("F jS, Y", strtotime($row[0]));
-
-            $result .= "<tr data-box='volDates_itemsToModify'
-            data-dataElem='$date2'><td class='special'>$date
-            <span class='td_metadata'>$date2</span></td><td>" .$row[1]. "</td>
-            <td>" .$row[2]. "</td></tr>";
-        }
-        $result .= "</table>";
         return $result;
     }
 
@@ -517,7 +536,7 @@ class VolunteerAppCreator {
      * @return (String) a table representation of the volunteers for the
      *                  specified data
      */
-    function displayVolunteersByDate($date) {
+    function displayVolunteersByDate($date, $start, $max) {
         // Sanitize the user input
         $date = $this->connection->cleanSQLInputs($date);
 
@@ -526,7 +545,11 @@ class VolunteerAppCreator {
         </tr><tr class='def_cursor'><td>Name</td><td>Email</td><td>Phone</td>
         <td>Time in</td><td>Time Out</td><td>Status</td></tr>";
 
-        $result = $this->findRegisteredDateUsers($date);
+        $count = $this->connection->runQuery("SELECT count(*)
+            FROM volunteers
+            WHERE volunteer_day = '$date'")->fetch_row()[0];
+
+        $result = $this->findRegisteredDateUsers($date, $start, $max);
         while ($row = $result->fetch_row()) {
             $volunteerAccepted;
             $class;
@@ -555,7 +578,12 @@ class VolunteerAppCreator {
             .$volunteerAccepted. "</td></tr>";
         }
         $resultTable .= "</table>";
-        return $resultTable;
+        $resultTable .= "<ul id='pagination'>";
+        for($i = 0; $i <= ($count/$max); $i++) {
+            $q = "?specificDate=$date&page=$i";
+            $resultTable .= "<li><button data-link=" .$_SERVER['PHP_SELF']. "$q>$i</button></li>";
+        }
+        return $resultTable .= "</ul>";;
     }
 
     /**
@@ -616,6 +644,19 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Displays a notice
+     *
+     * @param (String) $body the content to diplay
+     * @return (String) the HTML representation
+     */
+    function displayNotice($body) {
+        return "<p class='message'>
+                    <span class='caveat'>*</span>
+                $body
+                </p>";
+    }
+
+    /**
      * Builds an HTML table Calendar for volunteers who have registered
      *
      * @param (String) $month the month to render the calendar
@@ -628,7 +669,7 @@ class VolunteerAppCreator {
         $year = $this->connection->cleanSQLInputs($year);
 
         if($this->retrieveEventDates($year)->num_rows < 1) {
-            return "<p>No Events Scheduled</p>";
+            return $this->displayNotice("No Events Scheduled");
         }
 
         // Unix timestamp for the event month
