@@ -174,4 +174,4 @@ function createNewAcct() {
                 <input type="submit" value="submit"/>
             </form>
         </div>
-<? include("footer.php"); ?>
+<?php include("footer.php"); ?>

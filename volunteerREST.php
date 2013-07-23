@@ -5,7 +5,8 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE);
 include_once("common_utils/functions.php");
 include_once("volunteerSignUp.php");
 include_once("common_utils/email.php");
-
+$config = parse_ini_file("conf/citc_config.ini");
+define("displaySize", $config["pagination_size"]);
 $reqInfo = Utils::retrieveRequestInfo();
 $app;
 switch($reqInfo["method"]) {
@@ -17,11 +18,12 @@ switch($reqInfo["method"]) {
             $app = new VolunteerAppCreator();
             $users = explode("|", $reqInfo["acceptUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
+            $currPage = $reqInfo["page"];
             foreach ($users as $uemail) {
                 // Send Email
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 1);
             }
-            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
+            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay), $currPage * displaySize);
         }
     break;
 
@@ -30,11 +32,12 @@ switch($reqInfo["method"]) {
             $app = new VolunteerAppCreator();
             $users = explode("|", $reqInfo["denyUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
+            $currPage = $reqInfo["page"];
             foreach ($users as $uemail) {
                 // Send Email
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 0);
             }
-            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay));
+            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay), $currPage * displaySize);
         }
     break;
 

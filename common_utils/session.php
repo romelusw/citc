@@ -1,6 +1,6 @@
 <?php
 /**
- * An object providing support for SESSION creation and handling.
+ * An object providing support for SESSION creation/managing.
  *
  * @author Woody Romelus
  */
@@ -13,13 +13,13 @@ class Session {
      */
     function __construct($name) {
         // Session Cookie
-        $httponly = true; // Stop javascript from accessing the session id. 
+        $httponly = false; // Dissallow javascript from accessing the session. 
         $cookieParams = session_get_cookie_params(); // Gets current cookies params.
         session_set_cookie_params($cookieParams["lifetime"],
             $cookieParams["path"], $cookieParams["domain"], false, $httponly); 
 
-        session_name($name); // Session name changed
-        session_start(); // Start or resume a session
+        session_name($name);
+        session_start();
 
         if (!isset($_SESSION["created"])) {
             $_SESSION["created"] = date("Y-m-d h:i:s", time());

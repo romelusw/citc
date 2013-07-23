@@ -1,6 +1,6 @@
 <?php
 /** 
- * Establishes a connection to a database, and is capable of performing
+ * Establishes a connection to a database & is capable of performing
  * transactions against it.
  *
  * @author Woody Romelus
@@ -47,15 +47,17 @@ class DatabaseConnector {
         $pStatement = $this->connection->prepare($query);
         // Place the datatypes string in the beginning of the array
         array_unshift($params, $this->resolveTypes($params));
-        // On the prepare statement, invoke 'bind_param' using the referenced paramaters
-        call_user_func_array(array($pStatement, 'bind_param'), $this->referenceArrayValues($params));
+        // On the prepare statement, invoke 'bind_param' using 
+        // the referenced parameters
+        call_user_func_array(array($pStatement, 'bind_param'),
+            $this->referenceArrayValues($params));
 
         return $pStatement->execute();
     }
 
     /**
-     * Determines the Prepared Statement datatypes {i => "Integer", s => "String",
-     * d => "Double", b => "Blob"} for the given data parameters
+     * Determines the datatypes {i => "Integer", s => "String",
+     * d => "Double", b => "Blob"} for the given data parameters.
      *
      * @param (Array) $datum the data to inspect and find the datatype
      * @return (String) containing all the types found
@@ -107,8 +109,7 @@ class DatabaseConnector {
      * @return (Array) the espcaped string
      */
     public function cleanSQLInputs($datum) {
-        $value = $this->connection->real_escape_string($datum);
-        return $value;
+        return $this->connection->real_escape_string($datum);
     }
 
     /** 
@@ -128,7 +129,6 @@ class DatabaseConnector {
      * @return (Boolean) flag indicating if table was found
      */
     public function table_exists($table){
-        $res = $this->runQuery("SHOW TABLES LIKE '$table'");
-        return ($res->num_rows > 0);
+        return $this->runQuery("SHOW TABLES LIKE '$table'")->num_rows > 0;
     }
 }

@@ -1,8 +1,11 @@
 <?php 
 include_once("common_utils/functions.php");
+include("citc_db.php");
 
 define("admin", 0);
 define("norm_users", 1);
+$config = parse_ini_file("conf/citc_config.ini");
+define("displaySize", $config["pagination_size"]);
 
 /**
  * An Object used to create the volunteer application
@@ -17,7 +20,6 @@ class VolunteerAppCreator {
      * Default Constructor
      */
     public function __construct() {
-        include("citc_db.php");
         $this->connection = $conn;
 
         // If the tables necessary are not there we construct them
@@ -536,7 +538,7 @@ class VolunteerAppCreator {
      * @return (String) a table representation of the volunteers for the
      *                  specified data
      */
-    function displayVolunteersByDate($date, $start, $max) {
+    function displayVolunteersByDate($date, $start) {
         // Sanitize the user input
         $date = $this->connection->cleanSQLInputs($date);
 
@@ -548,8 +550,7 @@ class VolunteerAppCreator {
         $count = $this->connection->runQuery("SELECT count(*)
             FROM volunteers
             WHERE volunteer_day = '$date'")->fetch_row()[0];
-
-        $result = $this->findRegisteredDateUsers($date, $start, $max);
+        $result = $this->findRegisteredDateUsers($date, $start, displaySize);
         while ($row = $result->fetch_row()) {
             $volunteerAccepted;
             $class;
@@ -579,9 +580,11 @@ class VolunteerAppCreator {
         }
         $resultTable .= "</table>";
         $resultTable .= "<ul id='pagination'>";
-        for($i = 0; $i <= ($count/$max); $i++) {
+        for($i = 0; $i < ($count / displaySize); $i++) {
             $q = "?specificDate=$date&page=$i";
-            $resultTable .= "<li><button data-link=" .$_SERVER['PHP_SELF']. "$q>$i</button></li>";
+            $class = ($start / displaySize) == $i ? " class='active'" : "";
+            $resultTable .= "<li><button $class data-link=" .$_SERVER['PHP_SELF']. 
+            "$q>".($i + 1)."</button></li>";
         }
         return $resultTable .= "</ul>";;
     }

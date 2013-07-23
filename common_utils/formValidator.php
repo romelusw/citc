@@ -19,7 +19,7 @@ class FormValidator {
      * Loops the input validating each entry
      *
      * @param (Array) $entries inputs to validate with their respective types
-     * @return (Boolean) flag indicating if any errors were found
+     * @return (Boolean) Flag indicating if any errors were found
      */
     public function validate($entries) {
         foreach($entries as $fieldName => $fieldData) {
@@ -35,7 +35,7 @@ class FormValidator {
      * @param (Array) $data the field data
      */
     private function findTypeThenValidate($fieldTitle, $data) {
-        $key = key($data);
+        $key = strtolower(key($data));
 
         switch ($key) {
             case "email":
@@ -113,7 +113,7 @@ class FormValidator {
     }
 
     /**
-     * Getter for the error array.
+     * Retrieves all messages from the error array.
      *
      * @return (Array) the errors generated.
      */

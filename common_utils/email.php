@@ -29,10 +29,11 @@ class EmailTransport {
      * Sends an email message to the specified email address(es)
      *
      * @param (String) $address The email recipient(s)
-     * @return (Boolean) flag indicating if the email was successfully accepted for delivery
+     * @return (Boolean) Flag indicating if the email was successfully accepted
+     *                   for delivery
      */
     public function sendMail($address) {
-        return mail($address, $this->getSubject(), $this->getMessage(), $this->getHeaders());
+        return mail($address, $this->getSubject(), $this->getMessage(),$this->getHeaders());
     }
 
     /**
@@ -41,8 +42,8 @@ class EmailTransport {
      * @return (String) email headers
      */
     public function getHeaders() {
-        return "From: " . $this->getFrom() . "\r\n" . 
-            "CC: " . $this->getCc() . "\r\n" . 
+        return "From: " . $this->getFrom() . "\r\n" .
+            "CC: " . $this->getCc() . "\r\n" .
             "BCC: " . $this->getBcc() . "\r\n" .
             "Date: " . date("d M y");
     }
@@ -54,6 +55,6 @@ class EmailTransport {
      * @return (String) the value of the email property
      */
     function __get($prop) {
-        return $this->$prop; 
+        return $this->$prop;
     }
 }

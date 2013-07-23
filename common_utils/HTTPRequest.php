@@ -1,16 +1,25 @@
 <?php
+/**
+ * An object providing support for HTTP requests.
+ *
+ * @author Woody Romelus
+ */
 class HTTPRequest {
     private $url;
     private $mode = "r";
     private $contents;
     private $body;
 
-    // Default Constructor
+    /**
+     * Default Constructor.
+     */
     public function __construct() {
-        // No Body
+        // Empty Body
     }
 
-    // Send GET Request
+    /**
+     * Acts as a http "GET" request to a url location
+     */
     function get() {
         $filePointer = fopen("http://" . $this->url, $this->mode);
 
@@ -20,14 +29,18 @@ class HTTPRequest {
         }
     }
 
-    // Send POST Request
+    /**
+     * Acts as a http "POST" request to a url location
+     *
+     * @param (Array) $data the form data to send with the POST
+     */
     function post($data) {
         $wrapperOpts = array('http' =>
             array(
-            'method'  => 'POST',
-            'header'  => 'Content-type: application/x-www-form-urlencoded',
-            'content' => http_build_query($data, '', '&'),
-            'timeout' => 5,
+                'method'  => 'POST',
+                'header'  => 'Content-type: application/x-www-form-urlencoded',
+                'content' => http_build_query($data, '', '&'),
+                'timeout' => 200
             )
         );
         $streamContext = stream_context_create($wrapperOpts);

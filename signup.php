@@ -127,5 +127,4 @@ if ($_POST) {
             <p>Unfortunately there are no volunteer spots left this year. We thank you for your support and hope to have you retry for next year</p>
         </div>
         <? break; } ?>
-    </body>
-</html>
+<?php include("footer.php"); ?>

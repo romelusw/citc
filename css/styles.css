@@ -1,3 +1,8 @@
+/**
+ * CSS3 Stylesheet
+ *
+ * @author Woody Romelus
+ */
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300,600);
 
 html {
@@ -18,99 +23,53 @@ body {
     height: 100%;
 }
 
-#mainbody {
-    float: right;
-    width: 79%;
-    /*border: 1px solid red;*/
-    overflow: hidden;
-}
-
-#left{
-    float: left;
-    /*border: 1px solid red;*/
-    width:66%;
-    margin:0px 5px;
-}
-
-#right {
-    float: right;
-    /*border: 1px solid red;*/
-    width:31%;
-    margin:0px 5px;
-}
-
-#tooltip {
-    position: absolute;
-    padding: 7px
-    background: #000;
-    background: rgba(0,0,0,0.8);
-    display: none;
-    color: #fff;
-    z-index: 1001;
-    top: 75px;
-    left: 110px;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    padding: 10px;
-    max-width:400px;
-}
-#pagination li{
-    float:left;
-    margin: 0 4px;
-}
-
-#tooltip p {
-    margin: 0 0 10px 0;
-}
-
 .btn {
-padding: 6px 18px 4px;
-color: white;
-border: solid 1px rgb(0,60,180);
-background: rgb(0,99,255);
-background: -moz-linear-gradient(top, rgb(0,99,255) 0%, rgb(0,85,214) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgb(0,99,255)), color-stop(100%,rgb(0,85,214)));
-background: -webkit-linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
-background: -o-linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
-background: -ms-linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063ff', endColorstr='#0055d6',GradientType=0 );
-background: linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
-text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
--webkit-border-radius: 2px;
--moz-border-radius: 2px;
-border-radius: 2px;
--webkit-box-shadow: 0px 1px 0px rgba(255,255,255,0.3) inset;
--moz-box-shadow: 0px 1px 0px rgba(255,255,255,0.3) inset;
-box-shadow: 0px 1px 0px rgba(255,255,255,0.3) inset;
+    padding: 6px 18px 4px;
+    color: white;
+    border: solid 1px rgb(0,60,180);
+    background: rgb(0,99,255);
+    background: -moz-linear-gradient(top, rgb(0,99,255) 0%, rgb(0,85,214) 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgb(0,99,255)), color-stop(100%,rgb(0,85,214)));
+    background: -webkit-linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
+    background: -o-linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
+    background: -ms-linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063ff', endColorstr='#0055d6',GradientType=0 );
+    background: linear-gradient(top, rgb(0,99,255) 0%,rgb(0,85,214) 100%);
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-box-shadow: 0px 1px 0px rgba(255,255,255,0.3) inset;
+    -moz-box-shadow: 0px 1px 0px rgba(255,255,255,0.3) inset;
+    box-shadow: 0px 1px 0px rgba(255,255,255,0.3) inset;
 }
 .btn:hover{
     cursor: pointer;
     color: rgb(255,255,255) !important;
-border: solid 1px rgb(0,60,180) !important;
-background: rgb(43,128,255);
-background: -moz-linear-gradient(top, rgb(43,128,255) 0%, rgb(29,102,211) 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgb(43,128,255)), color-stop(100%,rgb(29,102,211)));
-background: -webkit-linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
-background: -o-linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
-background: -ms-linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2b80ff', endColorstr='#1d66d3',GradientType=0 );
-background: linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
+    border: solid 1px rgb(0,60,180) !important;
+    background: rgb(43,128,255);
+    background: -moz-linear-gradient(top, rgb(43,128,255) 0%, rgb(29,102,211) 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgb(43,128,255)), color-stop(100%,rgb(29,102,211)));
+    background: -webkit-linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
+    background: -o-linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
+    background: -ms-linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2b80ff', endColorstr='#1d66d3',GradientType=0 );
+    background: linear-gradient(top, rgb(43,128,255) 0%,rgb(29,102,211) 100%);
 }
 #tooltip #tip_arrow {
     border-color: #000;
-border-color: rgba(0,0,0,0.8);
-border-top-color: transparent !important;
-border-left-color: transparent !important;
-border-right-color: transparent !important;
-top: -28px;
-bottom: none;
-display: block;
-position: absolute;
-left: 0px;
-width: 0;
-height: 7px;
-border: solid 14px black;
+    border-color: rgba(0,0,0,0.8);
+    border-top-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+    top: -28px;
+    bottom: none;
+    display: block;
+    position: absolute;
+    left: 0px;
+    width: 0;
+    height: 7px;
+    border: solid 14px black;
 }
 
 .message {
@@ -152,20 +111,6 @@ border: solid 14px black;
     -o-animation: fadein 1.5s;
 }
 
-#headerbar {
-    background-color: #757575;
-    border-bottom: 1px solid #b1b1b1;
-    background-image: -moz-linear-gradient(#f9f9f9, #f3f3f3);
-    background-image: -webkit-linear-gradient(#f9f9f9, #f3f3f3);
-    background-image: linear-gradient(#f9f9f9, #f3f3f3);
-    background-repeat: repeat-x;
-    margin-bottom: 10px;
-    padding-right: 20px;
-    -webkit-box-shadow: 0px 1px 7px rgba(50, 50, 50, 0.27);
-    -moz-box-shadow:    0px 1px 7px rgba(50, 50, 50, 0.27);
-    box-shadow:         0px 1px 7px rgba(50, 50, 50, 0.27);
-}
-
 .rolllink {
     -webkit-transition: all 400ms ease;
     -moz-transition: all 400ms ease;
@@ -181,16 +126,88 @@ border: solid 14px black;
     transform-style: preserve-3d;
 }
 
-#headerbar p{
+#mainbody {
     float: right;
+    width: 79%;
+    /*border: 1px solid red;*/
+    overflow: hidden;
+}
+
+#left{
+    float: left;
+    /*border: 1px solid red;*/
+    width:66%;
+    margin:0px 5px;
+}
+
+#right {
+    float: right;
+    /*border: 1px solid red;*/
+    width:31%;
+    margin:0px 5px;
+}
+
+#tooltip {
+    position: absolute;
+    padding: 7px
+    background: #000;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    color: #fff;
+    z-index: 1001;
+    top: 75px;
+    left: 110px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    padding: 10px;
+    max-width:320px;
+}
+#pagination li{
+    float:left;
+    margin: 0 4px;
+}
+
+#tooltip p {
+    margin: 0 0 10px 0;
 }
 
 #content {
     /*border: 1px solid red;*/
 }
 
+#headerbar {
+    background-color: #757575;
+    border-bottom: 1px solid #b1b1b1;
+    background-image: -moz-linear-gradient(#f9f9f9, #f3f3f3);
+    background-image: -webkit-linear-gradient(#f9f9f9, #f3f3f3);
+    background-image: linear-gradient(#f9f9f9, #f3f3f3);
+    background-repeat: repeat-x;
+    margin-bottom: 10px;
+    padding-right: 20px;
+    -webkit-box-shadow: 0px 1px 7px rgba(50, 50, 50, 0.27);
+    -moz-box-shadow:    0px 1px 7px rgba(50, 50, 50, 0.27);
+    box-shadow:         0px 1px 7px rgba(50, 50, 50, 0.27);
+}
+
+#headerbar p{
+    float: right;
+}
+
 #min_pane {
     /*border:1px solid red;*/
+}
+
+#overlay {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    background: #000;
+    background: rgba(0,0,0,.5);
+    z-index: 1000;
+    display: none;
+    top: 0;
+    left: 0;
 }
 
 #sidebar {
@@ -198,6 +215,10 @@ border: solid 14px black;
     /*border: 1px solid red;*/
     width: 20%;
     margin:0px 5px;
+}
+
+#specificDate {
+    margin-top:10px;
 }
 
 .itemsToModify {
@@ -284,12 +305,17 @@ table.vol_table .active {
 }
 
 .actionContainer {
-    float: left;
+    position: absolute;
     background-color: white;
     min-width: 200px;
     overflow: hidden;
     display: none;
     border: 1px solid #d3d3d3;
+    right: 180px;
+    top: 376px;
+    -moz-box-shadow:    1px 1px 17px 1px #ccc;
+    -webkit-box-shadow: 1px 1px 17px 1px #ccc;
+    box-shadow:         1px 1px 17px 1px #ccc;
 }
 
 .card {
@@ -355,6 +381,9 @@ table.vol_table .active {
     padding: 0px;
 }
 
+.active{
+    border: 1px solid red;
+}
 .popout {
     animation: popout 0.3s ease;
     -webkit-animation: popout 0.3s ease;
@@ -460,22 +489,6 @@ table.vol_table{
     border: 1px solid #d3d3d3;
     border-collapse: collapse;
     width: 100%;
-}
-
-#specificDate {
-    margin-top:10px;
-}
-
-#overlay {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-    background: #000;
-    background: rgba(0,0,0,.5);
-    z-index: 1000;
-    display: none;
-    top: 0;
-    left: 0;
 }
 
 table.vol_table td {

@@ -10,40 +10,42 @@ include_once("volunteerSignUp.php");
 $isAdmin;
 $app;
 $config = parse_ini_file("conf/citc_config.ini");
+$displaySize = $config["pagination_size"];
 $sess = new Session("citc_s");
 $u_email;
 $app = new VolunteerAppCreator();
-// if (isset($_SESSION["recognized"])) {
-//     $u_email = $_SESSION["user"];
-//     $app = new VolunteerAppCreator();
-//     $isAdmin = $_SESSION["admin"];
-//     $app->updateUserLastLogin($u_email);
-// } elseif (isset($_COOKIE["citc_rem"])) {
-//     session_destroy();
-//     setcookie(session_name(), "", time() - 3600);
-//     $parsed = preg_split("/[_]/", htmlspecialchars($_COOKIE["citc_rem"]));
-//     $u_email = $parsed[0];
-//     $u_token = $parsed[1];
-//     $app = new VolunteerAppCreator();
 
-//     if($app->userTokenIsValid($u_email, $u_token)) {
-//         $token = md5(uniqid());
-//         $isAdmin = $app->isUserAdmin($u_email);
-//         $app->updateUserToken($u_email, $token);
-//         setcookie("citc_rem", $u_email."_".$token, strtotime($config["rem_me_token_exp"]), "/", "", false, true);
-//     } else {
-//         error_log($_SERVER["REMOTE_ADDR"] . " Potential Hacker!");
-//     }
-// } else {
-//     Utils::redirect("index.php");
-// }
+if (isset($_SESSION["recognized"])) {
+    $u_email = $_SESSION["user"];
+    $app = new VolunteerAppCreator();
+    $isAdmin = $_SESSION["admin"];
+    $app->updateUserLastLogin($u_email);
+} elseif (isset($_COOKIE["citc_rem"])) {
+    session_destroy();
+    setcookie(session_name(), "", time() - 3600);
+    $parsed = preg_split("/[_]/", htmlspecialchars($_COOKIE["citc_rem"]));
+    $u_email = $parsed[0];
+    $u_token = $parsed[1];
+    $app = new VolunteerAppCreator();
+
+    if($app->userTokenIsValid($u_email, $u_token)) {
+        $token = md5(uniqid());
+        $isAdmin = $app->isUserAdmin($u_email);
+        $app->updateUserToken($u_email, $token);
+        setcookie("citc_rem", $u_email."_".$token, strtotime($config["rem_me_token_exp"]), "/", "", false, true);
+    } else {
+        error_log($_SERVER["REMOTE_ADDR"] . " Potential Hacker!");
+    }
+} else {
+    Utils::redirect("index.php");
+}
 if (isset($_GET["specificDate"])) {
     $dateTime = strtotime($_GET["specificDate"]);
     $result = "<div id='volCalendar'>";
     $result .= $app->buildVolunteerCalendar(date("m", $dateTime), date("Y", $dateTime));
     $result .= "</div>";
     $result .= "<div id='specificDate'>";
-    $result .= $app->displayVolunteersByDate(date("Y-m-d", $dateTime), (isset($_GET["page"]) ? $_GET["page"] * 10 : 0), 10);
+    $result .= $app->displayVolunteersByDate(date("Y-m-d", $dateTime), (isset($_GET["page"]) ? $_GET["page"] * $displaySize : 0));
     $result .= "<div class='actionContainer' id='volList'>
                     <ol class='itemsToModify list' id='vol_itemsToModify'></ol>
                     <ul class='actions'>
@@ -143,7 +145,6 @@ if (isset($_GET["specificDate"])) {
                     <div id="volCalendar">
                         <?= $app->buildVolunteerCalendar(date("m"), date("Y")); ?>
                     </div>
-                    <div id='specificDate'></div>
                     <span class="clear"></span><div id="test"></div>
                 </div>
                 <div id="right">

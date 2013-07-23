@@ -16,7 +16,9 @@ for ($i = 0; $i < 50; $i++) {
     );
     $r->post($postData);
 }
-
+// INSERT INTO `volunteer_positions` (`pid`, `title`, `description`)
+// VALUES
+//     (1, 'Toy Room', 'Aides in packaging gifts for all the children participating within the party. Distributes the gifts to various shelter chaperones.');
 // Create a bunch of volunteers dates
 for ($i = 0; $i < 30; $i++) {
     $r = new HTTPRequest();

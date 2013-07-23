@@ -48,7 +48,7 @@ class Utils {
     }
 
     /**
-     * Hashes a password using a salt for more protection.
+     * Hashes a password.
      *
      * @param (String) $pass the password to hash
      * @return (String) the hashed password
@@ -58,7 +58,7 @@ class Utils {
     }
 
     /**
-     * Generates a unique key
+     * Generates a unique key.
      *
      * @param (String) $content the text used to create a unique key with
      * @return (String) the unique key

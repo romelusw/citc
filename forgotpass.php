@@ -153,5 +153,4 @@ function validateFields($fields) {
             <input type="submit" value="Submit"/>
         </form> 
         <?php break; } ?>
-    </body>
-</html>
+    <?php include("footer.php"); ?>
