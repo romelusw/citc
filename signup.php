@@ -22,6 +22,8 @@ if ($_POST) {
     $vol_volDay = $_POST["volDay"];
     $vol_checkIn = $_POST["checkIn"];
     $vol_checkOut = $_POST["checkOut"];
+    $vol_isGroup = $_POST["vol_isGroup"] == "on";
+    $vol_groupSize = $_POST["vol_groupSize"];
 
     $validator = new FormValidator();
     $fields = array(
@@ -33,7 +35,7 @@ if ($_POST) {
 
     if($validator->validate($fields)) {
         $result = $app->insertVolunteer($vol_firstName, $vol_lastName,
-            $vol_email, $vol_volPhone, $vol_volDay, $vol_checkIn, $vol_checkOut);
+            $vol_email, $vol_volPhone, $vol_volDay, $vol_checkIn, $vol_checkOut, $vol_isGroup, $vol_groupSize);
 
         // Determine which view to show based on the result
         switch($app->connection->error_list[0]["sqlstate"]) {
@@ -94,10 +96,17 @@ if ($_POST) {
             <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Day'] ."</p>" . PHP_EOL; ?>
             <label>Volunteer Day
                 <span class="caveat">*</span>
-                <select name="volDay">
+                <select name="volDay" id="volunteerDay">
                     <option>--</option>
                     <?= $app->displaySignUpDates(); ?>
                 </select>
+            </label>
+
+            <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Position'] ."</p>" . PHP_EOL; ?>
+            <label style="display:none;" id="volunteerPosition">Volunteer Position
+                <span class="caveat">*</span>
+                <ul>
+                </ul>
             </label>
 
             <label>Check In

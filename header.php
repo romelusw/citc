@@ -9,3 +9,5 @@
         <script type="text/javascript" src="javascript/cookies.js"></script>
         <script type="text/javascript" src="javascript/functions.js"></script>
     </head>
+
+    <body>

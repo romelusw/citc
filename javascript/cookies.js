@@ -20,13 +20,13 @@
                 case "object":
                     // Merge the user options with defaults
                     $.cookie.options = $.extend({}, $.cookie.options, options);
-                    result = elem._createCookie();
+                    result = this._createCookie();
                 break;
                 case "undefined":
-                    result = elem._displayCookies();
+                    result = this._displayCookies();
                 break;
                 case "string":
-                    result = elem._contains(options);
+                    result = this._contains(options);
                 break;
                 default:
                     throw "Argument not supported!";

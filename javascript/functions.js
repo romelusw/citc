@@ -5,35 +5,15 @@ $(document).ready(function() {
         var defaultExp = new Date();
         defaultExp.setMonth(defaultExp.getMonth() + 1);
 
-        $("#overlay").fadeIn(1050, function() {
-            $("#tooltip").fadeIn("slow", function() {
-                $("html body").animate({scrollTop: $("#tooltip").scrollTop() + 50});
-                $.cookie({name: "seenTutorial", value: true, 
-                    expires: defaultExp.toGMTString()});
+        $("#overlay").fadeIn("slow", function() {
+            displayTooltip($("button[data-step = 0]").parent(".tooltip"));
+            $.cookie({
+                name: "seenTutorial",
+                value: true, 
+                expires: defaultExp.toGMTString()
             });
         });
     }
-
-    $("#tooltip button").on("click", function() {
-        var step = $(this).attr("step");
-        var tooltip = $(this).parent("#tooltip");
-
-        switch (parseInt(step)) {
-            case 0:
-                displayTooltip(tooltip, "#c_1", "", "", 1);
-                break;
-            case 1:
-                displayTooltip(tooltip, "#c_2", "", "", 2);
-                break;
-            case 2:
-                displayTooltip(tooltip, "#c_3", "", "", -1);
-                break;
-            default:
-                $(tooltip).fadeOut();
-                $("#overlay").fadeOut();
-                break;
-        }
-    });
 
     /**
      * Function description
@@ -41,24 +21,40 @@ $(document).ready(function() {
      * @param (Type) Paramater description
      * @return (Type) Return description
      */
-    function displayTooltip(tooltip, id, title, message, step) {
-        var tooltipXY = $(id).position();
+    function displayTooltip(tooltip) {
+        var padding = 30;
+        var tipLocation = $(tooltip.children("button")
+            .attr("data-tipcontext")).position();
 
-        $(tooltip).fadeOut(500).animate({
-            top: tooltipXY.top + 28,
-            left: tooltipXY.left
-        }, 300, function () {
-            $(this).find("h3").text(title);
-            $(this).find("p").text(message);
-            $(this).find("button").attr("step", step);
-            if (step == -1) {
-                $(this).find("button").text("close");
-            }
-            $("html body").animate({
-                "scrollTop": $(id).scrollTop() + 50
-            });
-        }).fadeIn(500);
+        if(tipLocation) {
+            // Animate the tooltip onto the page
+            tooltip.animate({
+                top: tipLocation.top + padding,
+                left: tipLocation.left
+            }, "slow", function() {
+                // Position the page to the tooltip y-coordinate
+                $("html body").animate({
+                    scrollTop: (tipLocation.top)
+                });
+            }).fadeIn();
+        }
     }
+
+    // Handle Tooltip interaction
+    $(".tooltip button").on("click", function() {
+        var tooltip = $(this).parent(".tooltip");
+        var step = parseInt($(this).attr("data-step"));
+
+        if(step == -1) {
+            $(tooltip).fadeOut();
+            $("#overlay").fadeOut();
+        } else {
+            var nextStep = $(tooltip).children("button").attr("data-next");
+            tooltip.fadeOut();
+            var nextTooltip = $("button[data-step = " + nextStep + "]").parent(".tooltip");
+            displayTooltip(nextTooltip);
+        }
+    });
 
     /**
      * Function description
@@ -85,7 +81,8 @@ $(document).ready(function() {
         $(".optional").toggle();
     });
 
-    $("#close_form").on("click", function() {
+    $(".close_form").on("click", function() {
+        $("#newPositionForm").fadeOut();
         $("#newPartyForm").fadeOut();
         $("#overlay").fadeOut();
     });
@@ -95,20 +92,40 @@ $(document).ready(function() {
         $("#overlay").fadeIn();
     });
 
-    $(".sidebar_list li").on("click", function() {
+    $("#add_position").on("click", function(e) {
+        e.preventDefault();
+        var fieldset = $("#vol_pos").clone()
+        .append("<a href='#' class='removeset'>remove</a></fieldset>")
+        .removeAttr("id");
+        $(this).before(fieldset);
+    });
+
+    $(document).on("click", "a.removeset", function() {
+        $(this).parent("fieldset").remove();
+    });
+
+    $(".sidebar_list").on("click", "li:not('.clicked')", function() {
         $(".sidebar_list li").removeClass("clicked");
         $(this).addClass("clicked");
 
         var date = $(this).attr("data-date");
         $.ajax({
-            url: document.URL + "?specificDate=" + date,
+            url: "volunteerREST.php" + "?specificDate=" + date,
             type: "GET",
-            success: function(result) {
+            success: function(result, textStatus, xhr) {
                 // Calendar
                 $("#volCalendar").replaceWith(function() {
-                    $("#specificDate").remove();
-                    return $(result).fadeOut(1000).fadeIn(500);
+                    return $(result).filter("#volCalendar").fadeOut(1000).fadeIn(500);
                 });
+
+                $("#specificDate").replaceWith(function() {
+                    return $(result).filter("#specificDate").fadeOut(1000).fadeIn(500);
+                });
+
+                $("#volunteerDates").replaceWith(function() {
+                    return $(result).filter("#volunteerDates").fadeOut(1000).fadeIn(500);
+                });
+
                 // Post Request event Bindings
                 handlePagination();
                 handleDateClick();
@@ -208,7 +225,7 @@ $(document).ready(function() {
      * @return (Type) Return description
      */
     function handlePagination() {
-        $("#pagination button").on("click", function () {
+        $("#pagination").on("click", "button:not('.active')", function () {
             $.ajax({
                 url: $(this).attr("data-link"),
                 type: "GET",
@@ -224,4 +241,20 @@ $(document).ready(function() {
             });
         });
     }
+
+    $("#volunteerDay").change(function() {
+        var option = $("#volunteerDay option").filter(":selected");
+        if(option.text() != "--") {
+            $.ajax({
+                url: "volunteerREST.php?positionDate=" + option.val(),
+                type: "GET",
+                success: function(result) {
+                    $("#volunteerPosition ul").replaceWith(result);
+                    $("#volunteerPosition").fadeIn(500);
+                }
+            });
+        } else {
+            $("#volunteerPosition").fadeOut();
+        }
+    });
 });

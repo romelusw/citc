@@ -1,6 +1,6 @@
 <?php 
 include_once("../common_utils/HTTPRequest.php");
-
+$year = 2013;
 // Create a bunch of users
 for ($i = 0; $i < 50; $i++) {
     $r = new HTTPRequest();
@@ -16,15 +16,13 @@ for ($i = 0; $i < 50; $i++) {
     );
     $r->post($postData);
 }
-// INSERT INTO `volunteer_positions` (`pid`, `title`, `description`)
-// VALUES
-//     (1, 'Toy Room', 'Aides in packaging gifts for all the children participating within the party. Distributes the gifts to various shelter chaperones.');
+
 // Create a bunch of volunteers dates
 for ($i = 0; $i < 30; $i++) {
     $r = new HTTPRequest();
     $r->url = "localhost/accountPage.php";
     $postData = array(
-        "pdate" => "2013-06-$i",
+        "pdate" => "$year-06-$i",
         "pmaxreg" => "100"
     );
     $r->post($postData);
@@ -39,7 +37,7 @@ for ($i = 0; $i < 100; $i++) {
         "vol_lastName" => "Volunteer User $i L",
         "vol_email" => "vol_user$i@gmail.com",
         "vol_Phone" => "7777777777",
-        "volDay" => "2013-06-02"
+        "volDay" => "$year-06-02"
     );
     $r->post($postData);
 }

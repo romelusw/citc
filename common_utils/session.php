@@ -13,7 +13,7 @@ class Session {
      */
     function __construct($name) {
         // Session Cookie
-        $httponly = false; // Dissallow javascript from accessing the session. 
+        $httponly = true; // Dissallow javascript from accessing the session. 
         $cookieParams = session_get_cookie_params(); // Gets current cookies params.
         session_set_cookie_params($cookieParams["lifetime"],
             $cookieParams["path"], $cookieParams["domain"], false, $httponly); 
@@ -46,3 +46,4 @@ class Session {
         return $_SESSION[$prop]; 
     }
 }
+?>

@@ -81,8 +81,8 @@ if ($_POST) {
                     if (!isset($_SESSION["emailsent"]) && $_SESSION["emailsent"] == false) {
                         // Send email
                         include_once("common_utils/email.php");
-                        $emailer = new EmailTransport("Test Email", "Hello World", "test@gmail.com");
-                        $emailer->sendMail("romelus.w@gmail.com");
+                        // $emailer = new EmailTransport("Test Email", "Hello World", "test@gmail.com");
+                        // $emailer->sendMail("romelus.w@gmail.com");
                         $sess->emailsent = true;
                     }
                 }else {

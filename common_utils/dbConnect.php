@@ -45,11 +45,12 @@ class DatabaseConnector {
     public function runPreparedQuery($query, $params) {
         // Create Prepared Statement
         $pStatement = $this->connection->prepare($query);
+
         // Place the datatypes string in the beginning of the array
         array_unshift($params, $this->resolveTypes($params));
         // On the prepare statement, invoke 'bind_param' using 
         // the referenced parameters
-        call_user_func_array(array($pStatement, 'bind_param'),
+        call_user_func_array(array(&$pStatement, 'bind_param'),
             $this->referenceArrayValues($params));
 
         return $pStatement->execute();
