@@ -6,7 +6,7 @@ include_once("common_utils/functions.php");
 
 $u_firstName;
 $u_lastName;
-$u_email;
+$u_email = "none@gmail.com";
 $u_pass;
 $u_newAcct;
 $app;
@@ -52,15 +52,15 @@ if ($_POST) {
 
     // Show Accounts page
     if ($isValidUser) {
-        $sess = new Session("citc_s");
+        $session = new Session("citc_s");
         if ($app->isUserAdmin($u_email)) {
-            $sess->admin = true;
+            $session->admin = true;
         } else {
-            $sess->admin = false;
+            $session->admin = false;
         }
-        $sess->recognized = true;
-        $sess->visits = $_SESSION["visits"] + 1;
-        $sess->user = $u_email;
+        $session->recognized = true;
+        $session->visits = $_SESSION["visits"] + 1;
+        $session->user = $u_email;
         Utils::redirect("accountPage.php");
     }
 }

@@ -1,9 +1,25 @@
+/**
+ * Functionality specific to CITC Web app.
+ *
+ * @author Woody Romelus
+ */
 $(document).ready(function() {
+    /**
+     * Delays the execution of a specified callback funciton.
+     *
+     * @param callback the function to invoke after a period of time
+     * @param time the amount of seconds to wait until invoking the callback
+     * @returns {*} the calling object
+     */
+    $.fn.wait = function (callback, time) {
+        window.setTimeout(callback, time);
+        return this;
+    };
 
-    // Diplays the tutorial if they are new users
+    // Displays the tutorial if not already seen
     if(!$.cookie("seenTutorial")) {
         var defaultExp = new Date();
-        defaultExp.setMonth(defaultExp.getMonth() + 1);
+        defaultExp.setMonth(defaultExp.getYear() + 1);
 
         $("#overlay").fadeIn("slow", function() {
             displayTooltip($("button[data-step = 0]").parent(".tooltip"));
@@ -16,15 +32,14 @@ $(document).ready(function() {
     }
 
     /**
-     * Function description
+     * Displays the tutorial tooltip.
      *
-     * @param (Type) Paramater description
-     * @return (Type) Return description
+     * @param tooltip the HTML object representing the tooltip
      */
     function displayTooltip(tooltip) {
         var padding = 30;
-        var tipLocation = $(tooltip.children("button")
-            .attr("data-tipcontext")).position();
+        var tipLocation = $(tooltip.children("button").attr("data-tipcontext"))
+                            .position();
 
         if(tipLocation) {
             // Animate the tooltip onto the page
@@ -32,7 +47,7 @@ $(document).ready(function() {
                 top: tipLocation.top + padding,
                 left: tipLocation.left
             }, "slow", function() {
-                // Position the page to the tooltip y-coordinate
+                // Re-adjust the scroll pane to account for the tooltip
                 $("html body").animate({
                     scrollTop: (tipLocation.top)
                 });
@@ -40,42 +55,37 @@ $(document).ready(function() {
         }
     }
 
+    /**
+     * Replaces the HTML content from elements with results from AJAX requests.
+     *
+     * @param elements the classes or ids of the elements to replace their contents
+     * @param ajaxResult the HTML returned after an AJAX request
+     */
+    function updateContent(elements, ajaxResult) {
+        elements.forEach(function(elem, index, array) {
+            $(elem).replaceWith(function() {
+                return $(ajaxResult).filter(elem).fadeOut(1000).fadeIn(500);
+            });
+        });
+    }
+
     // Handle Tooltip interaction
     $(".tooltip button").on("click", function() {
         var tooltip = $(this).parent(".tooltip");
         var step = parseInt($(this).attr("data-step"));
 
+        // -1 indicates the end of the tutorial
         if(step == -1) {
             $(tooltip).fadeOut();
             $("#overlay").fadeOut();
         } else {
             var nextStep = $(tooltip).children("button").attr("data-next");
             tooltip.fadeOut();
-            var nextTooltip = $("button[data-step = " + nextStep + "]").parent(".tooltip");
+            var nextTooltip = $("button[data-step = " + nextStep + "]")
+                                .parent(".tooltip");
             displayTooltip(nextTooltip);
         }
     });
-
-    /**
-     * Function description
-     *
-     * @param (Type) Paramater description
-     * @return (Type) Return description
-     */
-    $.fn.wait = function(callback, time) {
-        window.setTimeout(callback, time);
-        return this;
-    }
-
-    /**
-     * Function description
-     *
-     * @param (Type) Paramater description
-     * @return (Type) Return description
-     */
-     function debug(obj) {
-        console.log("Debug: " + obj);
-     }
 
     $("#box").change(function() {
         $(".optional").toggle();
@@ -104,6 +114,7 @@ $(document).ready(function() {
         $(this).parent("fieldset").remove();
     });
 
+    // Handle event day interactions
     $(".sidebar_list").on("click", "li:not('.clicked')", function() {
         $(".sidebar_list li").removeClass("clicked");
         $(this).addClass("clicked");
@@ -112,19 +123,9 @@ $(document).ready(function() {
         $.ajax({
             url: "volunteerREST.php" + "?specificDate=" + date,
             type: "GET",
-            success: function(result, textStatus, xhr) {
-                // Calendar
-                $("#volCalendar").replaceWith(function() {
-                    return $(result).filter("#volCalendar").fadeOut(1000).fadeIn(500);
-                });
-
-                $("#specificDate").replaceWith(function() {
-                    return $(result).filter("#specificDate").fadeOut(1000).fadeIn(500);
-                });
-
-                $("#volunteerDates").replaceWith(function() {
-                    return $(result).filter("#volunteerDates").fadeOut(1000).fadeIn(500);
-                });
+            success: function(result) {
+                updateContent(["#volCalendar", "#specificDate",
+                               "#volunteerDates"], result);
 
                 // Post Request event Bindings
                 handlePagination();
@@ -138,7 +139,6 @@ $(document).ready(function() {
      * Function description
      *
      * @param (Type) Paramater description
-     * @return (Type) Return description
      */
     function handleActionClick() {
         $(".actionButton").on("click", function () {
@@ -158,21 +158,16 @@ $(document).ready(function() {
 
             // Make ajax request
             var page = parseInt($("button.active").text()) - 1;
-            var sendUrl = "volunteerREST.php?" + encodeURIComponent(action 
-                + "=" + actionItems + "&volunteerDate=" + dayVol + "&page=" + page);
+            var sendUrl = "volunteerREST.php?" +
+                encodeURIComponent(action + "=" + actionItems + "&volunteerDate="
+                                          + dayVol + "&page=" + page);
             $.ajax({
                 url: sendUrl,
                 context: $(parent),
                 type: reqType,
-                success: function (result, textStatus) {
-                    $("#vol_spec_date").replaceWith(function() {
-                        return $(result).filter("#vol_spec_date").fadeOut(1000).fadeIn(500);
-                    });
-
-                    $(this).children(".itemsToModify").children("li").each(
-                        function () {
-                        $(this).remove();
-                    });
+                success: function (result) {
+                    updateContent(["#vol_spec_date"], result);
+                    $(this).children(".itemsToModify").children("li").remove();
                     $(parent).trigger("modified");
                     // Post Request event Bindings
                     handlePagination();
@@ -186,11 +181,10 @@ $(document).ready(function() {
      * Function description
      *
      * @param (Type) Paramater description
-     * @return (Type) Return description
      */
     function handleDateClick() {
-        var elems = "tr:not('.def_cursor'):not('.disabled'):not('.granted')";
-        $("#specificDate .selectable").on("click", elems, function () {
+        $("#specificDate .selectable").on("click",
+            "tr:not('.def_cursor'):not('.disabled'):not('.granted')", function () {
             var dataBox = $(this).attr("data-box");
             var data = $(this).attr("data-dataElem");
             var dayVol = $(this).attr("data-datevol");
@@ -222,7 +216,6 @@ $(document).ready(function() {
      * Function description
      *
      * @param (Type) Paramater description
-     * @return (Type) Return description
      */
     function handlePagination() {
         $("#pagination").on("click", "button:not('.active')", function () {
@@ -230,10 +223,8 @@ $(document).ready(function() {
                 url: $(this).attr("data-link"),
                 type: "GET",
                 success: function (result) {
-                    $("#volCalendar").replaceWith(function() {
-                        $("#specificDate").remove();
-                        return $(result).fadeOut(1000).fadeIn(500);
-                    });
+                    updateContent(["#volCalendar", "#specificDate",
+                        "#volunteerDates"], result);
                     handlePagination();
                     handleDateClick();
                     handleActionClick();
@@ -243,6 +234,7 @@ $(document).ready(function() {
     }
 
     $("#volunteerDay").change(function() {
+        console.log("#volunteerDates");
         var option = $("#volunteerDay option").filter(":selected");
         if(option.text() != "--") {
             $.ajax({

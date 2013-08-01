@@ -1,51 +1,51 @@
 <?php
-define("EMPTY", "%s cannot be empty. Please fill in.<br/>");
-define("LENGTH", "Password must be at least '8' characters long.<br/>");
-define("NUMBER", "Password must contain at least one numeric value.<br/>");
-define("SYMBOL", "Password must contain at least one symbol.<br/>");
+define("EMPTY", "%s cannot be empty. Please fill in.");
+define("LENGTH", "Password must be at least '8' characters long.");
+define("NUMBER", "Password must contain at least one numeric value.");
+define("SYMBOL", "Password must contain at least one symbol.");
 define("unsupported", "%s is not supported for validation.");
 
 /**
- * A object capable of handling the validation of form input types
+ * A validation object for HTML form input types.
  *
  * @author Woody Romelus
  */
 class FormValidator {
 
     // Contains all error messages
-    private $errMsg = array(); 
+    private $errorMessages = array();
 
     /**
-     * Loops the input validating each entry
+     * Loops the input validating each field.
      *
-     * @param (Array) $entries inputs to validate with their respective types
-     * @return (Boolean) Flag indicating if any errors were found
+     * @param $fields inputs to validate
+     * @return bool indicating if any errors were found
      */
-    public function validate($entries) {
-        foreach($entries as $fieldName => $fieldData) {
-            $this->findTypeThenValidate($fieldName, $fieldData);
+    public function validate($fields) {
+        foreach($fields as $fieldName => $fieldValue) {
+            $this->validateField($fieldName, $fieldValue);
         }
-        return count($this->errMsg) == 0;
+        return count($this->errorMessages) == 0;
     }
 
     /**
      * Finds the appropriate method to validate each form input type.
      *
-     * @param (String) $fieldTitle the field name
-     * @param (Array) $data the field data
+     * @param $fieldTitle the field name
+     * @param $fieldValue the field data
      */
-    private function findTypeThenValidate($fieldTitle, $data) {
-        $key = strtolower(key($data));
+    private function validateField($fieldTitle, $fieldValue) {
+        $key = strtolower(key($fieldValue));
 
         switch ($key) {
             case "email":
-                $this->validateEmail($fieldTitle, $data[$key]);
+                $this->validateEmail($fieldTitle, $fieldValue[$key]);
                 break;
-            case "pass":
-                $this->validatePassword($fieldTitle, $data[$key]);
+            case "pass" || "password":
+                $this->validatePassword($fieldTitle, $fieldValue[$key]);
                 break;  
-            case "non_empty_text":
-                $this->validateNonEmptyText($fieldTitle, $data[$key]);
+            case "non_empty_text" || "net":
+                $this->validateNonEmptyText($fieldTitle, $fieldValue[$key]);
                 break;
             default:
                 error_log(sprintf(constant("unsupported"), $key));
@@ -53,71 +53,77 @@ class FormValidator {
     }
 
     /**
-     * A function to verify/validate non empty text fields
+     * Verifies/validates non empty text fields.
      *
-     * @param (String) $field the field title.
-     * @param (String) $name the name to validate.
+     * @param $field the field title
+     * @param $data the data of the field
      */
-    private function validateNonEmptyText($field, $name) {
-        if(strlen($name) == 0) {
-            $this->setErrMsg($field, sprintf(constant("EMPTY"), $field));
+    private function validateNonEmptyText($field, $data) {
+        if(strlen($data) == 0) {
+            $this->setErrorMessages($field, sprintf(constant("EMPTY"), $field));
         }
     }
 
     /**
-     * A function to verify/validate passwords
+     * Verifies/validates password fields.
      * RULES:
-     *  * Must contain one numeric character
-     *  * Must contain one symbol
-     *  * Must be at least 8 characters long
-     *
-     * @param (String) $field the field title.
-     * @param (String) $pass the password to validate.
+     *  - Must contain one numeric character
+     *  - Must contain one symbol
+     *  - Must be at least 8 characters long
+     * @param $field the field title
+     * @param $pass the password to validate
      */
     private function validatePassword($field, $pass) {
+        // Check for length requirements
         if(strlen($pass) == 0 || strlen($pass) < 8) {
-            $this->setErrMsg($field, sprintf(constant("LENGTH"), $field));
-        }
-        
-        if(!preg_match('@[0-9]@', $pass)) {
-            $this->setErrMsg($field, $this->errMsg[$field] . constant("NUMBER"));
+            $this->setErrorMessages($field, sprintf(constant("LENGTH"), $field));
         }
 
+        // Check for a numeric
+        if(!preg_match('@[0-9]@', $pass)) {
+            $this->setErrorMessages($field, $this->errorMessages[$field]
+                                            . constant("NUMBER"));
+        }
+
+        // Check for symbols
         if(!preg_match("/[^A-Za-z0-9]+/", $pass)) {
-            $this->setErrMsg($field, $this->errMsg[$field] . constant("SYMBOL"));
+            $this->setErrorMessages($field, $this->errorMessages[$field]
+                                            . constant("SYMBOL"));
         }
     }
 
     /**
-     * A function to verify/validate email addresses
+     * Verifies/validates email addresses.
      *
-     * @param (String) $field the field title.
-     * @param (String) $email the email to validate.
+     * @param $field the field title
+     * @param $email the email to validate
      */
     private function validateEmail($field, $email) {
+        $emailRegex = "/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,6}$/i";
+
         if(strlen($email) == 0) {
-            $this->setErrMsg($field, sprintf(constant("EMPTY"), $field));
-        } else if(!preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,6}$/i', $email)) {
-            $this->setErrMsg($field, "Invalid Email Address");
+            $this->setErrorMessages($field, sprintf(constant("EMPTY"), $field));
+        } else if(!preg_match($emailRegex, $email)) {
+            $this->setErrorMessages($field, "Invalid Email Address");
         }
     }
 
     /**
-     * Assigns values to the error array based on its field name.
+     * Sets the error messages for specific input fields.
      *
-     * @param (String) $field the field title.
-     * @param (String) $val the value to assign for the field.
+     * @param $fieldName the field title
+     * @param $message the error message to set
      */
-    private function setErrMsg($field, $val) {
-        $this->errMsg[$field] = $val; 
+    private function setErrorMessages($fieldName, $message) {
+        $this->errorMessages[$fieldName] = $message . "<br>";
     }
 
     /**
      * Retrieves all messages from the error array.
      *
-     * @return (Array) the errors generated.
+     * @return array the errors generated
      */
     public function getErrors() {
-        return $this->errMsg;
+        return $this->errorMessages;
     }
 }

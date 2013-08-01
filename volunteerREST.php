@@ -1,7 +1,4 @@
 <?php
-// Report running errors only (ignoring notices)
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
-
 include_once("common_utils/functions.php");
 include_once("volunteerSignUp.php");
 include_once("common_utils/email.php");
@@ -12,7 +9,6 @@ $reqInfo = Utils::retrieveRequestInfo();
 
 // Ensure user is valid
 require("verifyUser.php");
-// $app = new VolunteerAppCreator();
 
 switch($reqInfo["method"]) {
     case "POST":
@@ -60,7 +56,7 @@ switch($reqInfo["method"]) {
             data-action='acceptUsers' class='actionButton'>Accept</button>
             <button data-reqType='delete' data-action='denyUsers' 
             class='actionButton'>Deny</button></li></ul><span class='clear'>
-            </span><div id='test'></div></div></div>";
+            </span></div></div>";
 
             $result .= "<div id='volunteerDates'><h3>Volunteer Positions</h3>";
             $result .= $app->displayVolPositions(date("Y-m-d", $dateTime));

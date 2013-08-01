@@ -14,4 +14,4 @@
 # │    └──────────────────── hour (0 - 23)
 # └───────────────────────── min (0 - 59)
 # Min - Hour - Dom - Mon - Dow - CMD
-* 13 12 06 * ~/Desktop/runner.sh 
+* 13 12 06 * ~/Desktop/runner.sh

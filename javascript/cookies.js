@@ -3,30 +3,56 @@
  *
  * @author Woody Romelus
  */
-
 ;(function($, window, document, undefined) {
 
+    /**
+     * Plugin construction.
+     *
+     * @param arguments the user options to configure to use within the plugin
+     * @returns {*} result from the method invoked for the arguments given
+     */
+    $.cookie = function(arguments) {
+        return Object.create(Cookie).init(arguments);
+    };
+
+    /**
+     * Default settings for the plugin.
+     *
+     * @type {{name: string, value: string, path: string}}
+     */
+    $.cookie.options = {
+        name: "cookieMonster",
+        value: "monmonmonmon",
+        path: "/"
+    };
+
+    /**
+     * Wrapper object for "cookies".
+     *
+     * @type {{init: Function, _displayCookies: Function,
+     *         _createCookie: Function, _contains: Function}}
+     */
     var Cookie = {
         /**
-         * Initialization & executes the method relevant to the parameter.
+         * Executes the method pertinent to the parameter.
          *
-         * @param (Object) argument to handle
-         * @return (Object) result of the object method
+         * @param args the user options
+         * @returns {*} result from the method invoked for the arguments given
          */
-        init: function(options, elem) {
+        init: function(args) {
             var result;
 
-            switch (typeof(options)) {
+            switch (typeof(args)) {
                 case "object":
                     // Merge the user options with defaults
-                    $.cookie.options = $.extend({}, $.cookie.options, options);
+                    $.cookie.options = $.extend({}, $.cookie.options, args);
                     result = this._createCookie();
                 break;
                 case "undefined":
                     result = this._displayCookies();
                 break;
                 case "string":
-                    result = this._contains(options);
+                    result = this._contains(args);
                 break;
                 default:
                     throw "Argument not supported!";
@@ -36,67 +62,49 @@
         },
 
         /**
+         * Creates a browser cookie.
+         */
+        _createCookie: function() {
+            document.cookie = $.cookie.options.name
+                + "=" + $.cookie.options.value
+                + "; expires=" + $.cookie.options.expires
+                + "; path=" + $.cookie.options.path;
+        },
+
+        /**
          * Displays the cookies for the current domain.
          *
-         * @return (String) String representation of the cookies
+         * @returns {string} representation of all the cookies
          */
         _displayCookies: function() {
-            var cookies = document.cookie.split(";");
             var retVal = "";
+            var cookies = document.cookie.split(";");
 
             if(cookies == "") {
                 retVal = "No cookies set.";
             } else {
-                cookies.forEach(function(e, i, a) {
-                    var parts = e.split("=");
-                    retVal += parts;
+                cookies.forEach(function(elem, index, array) {
+                    retVal += elem.split("=");
                 });
             }
             return retVal;
         },
 
         /**
-         * Creates a browser cookie.
-         */
-        _createCookie: function() {
-            document.cookie = $.cookie.options.name
-                              + "=" + $.cookie.options.value
-                              + "; expires=" + $.cookie.options.expires
-                              + "; path=" + $.cookie.options.path;
-        },
-
-        /**
          * Determines if a cookie exists.
          *
-         * @param (String) the cookie name to look for
-         * @return (Boolean) Flag indicating if the cookie exists
+         * @param name the cookie name to look for
+         * @returns {boolean} indicating if the cookie exists
          */
         _contains: function(name) {
             var cookies = document.cookie.split(";");
             var cookieElements = {};
 
-            cookies.forEach(function(e, i, a) {
-                var parts = e.trim().split("=");
+            cookies.forEach(function(elem, index, array) {
+                var parts = elem.trim().split("=");
                 cookieElements[parts[0]] = parts[1];
             });
-            return (name in cookieElements) ? cookieElements[name] : false;
+            return (name in cookieElements);
         }
-    };
-
-    /**
-     * Plugin construction
-     *
-     * @param (Object) arguments to provide
-     * @return (Object) Results of the arguments passed into the object
-     */
-    $.cookie = function(options) {
-        return Object.create(Cookie).init(options, this);
-    };
-
-    // Plugin defaults
-    $.cookie.options = {
-        name: "cookieMonster",
-        value: "monmonmonmon",
-        path: "/"
     };
 }(jQuery, window, document));

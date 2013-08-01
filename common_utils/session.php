@@ -1,6 +1,6 @@
 <?php
 /**
- * An object providing support for SESSION creation/managing.
+ * Session object.
  *
  * @author Woody Romelus
  */
@@ -9,16 +9,16 @@ class Session {
     /**
      * Default Constructor.
      *
-     * @param (String) $name the name of the session identifier 
+     * @param $sessionCookieName the name of the session identifier
      */
-    function __construct($name) {
+    function __construct($sessionCookieName) {
         // Session Cookie
-        $httponly = true; // Dissallow javascript from accessing the session. 
+        $httponly = true; // Disallow javascript from accessing the session cookies.
         $cookieParams = session_get_cookie_params(); // Gets current cookies params.
         session_set_cookie_params($cookieParams["lifetime"],
-            $cookieParams["path"], $cookieParams["domain"], false, $httponly); 
+            $cookieParams["path"], $cookieParams["domain"], false, $httponly);
 
-        session_name($name);
+        session_name($sessionCookieName);
         session_start();
 
         if (!isset($_SESSION["created"])) {
@@ -29,21 +29,20 @@ class Session {
     /**
      * Setter for the session properties.
      *
-     * @param (String) $prop the property to set.
-     * @param (String) $val the value to assign with the property.
+     * @param $property  the property to set
+     * @param $val the value of the property to set
      */
-    function __set($prop, $val) {
-        $_SESSION[$prop] = $val; 
+    function __set($property, $val) {
+        $_SESSION[$property] = $val;
     }
 
     /**
      * Getter for session properties.
      *
-     * @param (String) $prop the property to retrieve.
-     * @return (String) the value of the session property
+     * @param $property the property to retrieve
+     * @return mixed the value of the property
      */
-    function __get($prop) {
-        return $_SESSION[$prop]; 
+    function __get($property) {
+        return $_SESSION[$property];
     }
 }
-?>

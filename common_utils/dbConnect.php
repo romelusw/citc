@@ -1,7 +1,7 @@
 <?php
-/** 
- * Establishes a connection to a database & is capable of performing
- * transactions against it.
+/**
+ * Establishes a database connection & provides an interface into the
+ * properties/methods of the data source.
  *
  * @author Woody Romelus
  */
@@ -12,41 +12,42 @@ class DatabaseConnector {
     /**
      * Establishes a connection to the database.
      *
-     * @param (String) $host the IP address or hostname of the DB server
-     * @param (String) $username the username
-     * @param (String) $passwd the password
-     * @param (String) $db the database to use
-     */ 
+     * @param $host IP address or hostname of the DB server
+     * @param $username the username
+     * @param $password the password
+     * @param null $db the database
+     */
     public function connect($host, $username, $password, $db = null) {
         $this->connection = new mysqli($host, $username, $password, $db);
 
-        if(!$this->connection) {
-            die("Could not connect to database:" . $this->connection->connect_error());
+        if (!$this->connection) {
+            die("Could not connect to database: "
+                . $this->connection->connect_error());
         }
     }
 
     /**
-     * Executes a SQL Query against the '$connection' database resource
-     * 
-     * @param (String) $query the statement to execute
-     * @return (mysqli_result) resultant object
+     * Executes a query against the data source.
+     *
+     * @param $query the query to execute
+     * @return mysqli_result the query results
      */
     public function runQuery($query) {
         return $result = $this->connection->query($query);
     }
 
     /**
-     * Executes a Prepared SQL Query against the '$connection' database resource
-     * 
-     * @param (String) $query the statement to execute
-     * @param (String) $params the paramaters to bind within the query
-     * @return (mysqli_result) resultant object
+     * Executes a Prepared SQL Query against the data source.
+     *
+     * @param $query the query to execute
+     * @param $params the parameters to bind within the query
+     * @return bool flag indicating if the statement was successful or not
      */
     public function runPreparedQuery($query, $params) {
         // Create Prepared Statement
         $pStatement = $this->connection->prepare($query);
 
-        // Place the datatypes string in the beginning of the array
+        // Place the data types string in the beginning of the array
         array_unshift($params, $this->resolveTypes($params));
         // On the prepare statement, invoke 'bind_param' using 
         // the referenced parameters
@@ -57,16 +58,19 @@ class DatabaseConnector {
     }
 
     /**
-     * Determines the datatypes {i => "Integer", s => "String",
-     * d => "Double", b => "Blob"} for the given data parameters.
+     * Determines the primitive types of an object.
+     * Types: {i => "Integer",
+     *         s => "String",
+     *         d => "Double",
+     *         b => "Blob"}
      *
-     * @param (Array) $datum the data to inspect and find the datatype
-     * @return (String) containing all the types found
+     * @param $datum the data to inspect and find the data type
+     * @return string containing all the types found
      */
     private function resolveTypes($datum) {
         $types = '';
-        foreach($datum as $para) {
-            if(is_int($para)) {
+        foreach ($datum as $para) {
+            if (is_int($para)) {
                 $types .= 'i';
             } elseif (is_float($para)) {
                 $types .= 'd';
@@ -80,15 +84,15 @@ class DatabaseConnector {
     }
 
     /**
-     * Creates a reference array of the values within an array
+     * Creates a reference array for the array given.
      *
-     * @param (Array) $arr the array to reference
-     * @return (Array) the referenced array.
+     * @param $arr the array to reference
+     * @return array the referenced array
      */
     private function referenceArrayValues(&$arr) {
         $refs = array();
-        foreach($arr as $key => $value) {
-            $refs[$key] = &$arr[$key];
+        foreach ($arr as $key => $value) {
+            $refs[$key] = & $arr[$key];
         }
         return $refs;
     }
@@ -96,28 +100,28 @@ class DatabaseConnector {
     /**
      * Closes the database connection.
      *
-     * @return (Boolean) flag depending if it was successful or not.
+     * @return bool flag indicating if the connection was closed successfully
      */
     public function close() {
         return mysqli_close($this->connection);
     }
 
     /**
-     * Protects against MySQL injection by escaping special
-     * characters known within the MySQL charset
+     * Protects against MySQL injection by escaping special characters
+     * reserved within the MySQL charset.
      *
-     * @param (String) $datum the data to sanitize
-     * @return (Array) the espcaped string
+     * @param $datum the data to sanitize
+     * @return string the escaped string
      */
     public function cleanSQLInputs($datum) {
         return $this->connection->real_escape_string($datum);
     }
 
-    /** 
-     * Retrieves the property values from the connection object
+    /**
+     * Getter that retrieves a property from the connection object.
      *
-     * @param (String) $prop the property to retrieve
-     * @return (String) the attribute value
+     * @param $prop the property to retrieve
+     * @return mixed the property value
      */
     public function __get($prop) {
         return $this->connection->$prop;
@@ -126,10 +130,10 @@ class DatabaseConnector {
     /**
      * Checks if a database table exists.
      *
-     * @param (String) $table the table to look for
-     * @return (Boolean) flag indicating if table was found
+     * @param $table the table to check for
+     * @return bool flag indicating if the table exists
      */
-    public function table_exists($table){
+    public function table_exists($table) {
         return $this->runQuery("SHOW TABLES LIKE '$table'")->num_rows > 0;
     }
 }

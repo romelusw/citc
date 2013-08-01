@@ -26,4 +26,3 @@ if (isset($_SESSION["recognized"])) {
 } else {
     Utils::redirect("index.php");
 }
-?>

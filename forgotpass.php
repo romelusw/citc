@@ -7,7 +7,7 @@ include_once("common_utils/session.php");
 
 // Global variables
 $app;
-$errMsgs;
+$errorMessages = array();
 $userLink;
 
 // Handle GET requests
@@ -17,9 +17,9 @@ if (isset($_GET["u_email"]) && isset($_GET["rec_key"])) {
 
     if ($app->recoveryEntryExists($_GET["u_email"], $_GET["rec_key"])) {
         $userEmail = $_GET["u_email"];
-        $sess = new Session("citc_rec");
+        $session = new Session("citc_rec");
         $step = 3;
-        $sess->step = 3;
+        $session->step = 3;
     } else {
         echo "The URL user/key is invalid. Or the url has expired please try again";
     }
@@ -30,7 +30,7 @@ if ($_POST) {
     include_once("common_utils/formValidator.php");
     include_once("volunteerSignUp.php");
 
-    $sess = new Session("citc_rec");
+    $session = new Session("citc_rec");
     $userEmail = isset($_SESSION["u_email"]) ? $_SESSION["u_email"]: "";
     $userQA = isset($_SESSION["u_qa"]) ? $_SESSION["u_qa"]: "";
     $userLink = isset($_SESSION["rec_link"]) ? $_SESSION["rec_link"] : "";
@@ -49,12 +49,12 @@ if ($_POST) {
 
                 if ($app->findUser($u_email)) {
                     $step = 1;
-                    $sess->step = 1;
+                    $session->step = 1;
                     $userQA = $app->findUserSecuritySelection($u_email)->fetch_assoc();
-                    $sess->u_email = $u_email;
-                    $sess->u_qa = $userQA;
+                    $session->u_email = $u_email;
+                    $session->u_qa = $userQA;
                 } else {
-                    $errMsgs["User Email"] = "We can't find a user by that email address. Please try again.";
+                    $errorMessages["User Email"] = "We can't find a user by that email address. Please try again.";
                 }
             }
             break;
@@ -68,12 +68,12 @@ if ($_POST) {
                 $u_answer = Utils::normalize($_POST["sec_a"]); 
                 if (Utils::equalIgnoreCase($u_answer, $userQA["security_a"])) {
                     $app = new VolunteerAppCreator();
-                    $key = Utils::genUniqKey($userEmail);
+                    $key = Utils::generateUniqueKey($userEmail);
                     $app->insertUserRecEntry($userEmail, $key, date("Y-m-d h:i:s", strtotime("+1 hours")));
                     $userLink = "?u_email=$userEmail&rec_key=$key";
-                    $sess->rec_link = $userLink;
+                    $session->rec_link = $userLink;
                     $step = 2;
-                    $sess->step = 2;
+                    $session->step = 2;
 
 
                     // Ensure email is sent only once no matter how many 
@@ -83,10 +83,10 @@ if ($_POST) {
                         include_once("common_utils/email.php");
                         // $emailer = new EmailTransport("Test Email", "Hello World", "test@gmail.com");
                         // $emailer->sendMail("romelus.w@gmail.com");
-                        $sess->emailsent = true;
+                        $session->emailsent = true;
                     }
                 }else {
-                    $errMsgs["Answer"] = "Answer is incorrect! Please try again.";
+                    $errorMessages["Answer"] = "Answer is incorrect! Please try again.";
                 }
             }
             break;
@@ -130,14 +130,14 @@ function validateFields($fields) {
         <?php switch($step) { case 0: ?>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
             <p>Forgot your password eh? Please let me know your email address to help you reset your password.</p>
-            <?= "<p class='error_msg'>".$errMsgs['User Email']."</p>" ?>
+            <?= "<p class='error_msg'>".$errorMessages['User Email']."</p>" ?>
             <label>Email address:<span class="caveat">*</span><input type="text" name="u_email"/></label>
             <input type="submit" value="Submit"/>
         </form> 
         <?php break; case 1: ?>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
             <p>Please answer the security question: <span class="sec_q"><?= ucwords($userQA["security_q"]); ?></span></p>
-            <?= "<p class='error_msg'>".$errMsgs['Answer']."</p>" ?>
+            <?= "<p class='error_msg'>".$errorMessages['Answer']."</p>" ?>
             <label>Answer:<span class="caveat">*</span><input type="text" name="sec_a"/></label>
             <input type="submit" value="Submit"/>
         </form> 
@@ -147,7 +147,7 @@ function validateFields($fields) {
             </p>
         <?php break; case 3: ?>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
-            <?= "<p class='error_msg'>".$errMsgs['Password']."</p>" ?>
+            <?= "<p class='error_msg'>".$errorMessages['Password']."</p>" ?>
             <label>New Password:<span class="caveat">*</span><input type="password" name="n_pass"/></label>     
             <label>Confirm New Password:<span class="caveat">*</span><input type="password"/></label>     
             <input type="submit" value="Submit"/>

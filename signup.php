@@ -1,12 +1,9 @@
 <?php
-// Report running errors only (ignoring notices)
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
-
 include_once("common_utils/functions.php");
 include_once("volunteerSignUp.php");
 
 // Global Variables
-$errMsgs;
+$errMsgs = array();
 $show = "form";
 $app = new VolunteerAppCreator();
 
@@ -24,6 +21,7 @@ if ($_POST) {
     $vol_checkOut = $_POST["checkOut"];
     $vol_isGroup = $_POST["vol_isGroup"] == "on";
     $vol_groupSize = $_POST["vol_groupSize"];
+    $vol_pos = $_POST["vol_position"];
 
     $validator = new FormValidator();
     $fields = array(
@@ -35,7 +33,8 @@ if ($_POST) {
 
     if($validator->validate($fields)) {
         $result = $app->insertVolunteer($vol_firstName, $vol_lastName,
-            $vol_email, $vol_volPhone, $vol_volDay, $vol_checkIn, $vol_checkOut, $vol_isGroup, $vol_groupSize);
+            $vol_email, $vol_volPhone, $vol_volDay, $vol_checkIn,
+            $vol_checkOut, $vol_isGroup, $vol_groupSize, $vol_pos);
 
         // Determine which view to show based on the result
         switch($app->connection->error_list[0]["sqlstate"]) {
@@ -62,15 +61,15 @@ if ($_POST) {
     <body>
         <? switch($show) { case "form": ?>
         <form class="card" action="<? $_SERVER["PHP_SELF"] ?>" method="post">
-            <?php echo "<p class='error_msg'>" . $errMsgs['First Name'] ."</p>" . PHP_EOL; ?>
             <label>Coming as a group?
-                <input type="checkbox" name="vol_isGroup" value="<?= $_POST["vol_isGroup"]; ?>"/>
+                <input type="checkbox" name="vol_isGroup" <?= $_POST['vol_isGroup'] == 'on' ? 'checked' : ''?>/>
             </label>
 
             <label>Number of volunteers within the group:
                 <input type="number" name="vol_groupSize" value="<?= $_POST["vol_groupSize"]; ?>"/>
             </label>
 
+            <?php echo "<p class='error_msg'>" . $errMsgs['First Name'] ."</p>" . PHP_EOL; ?>
             <label>First Name
                 <span class="caveat">*</span>
                 <input type="text" name="vol_firstName" value="<?= $_POST["vol_firstName"]; ?>"/>
@@ -105,8 +104,7 @@ if ($_POST) {
             <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Position'] ."</p>" . PHP_EOL; ?>
             <label style="display:none;" id="volunteerPosition">Volunteer Position
                 <span class="caveat">*</span>
-                <ul>
-                </ul>
+                <ul></ul>
             </label>
 
             <label>Check In
@@ -126,11 +124,11 @@ if ($_POST) {
         <p class='message'>Please be on the lookout for an email in your inbox!</p>
         <? break; case "spaceNotAvailable": ?>
         <p class='message'>Unfortunately the party date chosen is full. Please try another date or come back next year.</p>
-        <? break; case "invalidPartyDate" ?>
+        <? break; case "invalidPartyDate"; ?>
         <p class='message'>The Date specified is not a valid party date.</p>
-        <? break; case "dupRegistration" ?>
+        <? break; case "dupRegistration"; ?>
         <p class='message'>You have already registered for this date. Please choose another party date that you have not yet registered for.</p>
-        <? break; case "noparty" ?>
+        <? break; case "noparty"; ?>
         <div class="disclaimer">
             <h3>All Filled Up</h3>
             <p>Unfortunately there are no volunteer spots left this year. We thank you for your support and hope to have you retry for next year</p>
