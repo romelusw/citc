@@ -7,7 +7,8 @@ $errMsgs = array();
 $show = "form";
 $app = new VolunteerAppCreator();
 
-if($app->checkForAvailableVolDates()) $show = "noparty";
+if($app->eventsFull()) $show = "noparty";
+
 // Handle POST requests
 if ($_POST) {
     include_once("common_utils/formValidator.php");
@@ -32,7 +33,7 @@ if ($_POST) {
     );
 
     if($validator->validate($fields)) {
-        $result = $app->insertVolunteer($vol_firstName, $vol_lastName,
+        $result = $app->createVolunteer($vol_firstName, $vol_lastName,
             $vol_email, $vol_volPhone, $vol_volDay, $vol_checkIn,
             $vol_checkOut, $vol_isGroup, $vol_groupSize, $vol_pos);
 
@@ -49,6 +50,7 @@ if ($_POST) {
             break;
             default:
                 $show = "spaceAvailable";
+                // Send email
             break;
         }
     } else {
@@ -97,7 +99,7 @@ if ($_POST) {
                 <span class="caveat">*</span>
                 <select name="volDay" id="volunteerDay">
                     <option>--</option>
-                    <?= $app->displaySignUpDates(); ?>
+                    <?= $app->displayAvailVolDateOptions(); ?>
                 </select>
             </label>
 

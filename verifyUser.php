@@ -7,7 +7,7 @@ if (isset($_SESSION["recognized"])) {
     $u_email = $_SESSION["user"];
     $isAdmin = $_SESSION["admin"];
     $app->updateUserLastLogin($u_email);
-} elseif (isset($_COOKIE["citc_rem"])) {
+} elseif(isset($_COOKIE["citc_rem"])) {
     session_destroy();
     setcookie(session_name(), "", time() - 3600);
     $parsed = preg_split("/[_]/", htmlspecialchars($_COOKIE["citc_rem"]));
@@ -18,7 +18,7 @@ if (isset($_SESSION["recognized"])) {
         $token = md5(uniqid());
         $isAdmin = $app->isUserAdmin($u_email);
         $app->updateUserToken($u_email, $token);
-        setcookie("citc_rem", $u_email."_".$token, 
+        setcookie("citc_rem", $u_email."_".$token,
             strtotime($config["rem_me_token_exp"]), "/", "", false, true);
     } else {
         error_log($_SERVER["REMOTE_ADDR"] . " Potential Hacker!");

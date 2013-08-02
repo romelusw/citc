@@ -62,7 +62,7 @@ $(document).ready(function() {
      * @param ajaxResult the HTML returned after an AJAX request
      */
     function updateContent(elements, ajaxResult) {
-        elements.forEach(function(elem, index, array) {
+        elements.forEach(function (elem) {
             $(elem).replaceWith(function() {
                 return $(ajaxResult).filter(elem).fadeOut(1000).fadeIn(500);
             });
@@ -87,31 +87,23 @@ $(document).ready(function() {
         }
     });
 
-    $("#box").change(function() {
-        $(".optional").toggle();
-    });
-
-    $(".close_form").on("click", function() {
-        $("#newPositionForm").fadeOut();
-        $("#newPartyForm").fadeOut();
-        $("#overlay").fadeOut();
-    });
-
-    $("#add_event").on("click", function() {
-        $("#newPartyForm").fadeIn();
-        $("#overlay").fadeIn();
-    });
-
-    $("#add_position").on("click", function(e) {
-        e.preventDefault();
-        var fieldset = $("#vol_pos").clone()
-        .append("<a href='#' class='removeset'>remove</a></fieldset>")
-        .removeAttr("id");
-        $(this).before(fieldset);
-    });
-
-    $(document).on("click", "a.removeset", function() {
-        $(this).parent("fieldset").remove();
+    // Handle Sign up form interactions
+    $("#volunteerDay").change(function() {
+        console.log("#volunteerDates");
+        var option = $("#volunteerDay").find("option").filter(":selected");
+        if(option.text() != "--") {
+            $.ajax({
+                url: "volunteerREST.php?positionDate=" + option.val(),
+                type: "GET",
+                success: function(result) {
+                    var positionSection = $("#volunteerPosition");
+                    positionSection.find("ul").replaceWith(result);
+                    positionSection.fadeIn(500);
+                }
+            });
+        } else {
+            $("#volunteerPosition").fadeOut();
+        }
     });
 
     // Handle event day interactions
@@ -136,15 +128,12 @@ $(document).ready(function() {
     });
 
     /**
-     * Function description
-     *
-     * @param (Type) Paramater description
+     * Binds events for the action section
      */
     function handleActionClick() {
         $(".actionButton").on("click", function () {
             var parent = $(this).parents(".actionContainer");
             var itemsToModify = $(parent).children(".itemsToModify").children("li");
-
             var actionItems = "";
             var action = $(this).attr("data-action");
             var reqType = $(this).attr("data-reqType");
@@ -178,13 +167,12 @@ $(document).ready(function() {
     }
 
     /**
-     * Function description
-     *
-     * @param (Type) Paramater description
+     * Binds events for the specific date section
      */
     function handleDateClick() {
-        $("#specificDate .selectable").on("click",
-            "tr:not('.def_cursor'):not('.disabled'):not('.granted')", function () {
+        var specificDateSection = $("#specificDate");
+        specificDateSection.find(".selectable").on("click",
+            "tr:not('.def_cursor'):not('.disabled'):not('.granted')", function() {
             var dataBox = $(this).attr("data-box");
             var data = $(this).attr("data-dataElem");
             var dayVol = $(this).attr("data-datevol");
@@ -192,7 +180,7 @@ $(document).ready(function() {
             // Add/Remove element
             if ($(this).hasClass("highlight")) {
                 var item = $("#" + dataBox + " li:contains(" + data + ")");
-                item.attr("class", "popin").wait(function () {
+                item.attr("class", "popin").wait(function() {
                     $(item).remove();
                     $("#" + dataBox).trigger("modified");
                 }, 250);
@@ -203,7 +191,7 @@ $(document).ready(function() {
             $(this).toggleClass('highlight');
         });
         // Publish-Subcribe pattern
-        $("#specificDate .actionContainer").on("modified", function () {
+        specificDateSection.find(".actionContainer").on("modified", function () {
             if ($(this).children(".itemsToModify").children("li").length < 1) {
                 $(this).fadeOut();
             } else {
@@ -213,18 +201,15 @@ $(document).ready(function() {
     }
 
     /**
-     * Function description
-     *
-     * @param (Type) Paramater description
+     * Binds events for the pagination section
      */
     function handlePagination() {
-        $("#pagination").on("click", "button:not('.active')", function () {
+        $("#pagination").on("click", "button:not('.active')", function() {
             $.ajax({
                 url: $(this).attr("data-link"),
                 type: "GET",
                 success: function (result) {
-                    updateContent(["#volCalendar", "#specificDate",
-                        "#volunteerDates"], result);
+                    updateContent(["#specificDate"], result);
                     handlePagination();
                     handleDateClick();
                     handleActionClick();
@@ -233,20 +218,30 @@ $(document).ready(function() {
         });
     }
 
-    $("#volunteerDay").change(function() {
-        console.log("#volunteerDates");
-        var option = $("#volunteerDay option").filter(":selected");
-        if(option.text() != "--") {
-            $.ajax({
-                url: "volunteerREST.php?positionDate=" + option.val(),
-                type: "GET",
-                success: function(result) {
-                    $("#volunteerPosition ul").replaceWith(result);
-                    $("#volunteerPosition").fadeIn(500);
-                }
-            });
-        } else {
-            $("#volunteerPosition").fadeOut();
-        }
+    $("#box").change(function() {
+        $(".optional").toggle();
+    });
+
+    $(".close_form").on("click", function() {
+        $("#newPositionForm").fadeOut();
+        $("#newPartyForm").fadeOut();
+        $("#overlay").fadeOut();
+    });
+
+    $("#add_event").on("click", function() {
+        $("#newPartyForm").fadeIn();
+        $("#overlay").fadeIn();
+    });
+
+    $("#add_position").on("click", function(e) {
+        e.preventDefault();
+        var fieldset = $("#vol_pos").clone()
+            .append("<a href='#' class='removeset'>remove</a></fieldset>")
+            .removeAttr("id");
+        $(this).before(fieldset);
+    });
+
+    $(document).on("click", "a.removeset", function() {
+        $(this).parent("fieldset").remove();
     });
 });

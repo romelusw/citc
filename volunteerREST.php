@@ -12,9 +12,7 @@ require("verifyUser.php");
 
 switch($reqInfo["method"]) {
     case "POST":
-        if (isset($reqInfo["editVolunteerDates"])) {
-            Utils::printCode(print_r($reqInfo["editVolunteerDates"], true));
-        } else if (isset($reqInfo["acceptUsers"])) {
+        if (isset($reqInfo["acceptUsers"])) {
             $users = explode("|", $reqInfo["acceptUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
             $currPage = $reqInfo["page"];
@@ -22,7 +20,8 @@ switch($reqInfo["method"]) {
                 // Send Email
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 1);
             }
-            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay), $currPage * displaySize);
+            echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
+                $currPage * displaySize);
         }
     break;
 
@@ -35,7 +34,8 @@ switch($reqInfo["method"]) {
                 // Send Email
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 0);
             }
-            echo $app->displayVolunteersByDate(date("Y-m-d", $volDay), $currPage * displaySize);
+            echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
+                $currPage * displaySize);
         }
     break;
 
@@ -45,11 +45,13 @@ switch($reqInfo["method"]) {
             $dateTime = strtotime($_GET["specificDate"]);
 
             $result = "<div id='volCalendar'><h3>Volunteer Action</h3>";
-            $result .= $app->displayVolunteerCalendar(date("m", $dateTime), date("Y", $dateTime));
+            $result .= $app->displayEventCalendar(date("m", $dateTime),
+                date("Y", $dateTime));
             $result .= "</div>";
 
             $result .= "<div id='specificDate'>";
-            $result .= $app->displayVolunteersByDate(date("Y-m-d", $dateTime), (isset($reqInfo["page"]) ? $reqInfo["page"] * displaySize : 0));
+            $result .= $app->displayRegisteredVolunteers(date("Y-m-d", $dateTime),
+                (isset($reqInfo["page"]) ? $reqInfo["page"] * displaySize : 0));
             $result .= "<div class='actionContainer' id='volList'><ol 
             class='itemsToModify list' id='vol_itemsToModify'></ol><ul 
             class='actions'><li><button data-reqType='post' 

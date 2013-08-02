@@ -41,10 +41,12 @@ class FormValidator {
             case "email":
                 $this->validateEmail($fieldTitle, $fieldValue[$key]);
                 break;
-            case "pass" || "password":
+            case "pass":
+            case "password":
                 $this->validatePassword($fieldTitle, $fieldValue[$key]);
                 break;  
-            case "non_empty_text" || "net":
+            case "non_empty_text":
+            case "net":
                 $this->validateNonEmptyText($fieldTitle, $fieldValue[$key]);
                 break;
             default:

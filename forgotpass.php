@@ -1,11 +1,7 @@
 <?php
-// Report simple running errors
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
-
 include_once("common_utils/functions.php");
 include_once("common_utils/session.php");
 
-// Global variables
 $app;
 $errorMessages = array();
 $userLink;
@@ -15,7 +11,7 @@ if (isset($_GET["u_email"]) && isset($_GET["rec_key"])) {
     include_once("volunteerSignUp.php");
     $app = new VolunteerAppCreator();
 
-    if ($app->recoveryEntryExists($_GET["u_email"], $_GET["rec_key"])) {
+    if($app->passwordRecoveryEntryExists($_GET["u_email"], $_GET["rec_key"])) {
         $userEmail = $_GET["u_email"];
         $session = new Session("citc_rec");
         $step = 3;
@@ -69,7 +65,7 @@ if ($_POST) {
                 if (Utils::equalIgnoreCase($u_answer, $userQA["security_a"])) {
                     $app = new VolunteerAppCreator();
                     $key = Utils::generateUniqueKey($userEmail);
-                    $app->insertUserRecEntry($userEmail, $key, date("Y-m-d h:i:s", strtotime("+1 hours")));
+                    $app->createPasswordRecoveryEntry($userEmail, $key, date("Y-m-d h:i:s", strtotime("+1 hours")));
                     $userLink = "?u_email=$userEmail&rec_key=$key";
                     $session->rec_link = $userLink;
                     $step = 2;
@@ -78,7 +74,7 @@ if ($_POST) {
 
                     // Ensure email is sent only once no matter how many 
                     // refreshes
-                    if (!isset($_SESSION["emailsent"]) && $_SESSION["emailsent"] == false) {
+                    if (!isset($_SESSION["emailsent"]) || $_SESSION["emailsent"] == false) {
                         // Send email
                         include_once("common_utils/email.php");
                         // $emailer = new EmailTransport("Test Email", "Hello World", "test@gmail.com");
@@ -99,10 +95,10 @@ if ($_POST) {
 
             if($validator->validate($fields)) {
                 $app = new VolunteerAppCreator(date("Y"));
-                $app->recoverUpdatePassword($userEmail, $new_pass);
+                $app->updateUserPassword($userEmail, $new_pass);
                 session_destroy();
                 setcookie("citc_rec", "", time() - 3600);
-                echo "password has been updated";
+                echo "<p>password has been updated</p>";
             } else {
                 $GLOBALS["errMsgs"] = $validator->getErrors();
             }
@@ -110,7 +106,12 @@ if ($_POST) {
     }
 }
 
-// Validate user input fields and retrieve errors if they exist
+/**
+ * Validate user input fields and retrieve errors if they exist.
+ *
+ * @param $fields the user input fields
+ * @return bool if all the fields were verified successfully
+ */
 function validateFields($fields) {
     $validator = new FormValidator();
     $results = $validator->validate($fields);

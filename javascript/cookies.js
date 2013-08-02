@@ -83,7 +83,7 @@
             if(cookies == "") {
                 retVal = "No cookies set.";
             } else {
-                cookies.forEach(function(elem, index, array) {
+                cookies.forEach(function(elem) {
                     retVal += elem.split("=");
                 });
             }
@@ -100,7 +100,7 @@
             var cookies = document.cookie.split(";");
             var cookieElements = {};
 
-            cookies.forEach(function(elem, index, array) {
+            cookies.forEach(function(elem) {
                 var parts = elem.trim().split("=");
                 cookieElements[parts[0]] = parts[1];
             });

@@ -1,7 +1,4 @@
-<?php 
-// Report running errors only (ignoring notices)
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
-
+<?php
 include_once("common_utils/functions.php");
 
 $u_firstName;
@@ -115,7 +112,7 @@ function createNewAcct() {
         $app->insertNewUser($u_firstName, $u_lastName, $u_email, $u_pass, $u_secQ, $u_secA, $token);
         return true;
     } else {
-        $GLOBALS["errMsgs"] = $validator->getErrors(); 
+        $GLOBALS["errMsgs"] = $validator->getErrors();
         return false;
     }
 }

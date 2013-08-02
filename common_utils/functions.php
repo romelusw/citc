@@ -51,7 +51,7 @@ class Utils {
      * @return string the hashed password
      */
     public static function hashPassword($pass) {
-        return hash("sha1", $pass . salt);
+        return hash("sha1", strtolower($pass) . salt);
     }
 
     /**
