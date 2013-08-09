@@ -344,7 +344,7 @@ class VolunteerAppCreator {
      * @param $numItemsToDisplay the amount of results to display
      * @return mysqli_result the result of the query
      */
-    function findRegisteredVolunteers($udate, $strtIndex, $numItemsToDisplay) {
+    function paginateRegisteredVolunteers($udate, $strtIndex, $numItemsToDisplay) {
         // Sanitize the user input
         $udate = $this->connection->cleanSQLInputs($udate);
 
@@ -537,6 +537,26 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Retrieves all the volunteers for a specific date.
+     *
+     * @param $date the date to reference
+     * @return mysqli_result the results of the query
+     */
+    function retrieveRegisteredVolunteers($date) {
+        // Sanitize the input value
+        $date = $this->connection->cleanSQLInputs($date);
+
+        return $this->connection->runQuery("SELECT fname as 'First Name',
+        lname as 'Last Name', email as 'Email', phone as 'Phone Number',
+        time_in as 'Check In', time_out as 'Check Out', is_group as 'Is a group?',
+        group_size as 'Group Size', position as 'Volunteer Position',
+        accepted as 'Status'
+        FROM volunteers
+        WHERE volunteer_day = '$date'
+        ORDER BY lname ASC");
+    }
+
+    /**
      * .........................................................................
      * ........................... Display Methods .............................
      * .........................................................................
@@ -574,10 +594,10 @@ class VolunteerAppCreator {
 
         while ($ans = $row->fetch_row()) {
             $result .= "<li>"
-                . "<h4>" . $ans[0] . "</h4>"
-                . "<p>" . $ans[1] . "</p>"
-                . "<span>" . $ans[2] . "</span>"
-                . "<span>" . $ans[3] . "</span>"
+                . "<h4>" . $ans[0] . " <span style='color:#53a93f;
+                float:right'>" . (intval($ans[3]) - intval($ans[2])) . " spots
+                left!</span></h4>"
+                . "<p class='small_font'>" . $ans[1] . "</p>"
                 . "</li>";
         }
         return $result . "</ul>";
@@ -682,12 +702,6 @@ class VolunteerAppCreator {
         // Sanitize the user input
         $date = $this->connection->cleanSQLInputs($date);
 
-        $resultTable = "<table id='vol_spec_date' class='selectable vol_table'>
-        <tr class='def_cursor'><th colspan='9'>" . date("l jS \of F Y",
-                strtotime($date)) . " &middot; Volunteers</th></tr><tr class='def_cursor'>
-        <td>Name</td><td>Email</td><td>Phone</td><td>Time in</td><td>Time Out</td>
-        <td>Is Group?</td><td>Group Size</td><td>Position</td><td>Status</td></tr>";
-
         $count = $this->connection->runQuery("SELECT count(*)
             FROM volunteers
             WHERE volunteer_day = '$date'")->fetch_row()[0];
@@ -696,7 +710,15 @@ class VolunteerAppCreator {
             return $this->displayNotice("No registrants.");
         }
 
-        $result = $this->findRegisteredVolunteers($date, $startIndex, displaySize);
+        $resultTable = "<a href='downloads.php?specificDate=$date'
+        target='_blank' id='dwnld_csv'></a><table id='vol_spec_date'
+        class='selectable vol_table'><tr class='def_cursor'><th colspan='9'>"
+            . date("l jS \of F Y", strtotime($date)) . " &middot;
+            Volunteers</th></tr><tr class='def_cursor'><td>Name</td><td>Email</td>
+            <td>Phone</td><td>Time in</td><td>Time Out</td><td>Is Group?</td>
+            <td>Group Size</td><td>Position</td><td>Status</td></tr>";
+
+        $result = $this->paginateRegisteredVolunteers($date, $startIndex, displaySize);
         while ($row = $result->fetch_row()) {
             $volunteerAccepted = "";
             $class = "";
@@ -731,7 +753,7 @@ class VolunteerAppCreator {
         for ($i = 0; $i < floor($count / displaySize); $i++) {
             $q = "?specificDate=$date&page=$i";
             $class = ($startIndex / displaySize) == $i ? " class='active'" : "";
-            $resultTable .= "<li><button $class data-link="
+            $resultTable .= "<li><button type='button' $class data-link="
                 . $_SERVER['PHP_SELF'] . "$q>" . ($i + 1) . "</button></li>";
         }
         return $resultTable .= "</span></ul><span class='clear'></div>";

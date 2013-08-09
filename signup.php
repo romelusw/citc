@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 include_once("common_utils/functions.php");
 include_once("volunteerSignUp.php");
 
@@ -62,64 +63,73 @@ if ($_POST) {
 
     <body>
         <? switch($show) { case "form": ?>
-        <form class="card" action="<? $_SERVER["PHP_SELF"] ?>" method="post">
-            <label>Coming as a group?
-                <input type="checkbox" name="vol_isGroup" <?= $_POST['vol_isGroup'] == 'on' ? 'checked' : ''?>/>
-            </label>
+        <form class="card" id="signupForm" action="<? $_SERVER["PHP_SELF"] ?>"
+    method="post">
+            <fieldset id="f1">
+                <?php echo "<p class='error_msg'>" . $errMsgs['First Name'] ."</p>" . PHP_EOL; ?>
+                <label>First Name
+                    <span class="caveat">*</span>
+                    <input type="text" name="vol_firstName" value="<?= $_POST["vol_firstName"]; ?>"/>
+                </label>
 
-            <label>Number of volunteers within the group:
-                <input type="number" name="vol_groupSize" value="<?= $_POST["vol_groupSize"]; ?>"/>
-            </label>
+                <?php echo "<p class='error_msg'>" . $errMsgs['Last Name'] ."</p>" . PHP_EOL; ?>
+                <label>Last Name
+                    <span class="caveat">*</span>
+                    <input type="text" name="vol_lastName" value="<?= $_POST["vol_lastName"] ?>"/>
+                </label>
 
-            <?php echo "<p class='error_msg'>" . $errMsgs['First Name'] ."</p>" . PHP_EOL; ?>
-            <label>First Name
-                <span class="caveat">*</span>
-                <input type="text" name="vol_firstName" value="<?= $_POST["vol_firstName"]; ?>"/>
-            </label>
+                <?php echo "<p class='error_msg'>" . $errMsgs['Email'] ."</p>" . PHP_EOL; ?>
+                <label>Email
+                    <span class="caveat">*</span>
+                    <input type="email" name="vol_email" value="<?= $_POST["vol_email"] ?>"/>
+                </label>
 
-            <?php echo "<p class='error_msg'>" . $errMsgs['Last Name'] ."</p>" . PHP_EOL; ?>
-            <label>Last Name
-                <span class="caveat">*</span>
-                <input type="text" name="vol_lastName" value="<?= $_POST["vol_lastName"] ?>"/>
-            </label>
+                <label>Telephone
+                    <span class="caveat">*</span>
+                    <input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" name="vol_Phone" title="888-888-8888"/>
+                </label>
+            </fieldset>
 
-            <?php echo "<p class='error_msg'>" . $errMsgs['Email'] ."</p>" . PHP_EOL; ?>
-            <label>Email
-                <span class="caveat">*</span>
-                <input type="email" name="vol_email" value="<?= $_POST["vol_email"] ?>"/>
-            </label>
+            <fieldset id="f2">
+                <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Day'] ."</p>" . PHP_EOL; ?>
+                <label>Volunteer Day
+                    <span class="caveat">*</span>
+                    <select name="volDay" id="volunteerDay">
+                        <option>--</option>
+                        <?= $app->displayAvailVolDateOptions(); ?>
+                    </select>
+                </label>
+            </fieldset>
 
-            <label>Telephone
-                <span class="caveat">*</span>
-                <input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" name="vol_Phone" title="888-888-8888"/>
-            </label>
+            <fieldset id="f3">
+                <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Position'] ."</p>" . PHP_EOL; ?>
+                <label id="volunteerPosition">Volunteer Position
+                    <span class="caveat">*</span>
+                    <ul></ul>
+                </label>
+            </fieldset>
 
-            <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Day'] ."</p>" . PHP_EOL; ?>
-            <label>Volunteer Day
-                <span class="caveat">*</span>
-                <select name="volDay" id="volunteerDay">
-                    <option>--</option>
-                    <?= $app->displayAvailVolDateOptions(); ?>
-                </select>
-            </label>
+            <fieldset id="f4">
+                <label>Coming as a group?
+                    <input type="checkbox" name="vol_isGroup" <?= $_POST['vol_isGroup'] == 'on' ? 'checked' : ''?>/>
+                </label>
 
-            <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Position'] ."</p>" . PHP_EOL; ?>
-            <label style="display:none;" id="volunteerPosition">Volunteer Position
-                <span class="caveat">*</span>
-                <ul></ul>
-            </label>
+                <label>Number of volunteers within the group:
+                    <input type="number" name="vol_groupSize" value="<?= $_POST["vol_groupSize"]; ?>"/>
+                </label>
 
-            <label>Check In
-                <span class="caveat">*</span>
-                <input type="time" name="checkIn"/>
-            </label>
+                <label>Check In
+                    <span class="caveat">*</span>
+                    <input type="time" name="checkIn"/>
+                </label>
 
-            <label>Check Out
-                <span class="caveat">*</span>
-                <input type="time" name="checkOut"/>
-            </label>
-
-            <input type="submit" value="submit"/>
+                <label>Check Out
+                    <span class="caveat">*</span>
+                    <input type="time" name="checkOut"/>
+                </label>
+                <input type="submit" value="submit"/>
+            </fieldset>
+<!--            <button class="arrow">Next</button>-->
         </form>
         <? break; case "spaceAvailable": ?>
         <p class='message'>Thank you for signing up! We will be getting back to you shortly informing you whether you have been chosen as a volunteer for this years party.</p>
@@ -136,4 +146,7 @@ if ($_POST) {
             <p>Unfortunately there are no volunteer spots left this year. We thank you for your support and hope to have you retry for next year</p>
         </div>
         <? break; } ?>
+        <script type="text/javascript">
+            $("#signupForm").formWizard({allowBack: true});
+        </script>
 <?php include("footer.php"); ?>

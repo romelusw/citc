@@ -7,6 +7,7 @@
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
         <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
         <script type="text/javascript" src="javascript/cookies.js"></script>
+        <script type="text/javascript" src="javascript/formWizard.js"></script>
         <script type="text/javascript" src="javascript/functions.js"></script>
     </head>
 

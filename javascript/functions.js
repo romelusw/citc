@@ -4,6 +4,9 @@
  * @author Woody Romelus
  */
 $(document).ready(function() {
+    // Be a good programmer now :p
+    "use strict";
+
     /**
      * Delays the execution of a specified callback funciton.
      *
@@ -89,7 +92,6 @@ $(document).ready(function() {
 
     // Handle Sign up form interactions
     $("#volunteerDay").change(function() {
-        console.log("#volunteerDates");
         var option = $("#volunteerDay").find("option").filter(":selected");
         if(option.text() != "--") {
             $.ajax({
@@ -113,7 +115,7 @@ $(document).ready(function() {
 
         var date = $(this).attr("data-date");
         $.ajax({
-            url: "volunteerREST.php" + "?specificDate=" + date,
+            url: "volunteerREST.php?specificDate=" + date,
             type: "GET",
             success: function(result) {
                 updateContent(["#volCalendar", "#specificDate",

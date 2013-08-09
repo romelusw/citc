@@ -4,6 +4,8 @@
  * @author Woody Romelus
  */
 ;(function($, window, document, undefined) {
+    // Be a good programmer now :p
+    "use strict";
 
     /**
      * Plugin construction.
@@ -11,8 +13,8 @@
      * @param arguments the user options to configure to use within the plugin
      * @returns {*} result from the method invoked for the arguments given
      */
-    $.cookie = function(arguments) {
-        return Object.create(Cookie).init(arguments);
+    $.cookie = function(args) {
+        return Object.create(Cookie).init(args);
     };
 
     /**
@@ -55,7 +57,7 @@
                     result = this._contains(args);
                 break;
                 default:
-                    throw "Argument not supported!";
+                    $.error("Argument not supported!");
                 break;
             }
             return result;

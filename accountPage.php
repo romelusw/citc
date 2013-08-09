@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 include_once("volunteerSignUp.php");
 include_once("common_utils/functions.php");
 

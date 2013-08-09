@@ -1,5 +1,6 @@
 <?php
 include_once("common_utils/functions.php");
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 $u_firstName;
 $u_lastName;

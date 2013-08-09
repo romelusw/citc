@@ -10,9 +10,6 @@ html {
     margin: 0;
 }
 
-h1, h2, h3, h4, h5 {
-    margin: 0;
-}
 .event_day{
     cursor: pointer;
 }
@@ -23,6 +20,13 @@ body {
     margin: 0;
     background: #f5f5f5 url('../media/images/bg.png');
     height: 100%;
+}
+
+#dwnld_csv{
+    background-image: url("https://itsupport.unh.edu/img/download-csv-icon.gif");
+    background-repeat: no-repeat;
+    height: 65px;
+    display: block;
 }
 
 .tooltip button {
@@ -310,8 +314,64 @@ body {
     padding: 7px;
 }
 
+.small_font{
+    margin:0px;
+    color: #aaa;
+    filter: alpha(opacity=60);
+    opacity: 0.6;
+}
+
+.arrow{
+    float: left;
+    height: 24px;
+    line-height: 24px;
+    position: relative;
+    margin: 0;
+    padding: 0 10px 0 14px;
+    background: #0ac92b;
+    color: #fff;
+    font-size: 12px;
+    text-decoration: none;
+    -moz-border-radius: 6px 0 0 6px;
+    -webkit-border-radius: 6px 0 0 6px;
+    border-radius: 6px 0 0 6px;
+    border: none;
+}
+
+.arrow:after{
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -12px;
+    width: 0;
+    height: 0;
+    border-color: transparent transparent transparent #0ac92b;
+    border-style: solid;
+    border-width: 12px 0 12px 12px;
+}
+
 table.vol_table .active {
     padding: 0;
+}
+
+#signupForm{
+
+}
+
+#volunteerPosition ul {
+    max-height: 100px;
+    overflow-y: auto;
+    border: 1px solid #ececec;
+    padding: 0;
+}
+#volunteerPosition ul li{
+    border-bottom: 1px solid rgba(0,0,0,.12);
+    padding: 2px 10px;
+    cursor: pointer;
+}
+
+#volunteerPosition ul li:hover{
+    background: #f5f5f5;
 }
 
 .disabled {
@@ -482,15 +542,13 @@ table.vol_table .active {
 .sidebar_list ul {
     padding: 0;
 }
+fieldset{
+    border:none;
+}
 
 .td_metadata {
     color: #909090;
     display: block;
-}
-
-a {
-    color: #9cc867;
-    text-decoration: none;
 }
 
 form {
