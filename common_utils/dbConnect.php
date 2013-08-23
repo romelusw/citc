@@ -41,7 +41,8 @@ class DatabaseConnector {
      *
      * @param $query the query to execute
      * @param $params the parameters to bind within the query
-     * @return bool flag indicating if the statement was successful or not
+     * @return mixed either a flag indicating if the statement was successful
+     * or the error for the statement
      */
     public function runPreparedQuery($query, $params) {
         // Create Prepared Statement
@@ -54,7 +55,14 @@ class DatabaseConnector {
         call_user_func_array(array(&$pStatement, 'bind_param'),
             $this->referenceArrayValues($params));
 
-        return $pStatement->execute();
+        $result = $pStatement->execute();
+
+        // Handle errors after statement execution
+        if($result == false) {
+            $result = $pStatement->error_list;
+        }
+
+        return $result;
     }
 
     /**

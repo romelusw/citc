@@ -68,18 +68,18 @@ if ($_POST) {
                     $app->createPasswordRecoveryEntry($userEmail, $key, date("Y-m-d h:i:s", strtotime("+1 hours")));
                     $userLink = "?u_email=$userEmail&rec_key=$key";
                     $session->rec_link = $userLink;
-                    $step = 2;
-                    $session->step = 2;
-
 
                     // Ensure email is sent only once no matter how many 
                     // refreshes
                     if (!isset($_SESSION["emailsent"]) || $_SESSION["emailsent"] == false) {
                         // Send email
                         include_once("common_utils/email.php");
-                        // $emailer = new EmailTransport("Test Email", "Hello World", "test@gmail.com");
-                        // $emailer->sendMail("romelus.w@gmail.com");
-                        $session->emailsent = true;
+                        $emailer = new EmailTransport("Forgotten Password",
+                            "Hello World", "webmaster@christmasinthecity.org");
+                        $retVal = $emailer->sendMail($userEmail);
+                        $session->emailsent = $retVal;
+                        $step = 2;
+                        $session->step = 2;
                     }
                 }else {
                     $errorMessages["Answer"] = "Answer is incorrect! Please try again.";
@@ -100,7 +100,7 @@ if ($_POST) {
                 setcookie("citc_rec", "", time() - 3600);
                 echo "<p>password has been updated</p>";
             } else {
-                $GLOBALS["errMsgs"] = $validator->getErrors();
+                $GLOBALS["errorMessages"] = $validator->getErrors();
             }
             break;
     }
@@ -119,7 +119,7 @@ function validateFields($fields) {
     if ($results) {
         // Nothing to do
     }else {
-        $GLOBALS["errMsgs"] = $validator->getErrors();
+        $GLOBALS["errorMessages"] = $validator->getErrors();
     }
     return $results;
 }

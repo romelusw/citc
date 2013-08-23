@@ -10,6 +10,10 @@ html {
     margin: 0;
 }
 
+a {
+    text-decoration: none;
+}
+
 .event_day{
     cursor: pointer;
 }
@@ -22,14 +26,8 @@ body {
     height: 100%;
 }
 
-#dwnld_csv{
-    background-image: url("https://itsupport.unh.edu/img/download-csv-icon.gif");
-    background-repeat: no-repeat;
-    height: 65px;
-    display: block;
-}
-
-.tooltip button {
+.bbutton {
+    display: inline-block;
     padding: 6px 18px 4px;
     color: white;
     border: solid 1px rgb(0,60,180);
@@ -49,7 +47,7 @@ body {
     -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset;
     box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset;
 }
-.tooltip button:hover{
+.bbutton:hover{
     cursor: pointer;
     color: rgb(255,255,255) !important;
     border: solid 1px rgb(0,60,180) !important;
@@ -116,6 +114,56 @@ body {
     -o-animation: fadein 1.5s;
 }
 
+.acceptance {
+    padding: 10px 15px 10px 15px;
+    background-color: #26A967;
+    border: 1px solid #2CC578;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    width: 50%;
+    margin: 5% auto;
+    background-image: -ms-linear-gradient(top, #92E7BC 0%, #69DDA3 100%);
+    background-image: -moz-linear-gradient(top, #92E7BC 0%, #69DDA3 100%);
+    background-image: -o-linear-gradient(top, #92E7BC 0%, #69DDA3 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #92E7BC), color-stop(1, #69DDA3));
+    background-image: -webkit-linear-gradient(top, #92E7BC 0%, #69DDA3 100%);
+    background-image: linear-gradient(to bottom, #92E7BC 0%, #69DDA3 100%);
+    animation: fadein 1.5s;
+    -moz-animation: fadein 1.5s;
+    -webkit-animation: fadein 1.5s;
+    -o-animation: fadein 1.5s;
+}
+
+.error {
+    padding: 10px 15px 10px 15px;
+    background-color: #e43f39;
+    border: 1px solid #dd251e;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    width: 50%;
+    margin: 5% auto;
+    background-image: -ms-linear-gradient(top, #f09693 0%, #e64e48 100%);
+    background-image: -moz-linear-gradient(top, #f09693 0%, #e64e48 100%);
+    background-image: -o-linear-gradient(top, #f09693 0%, #e64e48 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #f09693), color-stop(1, #e64e48));
+    background-image: -webkit-linear-gradient(top, #f09693 0%, #e64e48 100%);
+    background-image: linear-gradient(to bottom, #f09693 0%, #e64e48 100%);
+    animation: fadein 1.5s;
+    -moz-animation: fadein 1.5s;
+    -webkit-animation: fadein 1.5s;
+    -o-animation: fadein 1.5s;
+}
+
+.icon-download:before {
+    content: "\f019";
+}
+
+.icon {
+    font-family: FontAwesome;
+    margin-right: 7px;
+}
 .rolllink {
     -webkit-transition: all 400ms ease;
     -moz-transition: all 400ms ease;
@@ -224,7 +272,7 @@ body {
     background-image: linear-gradient(#f9f9f9, #f3f3f3);
     background-repeat: repeat-x;
     margin-bottom: 10px;
-    padding-right: 20px;
+    padding: 0px 20px;
     -webkit-box-shadow: 0 1px 7px rgba(50, 50, 50, 0.27);
     -moz-box-shadow:    0 1px 7px rgba(50, 50, 50, 0.27);
     box-shadow:         0 1px 7px rgba(50, 50, 50, 0.27);
@@ -250,6 +298,9 @@ body {
     left: 0;
 }
 
+#dateAltCal {
+    cursor: pointer;
+}
 #sidebar {
     float: left;
     /*border: 1px solid red;*/
@@ -408,7 +459,7 @@ table.vol_table .active {
     display: none;
     border: 1px solid #d3d3d3;
     right: 180px;
-    top: 376px;
+    top: 470px;
     -moz-box-shadow:    1px 1px 17px 1px #ccc;
     -webkit-box-shadow: 1px 1px 17px 1px #ccc;
     box-shadow:         1px 1px 17px 1px #ccc;
@@ -507,12 +558,18 @@ table.vol_table .active {
 .selectable td {
 }
 
+.white-highlight {
+    background-color: white;
+    color: black;
+    padding: .5px 4px;
+    font-weight: bold;
+}
 .selectable tr:hover {
     cursor: pointer;
 }
 
-.sidebar_list {
-    /*border: 1px solid red;*/
+.modifiable_desc{
+    cursor: text;
 }
 
 .sidebar_list li{
@@ -543,7 +600,9 @@ table.vol_table .active {
     padding: 0;
 }
 fieldset{
-    border:none;
+    border: none;
+    padding: 0px;
+    margin: 0px;
 }
 
 .td_metadata {

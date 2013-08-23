@@ -39,7 +39,7 @@ if ($_POST) {
             $vol_checkOut, $vol_isGroup, $vol_groupSize, $vol_pos);
 
         // Determine which view to show based on the result
-        switch($app->connection->error_list[0]["sqlstate"]) {
+        switch($result[0]["sqlstate"]) {
             case "70000":
                 $show = "invalidPartyDate";
             break;
@@ -52,6 +52,11 @@ if ($_POST) {
             default:
                 $show = "spaceAvailable";
                 // Send email
+                include_once("common_utils/email.php");
+                $emailer = new EmailTransport("Volunteer Registration",
+                    "Hello World",
+                    "webmaster@christmasinthecity.org");
+                $retVal = $emailer->sendMail($vol_email);
             break;
         }
     } else {
@@ -105,6 +110,7 @@ if ($_POST) {
                 <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Position'] ."</p>" . PHP_EOL; ?>
                 <label id="volunteerPosition">Volunteer Position
                     <span class="caveat">*</span>
+                    <input type="hidden" id="chosen" name="vol_position"/>
                     <ul></ul>
                 </label>
             </fieldset>
@@ -132,18 +138,22 @@ if ($_POST) {
 <!--            <button class="arrow">Next</button>-->
         </form>
         <? break; case "spaceAvailable": ?>
-        <p class='message'>Thank you for signing up! We will be getting back to you shortly informing you whether you have been chosen as a volunteer for this years party.</p>
-        <p class='message'>Please be on the lookout for an email in your inbox!</p>
+        <p class='disclaimer'>Thank you for signing up! We will be getting back to
+            you shortly informing you whether you have been chosen as a volunteer
+            for this years party.Please be on the lookout for an email in your inbox!</p>
         <? break; case "spaceNotAvailable": ?>
-        <p class='message'>Unfortunately the party date chosen is full. Please try another date or come back next year.</p>
+        <p class='error'>Unfortunately the party date chosen is full. Please
+            try another date or come back next year.</p>
         <? break; case "invalidPartyDate"; ?>
-        <p class='message'>The Date specified is not a valid party date.</p>
+        <p class='error'>The Date specified is not a valid party date.</p>
         <? break; case "dupRegistration"; ?>
-        <p class='message'>You have already registered for this date. Please choose another party date that you have not yet registered for.</p>
+        <p class='error'>You have already registered for this date. Please
+            choose another party date that you have not yet registered for.</p>
         <? break; case "noparty"; ?>
-        <div class="disclaimer">
+        <div class="error">
             <h3>All Filled Up</h3>
-            <p>Unfortunately there are no volunteer spots left this year. We thank you for your support and hope to have you retry for next year</p>
+            <p>Unfortunately there are no volunteer spots left this year. We
+                thank you for your support and hope to have you retry for next year</p>
         </div>
         <? break; } ?>
         <script type="text/javascript">

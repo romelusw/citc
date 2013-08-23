@@ -12,7 +12,7 @@ class Utils {
     /**
      * Logs messages.
      * The default location of the log file is: "romelus_debug.log"
-     * If the file deos not already exist, the file will be created.
+     * If the file does not already exist, the file will be created.
      *
      * @param $message the message to log
      * @param string $logFilePath location where log file should exist

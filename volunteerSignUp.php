@@ -12,7 +12,6 @@ define("displaySize", $config["pagination_size"]);
  * @author Woody Romelus
  */
 class VolunteerAppCreator {
-
     public $connection;
 
     /**
@@ -29,7 +28,6 @@ class VolunteerAppCreator {
             $this->buildVolunteerMgmtTables();
         }
     }
-
     /**
      * .........................................................................
      * ......................... Functional Methods ............................
@@ -46,6 +44,7 @@ class VolunteerAppCreator {
            email varchar(60) NOT NULL,
            keyval varchar(32) NOT NULL,
            expires datetime NOT NULL,
+           created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
            UNIQUE KEY distinct_users_email (email),
            PRIMARY KEY (rec_id))");
 
@@ -62,6 +61,7 @@ class VolunteerAppCreator {
            is_group tinyint NOT NULL DEFAULT 0,
            group_size int NOT NULL DEFAULT 0,
            position varchar(100) NOT NULL,
+           created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
            UNIQUE KEY distinct_users_key (email, volunteer_day),
            PRIMARY KEY (vol_id))");
 
@@ -70,6 +70,7 @@ class VolunteerAppCreator {
            vol_day date NOT NULL,
            curr_registered int NOT NULL DEFAULT 0,
            max_registered int NOT NULL DEFAULT 100,
+           created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
            PRIMARY KEY (aud_id),
            UNIQUE KEY vol_day (vol_day))");
 
@@ -81,7 +82,7 @@ class VolunteerAppCreator {
            password varchar(60) NOT NULL,
            security_q varchar(70) NOT NULL,
            security_a varchar(30) NOT NULL,
-           created datetime NOT NULL,
+           created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
            lastloggedin datetime NOT NULL,
            rem_me_token varchar(60) NOT NULL DEFAULT '',
            usertype int NOT NULL DEFAULT " . norm_users . ",
@@ -91,9 +92,10 @@ class VolunteerAppCreator {
         $this->connection->runQuery("CREATE TABLE IF NOT EXISTS volunteer_positions (
            pid int NOT NULL AUTO_INCREMENT,
            title varchar(100) NOT NULL,
-           description varchar(100) NOT NULL DEFAULT '',
+           description varchar(700) NOT NULL DEFAULT '',
            max_users int NOT NULL DEFAULT '0',
            date date NOT NULL,
+           created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
            PRIMARY KEY (pid),
            UNIQUE KEY distinct_positions (title, date))");
 
@@ -143,16 +145,17 @@ class VolunteerAppCreator {
      * @param $secQ the users security question
      * @param $secA the users security answer
      * @param $token the users token
-     * @return bool indicating if the statement executed successfully
+     * @return mixed flag indicating the query was executed successfully,
+     * or the error that was propagated from the prepared statement
      */
     function insertNewUser($fname, $lname, $email, $passw, $secQ, $secA, $token) {
 
         $now = date("Y-m-d H:i:s");
         $pass = Utils::hashPassword($passw);
         return $this->connection->runPreparedQuery("INSERT INTO users (fname,
-            lname, email, password, security_q, security_a, created, lastloggedin, rem_me_token)
+            lname, email, password, security_q, security_a, lastloggedin, rem_me_token)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", array($fname, $lname, $email,
-            $pass, $secQ, $secA, $now, $now, $token));
+            $pass, $secQ, $secA, $now, $token));
     }
 
     /**
@@ -221,7 +224,8 @@ class VolunteerAppCreator {
      *
      * @param $uemail the user's email
      * @param $utoken the new token to set
-     * @return bool indicating if the statement executed successfully
+     * @return mixed flag indicating the query was executed successfully,
+     * or the error that was propagated from the prepared statement
      */
     function updateUserToken($uemail, $utoken) {
         return $this->connection->runPreparedQuery("UPDATE users
@@ -250,7 +254,8 @@ class VolunteerAppCreator {
      * Updates the last time the user logged in.
      *
      * @param $uemail the user's email
-     * @return bool indicating if the statement executed successfully
+     * @return mixed flag indicating the query was executed successfully,
+     * or the error that was propagated from the prepared statement
      */
     function updateUserLastLogin($uemail) {
         return $this->connection->runPreparedQuery("UPDATE users
@@ -333,6 +338,23 @@ class VolunteerAppCreator {
         return $this->connection->runQuery("SELECT DISTINCT vol_day
             FROM volunteer_audit
             WHERE Year(vol_day) = '$year'");
+    }
+
+    /**
+     * Retrieves all of volunteer events created within a specific year that
+     * are not yet full.
+     *
+     * @param $year the year to filter the dates against
+     * @return mysqli_result the result of the query
+     */
+    function retrieveAvailEventDates($year) {
+        // Sanitize the user input
+        $year = $this->connection->cleanSQLInputs($year);
+
+        return $this->connection->runQuery("SELECT DISTINCT vol_day
+            FROM volunteer_audit
+            WHERE Year(vol_day) = '$year'
+            AND curr_registered < max_registered");
     }
 
     /**
@@ -455,11 +477,12 @@ class VolunteerAppCreator {
      * @param $isGrp the group to reference
      * @param $grpSize the group size to reference
      * @param $pos the position to reference
-     * @return bool indicating the query was executed successfully
+     * @return mixed flag indicating the query was executed successfully,
+     * or the error that was propagated from the prepared statement
      */
     function createVolunteer($fname, $lname, $email, $phone, $v_day, $tin,
                              $tout, $isGrp, $grpSize, $pos) {
-        return $this->connection->runPreparedQuery("INSERT INTO volunteers 
+        return $this->connection->runPreparedQuery("INSERT INTO volunteers
             (fname, lname, email, phone, volunteer_day, time_in, time_out,
             is_group, group_size, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?,
             ?, ?)", array($fname, $lname, $email, $phone, $v_day, $tin,
@@ -472,7 +495,8 @@ class VolunteerAppCreator {
      * @param $uemail the user's email address
      * @param $vday volunteers volunteer day
      * @param $flag indicating to accept or reject the volunteer
-     * @return bool the query result
+     * @return mixed flag indicating the query was executed successfully,
+     * or the error that was propagated from the prepared statement
      */
     function processVolunteer($uemail, $vday, $flag) {
         return $this->connection->runPreparedQuery("UPDATE volunteers
@@ -557,6 +581,22 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Updates the text for the volunteer position for a specific title and
+     * date combination.
+     *
+     * @param $updText the new content to switch the description to
+     * @param $title the title that will have its description changed
+     * @param $date the date associated to the the position
+     * @return mixed either a flag indicating if the statement was successful
+     * or the error for the statement
+     */
+    function updatePositionTitle($updText, $title, $date) {
+        return $this->connection->runPreparedQuery("UPDATE volunteer_positions
+            SET description = ?
+            WHERE title = ?
+            AND date = ?", array($updText, $title, $date));
+    }
+    /**
      * .........................................................................
      * ........................... Display Methods .............................
      * .........................................................................
@@ -565,11 +605,10 @@ class VolunteerAppCreator {
      * Displays the list of available event dates that volunteers can choose.
      *
      * @return string the HTML list of dates
-     * TODO: Improve this query to only return "non-filled" event dates
      */
     function displayAvailVolDateOptions() {
         $result = "";
-        $row = $this->retrieveEventDates(date("Y"));
+        $row = $this->retrieveAvailEventDates(date("Y"));
         while ($ans = $row->fetch_row()) {
             $evtDate = strtotime($ans[0]);
             $result .= "<option value='" . date("Y-m-d", $evtDate) . "'>"
@@ -593,14 +632,32 @@ class VolunteerAppCreator {
         }
 
         while ($ans = $row->fetch_row()) {
-            $result .= "<li>"
-                . "<h4>" . $ans[0] . " <span style='color:#53a93f;
+            $result .= "<li class='pos_li'>"
+                . "<h4>" . $ans[0] . "</h4>" . "<span style='color:#53a93f;
                 float:right'>" . (intval($ans[3]) - intval($ans[2])) . " spots
-                left!</span></h4>"
-                . "<p class='small_font'>" . $ans[1] . "</p>"
-                . "</li>";
+                left!</span><p class='small_font'>" . $ans[1] . "</p></li>";
         }
         return $result . "</ul>";
+    }
+
+    /**
+     * Displays a set of input fields that represent all the positions created.
+     *
+     * @return string the HTML content
+     */
+    function displayPositionsCreated() {
+        $result = "";
+
+        $rows = $this->connection->runQuery("SELECT DISTINCT title, description
+        FROM volunteer_positions");
+
+        while($ans = $rows->fetch_row()) {
+            $result .= "<input class='gen_field' name='ptitle[]' type=checkbox
+            value='$ans[0]' />$ans[0]<input type=text
+            value='$ans[1]' name='pdescription[]' style='display:none'
+             disabled/>";
+        }
+        return $result;
     }
 
     /**
@@ -626,7 +683,8 @@ class VolunteerAppCreator {
             $desc = $ans[1];
             $divisor = $ans[2];
             $dividend = $ans[3];
-            $result .= "<tr><td class='special'>$title</td><td>$desc</td>
+            $result .= "<tr><td class='special'>$title</td><td class='modifiable_desc'
+ contenteditable=true>$desc</td>
             <td>$divisor / $dividend</td></tr>";
         }
 
@@ -653,7 +711,7 @@ class VolunteerAppCreator {
      * @return the volunteer events list
      */
     function displayCurrEventsList() {
-        $result = "<ul>";
+        $result = "<ul style='margin-bottom: 2px;'>";
         $row = $this->retrieveEventDates(date("Y"));
 
         if ($row->num_rows < 1) {
@@ -704,15 +762,16 @@ class VolunteerAppCreator {
 
         $count = $this->connection->runQuery("SELECT count(*)
             FROM volunteers
-            WHERE volunteer_day = '$date'")->fetch_row()[0];
+            WHERE volunteer_day = '$date'")->num_rows;
 
         if ($count < 1) {
             return $this->displayNotice("No registrants.");
         }
 
         $resultTable = "<a href='downloads.php?specificDate=$date'
-        target='_blank' id='dwnld_csv'></a><table id='vol_spec_date'
-        class='selectable vol_table'><tr class='def_cursor'><th colspan='9'>"
+        target='_blank' style='float: right; margin-bottom: 10px;'
+        class='bbutton'><i class='icon-download-alt icon'></i>Download CSV</a><table
+        id='vol_spec_date' class='selectable vol_table'><tr class='def_cursor'><th colspan='9'>"
             . date("l jS \of F Y", strtotime($date)) . " &middot;
             Volunteers</th></tr><tr class='def_cursor'><td>Name</td><td>Email</td>
             <td>Phone</td><td>Time in</td><td>Time Out</td><td>Is Group?</td>

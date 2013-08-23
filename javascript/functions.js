@@ -8,7 +8,7 @@ $(document).ready(function() {
     "use strict";
 
     /**
-     * Delays the execution of a specified callback funciton.
+     * Delays the execution of a specified callback function.
      *
      * @param callback the function to invoke after a period of time
      * @param time the amount of seconds to wait until invoking the callback
@@ -20,7 +20,7 @@ $(document).ready(function() {
     };
 
     // Displays the tutorial if not already seen
-    if(!$.cookie("seenTutorial")) {
+    if(!$.cookie("seenTutorial") || $.cookie("seenTutorial") == false) {
         var defaultExp = new Date();
         defaultExp.setMonth(defaultExp.getYear() + 1);
 
@@ -28,7 +28,7 @@ $(document).ready(function() {
             displayTooltip($("button[data-step = 0]").parent(".tooltip"));
             $.cookie({
                 name: "seenTutorial",
-                value: true, 
+                value: false,
                 expires: defaultExp.toGMTString()
             });
         });
@@ -101,6 +101,11 @@ $(document).ready(function() {
                     var positionSection = $("#volunteerPosition");
                     positionSection.find("ul").replaceWith(result);
                     positionSection.fadeIn(500);
+
+                    $('.pos_li').on("click", function() {
+                        var val = $.trim($(this).children('h4').text());
+                        $('#chosen').val(val);
+                    });
                 }
             });
         } else {
@@ -192,7 +197,7 @@ $(document).ready(function() {
             }
             $(this).toggleClass('highlight');
         });
-        // Publish-Subcribe pattern
+        // Publish-Subscribe pattern
         specificDateSection.find(".actionContainer").on("modified", function () {
             if ($(this).children(".itemsToModify").children("li").length < 1) {
                 $(this).fadeOut();
@@ -220,6 +225,19 @@ $(document).ready(function() {
         });
     }
 
+    $(".gen_field").change(function() {
+        var thiz = $(this);
+        var state = thiz.data("clicked");
+
+        if(state == null || state == 0) {
+            thiz.data("clicked", 1);
+            thiz.next().removeAttr("disabled");
+        } else {
+            thiz.data("clicked", 0);
+            thiz.next().attr("disabled","disabled");
+        }
+    });
+
     $("#box").change(function() {
         $(".optional").toggle();
     });
@@ -240,7 +258,17 @@ $(document).ready(function() {
         var fieldset = $("#vol_pos").clone()
             .append("<a href='#' class='removeset'>remove</a></fieldset>")
             .removeAttr("id");
+        fieldset.find('input[type=text]').val('');
         $(this).before(fieldset);
+    });
+
+    $(document).on("blur", ".vol_table .modifiable_desc", function(){
+        $.ajax({
+            url: "volunteerREST.php?modifyDesc",
+            type: "POST",
+            data: {volDay: $(".sidebar_list li.clicked").attr("data-date"),
+                volPos:$(this).prev().text(), updateTxt: $(this).text()}
+        });
     });
 
     $(document).on("click", "a.removeset", function() {

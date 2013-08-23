@@ -9,31 +9,48 @@ $config = parse_ini_file("conf/citc_config.ini");
 define("displaySize", $config["pagination_size"]);
 $reqInfo = Utils::retrieveRequestInfo();
 
-// Ensure user is valid
-require("verifyUser.php");
-
 switch($reqInfo["method"]) {
     case "POST":
+        // Ensure user is valid
+        require("verifyUser.php");
+
         if (isset($reqInfo["acceptUsers"])) {
             $users = explode("|", $reqInfo["acceptUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
             $currPage = $reqInfo["page"];
             foreach ($users as $uemail) {
                 // Send Email
+                include_once("common_utils/email.php");
+                $emailer = new EmailTransport("You have been accepted!",
+                    "Hello World", "webmaster@christmasinthecity.org");
+                $retVal = $emailer->sendMail($uemail);
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 1);
             }
             echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
                 $currPage * displaySize);
+        } else {
+            if (isset($reqInfo["modifyDesc"])) {
+                $app->updatePositionTitle(trim($_POST["updateTxt"]),
+                    $_POST["volPos"], $_POST["volDay"]);
+            }
         }
     break;
 
     case "DELETE":
+        // Ensure user is valid
+        require("verifyUser.php");
+
         if (isset($reqInfo["denyUsers"])) {
             $users = explode("|", $reqInfo["denyUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
             $currPage = $reqInfo["page"];
             foreach ($users as $uemail) {
                 // Send Email
+                include_once("common_utils/email.php");
+                $emailer = new EmailTransport("Unfortunately we could not
+                fit you in this event!",
+                    "Hello World", "webmaster@christmasinthecity.org");
+                $retVal = $emailer->sendMail($uemail);
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 0);
             }
             echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
@@ -41,12 +58,12 @@ switch($reqInfo["method"]) {
         }
     break;
 
-    // 'GET' requests are forbidden.
     case "GET":
+        $app = new VolunteerAppCreator();
         if (isset($_GET["specificDate"])) {
             $dateTime = strtotime($_GET["specificDate"]);
 
-            $result = "<div id='volCalendar'><h3>Volunteer Action</h3>";
+            $result = "<div id='volCalendar'><h3>Manage Volunteers</h3>";
             $result .= $app->displayEventCalendar(date("m", $dateTime),
                 date("Y", $dateTime));
             $result .= "</div>";

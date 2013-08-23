@@ -4,7 +4,7 @@
  * the dividing element to create individual 'steps' within the wizard.
  *
  * Validates form elements within each fieldset according to its type. Elements
- * requiring validation will have a class of 'required'. Which dissallows
+ * requiring validation will have a class of 'required'. Which disallows
  * progression of the wizard if the required fields are not valid.
  *
  * Multi-form support
@@ -66,11 +66,10 @@
             if($.fn.formWizard.options.cycleSteps) {
                 var newStep = (Math.abs(currStep) + direction) % (numSteps + 1);
                 $(parent).data("currStep", newStep);
-                transOut.apply(childElms.eq(currStep));
 
-//                childElms.eq(currStep).fadeOut(function () {
-//                    childElms.eq(newStep).fadeIn();
-//                });
+                childElms.eq(currStep).fadeOut(function () {
+                    childElms.eq(newStep).fadeIn();
+                });
             } else {
                 $(parent).data("currStep", currStep + direction);
                 childElms.eq(currStep).fadeOut(function () {
@@ -119,9 +118,6 @@
                 $.error(args + ": is unsupported within jQuery formWizard!");
             }
         });
-
-        // Allow for jQuery chainability
-        return this;
     };
 
     /**

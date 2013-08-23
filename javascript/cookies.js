@@ -10,7 +10,7 @@
     /**
      * Plugin construction.
      *
-     * @param arguments the user options to configure to use within the plugin
+     * @param args the user options to configure to use within the plugin
      * @returns {*} result from the method invoked for the arguments given
      */
     $.cookie = function(args) {

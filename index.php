@@ -140,13 +140,15 @@ function createNewAcct() {
                 <? echo "<p class='error_msg'>" . $errMsgs['Email'] ."</p>" . PHP_EOL; ?>
                 <label>Email:
                     <span class="caveat">*</span>
-                    <input type="email" name="userEmail" placeholder="Please type in your Email Address" value="<?= $_POST['userEmail']; ?>">
+                    <input type="email" name="userEmail" placeholder="Please type in your Email Address" value="<?= $_POST['userEmail']; ?>" required />
                 </label>
 
                 <? echo "<p class='error_msg'>" . $errMsgs['Password'] ."</p>" . PHP_EOL;?>
                 <label>Password: 
                     <span class="caveat">*</span>
-                    <input type="password" name="userPassword" placeholder="Please type in your password"/>
+                    <input type="password" name="userPassword"
+                           placeholder="Please type in your password"
+                           required/>
                 </label>
 
                 <label class='optional'>Confirm Password:

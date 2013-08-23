@@ -40,8 +40,8 @@ class EmailTransport {
      *              delivery
      */
     public function sendMail($address) {
-        return mail($address, $this->getSubject(), $this->getMessage(),
-                    $this->getHeaders());
+        return mail($address, $this->subject, $this->message,
+            $this->getHeaders());
     }
 
     /**
@@ -50,9 +50,9 @@ class EmailTransport {
      * @return string the email headers
      */
     public function getHeaders() {
-        return "From: " . $this->getFrom() . PHP_EOL .
-               "CC: " . $this->getCc() . PHP_EOL .
-               "BCC: " . $this->getBcc() . PHP_EOL .
+        return "From: " . $this->from . PHP_EOL .
+               "CC: " . $this->cc . PHP_EOL .
+               "BCC: " . $this->bcc . PHP_EOL .
                "Date: " . date("d M y");
     }
 
