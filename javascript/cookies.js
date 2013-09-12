@@ -54,7 +54,7 @@
                     result = this._displayCookies();
                 break;
                 case "string":
-                    result = this._contains(args);
+                    result = this._getCookieValue(args);
                 break;
                 default:
                     $.error("Argument not supported!");
@@ -80,7 +80,7 @@
          */
         _displayCookies: function() {
             var retVal = "";
-            var cookies = document.cookie.split(";");
+            var cookies = this._getCookies();
 
             if(cookies == "") {
                 retVal = "No cookies set.";
@@ -93,13 +93,39 @@
         },
 
         /**
+         * Retrieves the value of the cookie.
+         *
+         * @param cookieName the name to lookup
+         * @return {String} the value of the cookie
+         */
+        _getCookieValue: function(cookieName) {
+            var retVal = "";
+
+            if(this._exists(cookieName)) {
+                var cookies = this._getCookies();
+
+                // Find the cookie we want if it exists
+                for(var i = 0; i < cookies.length; i++) {
+                    var elem = cookies[i].split("=");
+                    var key = elem[0].trim();
+                    var value = elem[1].trim();
+
+                    if(key == cookieName){
+                        retVal = value;
+                    }
+                }
+            }
+            return retVal;
+        },
+
+        /**
          * Determines if a cookie exists.
          *
          * @param name the cookie name to look for
          * @returns {boolean} indicating if the cookie exists
          */
-        _contains: function(name) {
-            var cookies = document.cookie.split(";");
+        _exists: function(name) {
+            var cookies = this._getCookies();
             var cookieElements = {};
 
             cookies.forEach(function(elem) {
@@ -107,6 +133,15 @@
                 cookieElements[parts[0]] = parts[1];
             });
             return (name in cookieElements);
+        },
+        
+        /**
+         * Retrieves all the cookies for the domain.
+         * 
+         * @return {Array} of cookies as strings
+         */
+        _getCookies: function() {
+           return document.cookie.split(";");
         }
     };
 }(jQuery, window, document));

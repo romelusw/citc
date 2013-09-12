@@ -5,13 +5,11 @@
  *
  * Validates form elements within each fieldset according to its type. Elements
  * requiring validation will have a class of 'required'. Which disallows
- * progression of the wizard if the required fields are not valid.
- *
- * Multi-form support
+ * progression of the wizard if the required fields are not filled and/or valid.
  *
  * @author Woody Romelus
- */
-;(function ($, window, document, undefined) {
+ */;
+(function ($, window, document, undefined) {
     // Be a good programmer now :p
     "use strict";
 
@@ -26,76 +24,119 @@
         }
     };
 
-    function _buildWizard(parent) {
-        var wizard = $.fn.formWizard;
-        var wizardOpt = wizard.options;
-        var numSteps = $(parent).children(wizardOpt.childElem).length;
-
-        // Store useful data onto the form
-        $(parent).data({numSteps: numSteps, currStep: 0});
-
-        // Hide the non-zeroth elements
-        $(parent).find(wizardOpt.childElem + ":not(:first)").hide();
-
-        if (wizardOpt.allowBack) {
-            $(parent).append("<button data-dir='-1' type='button' class='fw_transition'>Back</button>");
+    /**
+     * Builds the wizard for the form element
+     *
+     * @param formCtx the form context
+     */
+    function _buildWizard(formCtx) {
+        // Validate we are working on form elements
+        if (!$(formCtx).is("form")) {
+            throw "Cannot build form wizard, because element is not a form!";
         }
 
+        var wizard = $.fn.formWizard;
+        var wizardOpt = wizard.options;
+        var numSteps = $(formCtx).children(wizardOpt.transitionField).length - 1;
+
+        // Store useful data into the form
+        $(formCtx).data({
+            numSteps: numSteps,
+            currStep: 0
+        });
+
+        // Hide the non-zeroth(all elements aside from the first) elements
+        $(formCtx).find(wizardOpt.transitionField + ":not(:first)").hide();
+
+        // HTML Container
+        var wizardHTML = $("<div></div>").attr('class', 'formWizard');
+
         // Add next/back buttons
-        $(parent).append("<button data-dir='1' type='button' class='fw_transition'>Next</button>");
+        if (wizardOpt.allowBack) {
+            $(wizardHTML).append("<button data-dir='-1' class='fw_transition\
+                fw_back'><i class='icon-chevron-sign-left'></i></button>");
+        }
+        $(wizardHTML).append("<button data-dir='1' class='fw_transition\
+            fw_next'><i class='icon-chevron-sign-right'></i></button>");
+        $(formCtx).append(wizardHTML);
+
+        _bindClickHandler(formCtx);
+    }
+
+    /**
+     * Binds a event handler for the form buttons
+     *
+     * @param formCtx the form context
+     */
+    function _bindClickHandler(formCtx) {
+        // Initially set the button states
+        _updateStepButtons(formCtx);
 
         // Bind Event handler for click events onto the button(s)
-        $(parent).find("button.fw_transition").click(function() {
-            var data = $(parent).data();
+        $(formCtx).find(".formWizard button.fw_transition").click(function(evt) {
+            evt.preventDefault();
+            var data = $(formCtx).data();
             var currStep = data.currStep;
-            var numSteps = data.numSteps - 1;
-            var childElms = $(parent).children(wizardOpt.childElem);
+            var numSteps = data.numSteps;
+            var childElms = $(formCtx).children($.fn.formWizard.options.transitionField);
             var direction = parseInt($(this).attr("data-dir"));
-            var transIn = $.fn.formWizard.options.transitionIn;
-            var transOut = $.fn.formWizard.options.transitionOut;
 
-            // Handle Validation
-            if($.fn.formWizard.options.ignoreValidation) {
-                // Validates form input types that contain 'requiredClass'
+            // Validate form elements
+            if ($.fn.formWizard.options.ignoreValidation) {
+                // Validates form input types that contain 'validateClass'
                 // Checks for empty
                 // Verifies by the type
                 // TODO: Add Validation to form fields
             }
 
             // Update Step
-            if($.fn.formWizard.options.cycleSteps) {
+            if ($.fn.formWizard.options.cycleSteps) {
                 var newStep = (Math.abs(currStep) + direction) % (numSteps + 1);
-                $(parent).data("currStep", newStep);
+                $(formCtx).data("currStep", newStep);
 
                 childElms.eq(currStep).fadeOut(function () {
                     childElms.eq(newStep).fadeIn();
                 });
             } else {
-                $(parent).data("currStep", currStep + direction);
+                $(formCtx).data("currStep", currStep + direction);
+
                 childElms.eq(currStep).fadeOut(function () {
                     childElms.eq(currStep + direction).fadeIn();
                 });
-                updateStepButtons(parent);
+                _updateStepButtons(formCtx);
             }
         });
+    }
 
-        function updateStepButtons(parent) {
-            var nxtBtn = $(parent).find($("button.fw_transition:contains('Next')"));
-            var bckBtn = $(parent).find($("button.fw_transition:contains('Back')"));
+    /**
+     * Changes the state of the transition buttons based on the current step
+     * 
+     * @param formCtx the form context
+     */
+    function _updateStepButtons(formCtx) {
+        var nxtBtn = $(formCtx).find($("button.fw_next"));
+        var bckBtn = $(formCtx).find($("button.fw_back"));
 
-            // Enable Buttons to start
-            nxtBtn.prop("disabled", false);
-            bckBtn.prop("disabled", false);
+        // Enable Buttons to start
+        nxtBtn.prop("disabled", false);
+        bckBtn.prop("disabled", false);
 
-            // Update buttons
-            switch ($(parent).data("currStep")) {
-                case $(parent).data("numSteps") - 1:
-                    nxtBtn.prop("disabled", true);
-                    break;
-                case 0:
-                    bckBtn.prop("disabled", true);
-                    break;
-            }
+        // Update buttons
+        switch ($(formCtx).data("currStep")) {
+            // The last transition field
+            case $(formCtx).data("numSteps"):
+                nxtBtn.prop("disabled", true);
+                if ($.fn.formWizard.options.hideDisabledStep) $(nxtBtn).hide();
+                break;
+            // The first transition field
+            case 0:
+                bckBtn.prop("disabled", true);
+                if ($.fn.formWizard.options.hideDisabledStep) $(bckBtn).hide();
+                break;
+            default:
+                $(nxtBtn).show();
+                $(bckBtn).show();
+                break;
         }
     }
 
@@ -131,12 +172,11 @@
     $.fn.formWizard.options = {
         allowBack: false,
         cycleSteps: false,
-        childElem: "fieldset",
+        transitionField: "fieldset",
         ignoreValidation: false,
-        requiredClass: "required",
+        hideDisabledStep: true,
+        validateClass: "validate",
         showBreadCrumb: true,
-        showErrors: true,
-        transitionIn: "fadeIn",
-        transitionOut: "fadeOut"
+        showErrors: true
     };
 }(jQuery, window, document));

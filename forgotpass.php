@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 include_once("common_utils/functions.php");
 include_once("common_utils/session.php");
 
@@ -128,30 +129,46 @@ function validateFields($fields) {
     <?php $pageTitle = "Volunteer Forgot Password"; include("header.php"); ?>
 
     <body>
+        <div class="centerForm">
         <?php switch($step) { case 0: ?>
+        <h1>Forgot Your Password eh?</h1>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
             <p>Forgot your password eh? Please let me know your email address to help you reset your password.</p>
-            <?= "<p class='error_msg'>".$errorMessages['User Email']."</p>" ?>
-            <label>Email address:<span class="caveat">*</span><input type="text" name="u_email"/></label>
-            <input type="submit" value="Submit"/>
-        </form> 
+            <?= Utils::generateUIError($errorMessages['User Email']);?>
+            <label>
+                <div class="lft"><i class="icon-envelope-alt"></i><span class="caveat">*</span></div>
+                <input type="text" class="formField" name="u_email" placeholder="Email Address"/>
+            </label>
+            <input type="submit" class="formButton" value="Submit"/>
+        </form>
         <?php break; case 1: ?>
+        <h1>Lets find out if you are <br/> who you say you are.</h1>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
             <p>Please answer the security question: <span class="sec_q"><?= ucwords($userQA["security_q"]); ?></span></p>
-            <?= "<p class='error_msg'>".$errorMessages['Answer']."</p>" ?>
-            <label>Answer:<span class="caveat">*</span><input type="text" name="sec_a"/></label>
-            <input type="submit" value="Submit"/>
+            <?= Utils::generateUIError($errorMessages['Answer']);?>
+            <label>Answer:<span class="caveat">*</span>
+                <input type="text" class="formField" name="sec_a"/>
+            </label>
+            <input type="submit" class="formButton" value="Submit"/>
         </form> 
         <?php break; case 2: ?>
             <p>An email was sent to '<?= $userEmail ?>'.Click on the link to reset the password.
                 <a href="<?= $userLink ?>" title="Click to reset your password">Reset Password</a>
             </p>
         <?php break; case 3: ?>
+        <h1>Reset your password with a new one. Dont Forget it this time!</h1>
         <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
-            <?= "<p class='error_msg'>".$errorMessages['Password']."</p>" ?>
-            <label>New Password:<span class="caveat">*</span><input type="password" name="n_pass"/></label>     
-            <label>Confirm New Password:<span class="caveat">*</span><input type="password"/></label>     
-            <input type="submit" value="Submit"/>
+            <?= Utils::generateUIError($errorMessages['Password']);?>
+            <label>
+                <div class="lft"><i class="icon-key"></i><span class="caveat">*</span></div>
+                <input type="password" class="formField" placeholder="New Password" name="n_pass"/>
+            </label>
+            <label>
+                <div class="lft"><i class="icon-key" style="color:blue;"></i><span class="caveat">*</span></div>
+                <input type="password" class="formField" placeholder="Confirm New Password"/>
+                <input type="submit" class="formButton" value="Submit"/>
+            </label>
         </form> 
         <?php break; } ?>
+        </div>
     <?php include("footer.php"); ?>

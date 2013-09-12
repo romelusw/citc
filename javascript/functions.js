@@ -15,12 +15,13 @@ $(document).ready(function() {
      * @returns {*} the calling object
      */
     $.fn.wait = function (callback, time) {
+        if(isNaN(time)) { time = 100; }
         window.setTimeout(callback, time);
         return this;
     };
 
     // Displays the tutorial if not already seen
-    if(!$.cookie("seenTutorial") || $.cookie("seenTutorial") == false) {
+    if($.cookie("seenTutorial") != "true") {
         var defaultExp = new Date();
         defaultExp.setMonth(defaultExp.getYear() + 1);
 
@@ -28,7 +29,7 @@ $(document).ready(function() {
             displayTooltip($("button[data-step = 0]").parent(".tooltip"));
             $.cookie({
                 name: "seenTutorial",
-                value: false,
+                value: true,
                 expires: defaultExp.toGMTString()
             });
         });
@@ -41,8 +42,7 @@ $(document).ready(function() {
      */
     function displayTooltip(tooltip) {
         var padding = 30;
-        var tipLocation = $(tooltip.children("button").attr("data-tipcontext"))
-                            .position();
+        var tipLocation = $(tooltip.children("button").attr("data-tipcontext")).position();
 
         if(tipLocation) {
             // Animate the tooltip onto the page
@@ -98,8 +98,7 @@ $(document).ready(function() {
                 url: "volunteerREST.php?positionDate=" + option.val(),
                 type: "GET",
                 success: function(result) {
-                    var positionSection = $("#volunteerPosition");
-                    positionSection.find("ul").replaceWith(result);
+                    var positionSection = $("#volunteerPosition").replaceWith(result);
                     positionSection.fadeIn(500);
 
                     $('.pos_li').on("click", function() {
@@ -273,5 +272,41 @@ $(document).ready(function() {
 
     $(document).on("click", "a.removeset", function() {
         $(this).parent("fieldset").remove();
+    });
+
+    $("#overlay").click(function() {
+        var thiz = this;
+        $("#newPartyForm").fadeOut(function() {
+            $(thiz).fadeOut();
+        });
+    });
+
+    // Form Wizard
+    $("#signupForm").formWizard({
+        allowBack: true
+    });
+
+    // Counter
+    $(".addCount, .subCount").on("click", function(evt) {
+        evt.preventDefault();
+        var parent = $(this).parent("div");
+        var inputField = parent.find("input[type=text]").first();
+        var inputFieldVal = parseInt(inputField.val());
+        var subButton = $(parent).find(".subCount");
+        var addButton = $(parent).find(".addCount");
+
+        // Invalid numeric entered
+        if(isNaN(inputFieldVal)) {
+            $(subButton).attr("disabled", "disabled");
+            $(inputField).val(0);
+        } else {
+            var newVal = inputFieldVal += parseInt($(this).attr("data-increment"));
+            if(newVal == 0) {
+                $(subButton).attr("disabled", "disabled");
+            } else {
+                $(subButton).removeAttr("disabled");
+            }
+            inputField.val(newVal);
+        }
     });
 });

@@ -120,58 +120,61 @@ function createNewAcct() {
 ?>
     <?php $pageTitle = "Volunteer Admin Sign In"; include("header.php"); ?>
     <body>
-        <div class="loginForm">
-            <?php echo "<p class='error_msg'>" . $errMsgs['exists'] ."</p>" . PHP_EOL; ?>
+        <div class="centerForm">
+            <h1>CITC Volunteer App</h1>
+            <div class="loginForm">
+            <?= Utils::generateUIError($errMsgs['exists']);?>
             <form class="card animate" method="post" action="<?= $_SERVER['PHP_SELF']?>">
                 <input type="checkbox" id="box" name="isNewUser" <?= $_POST['isNewUser'] == "on" ? "checked" : ""?>/>Create an Account
 
-                <? echo "<p class='error_msg'>" . $errMsgs['First Name'] ."</p>" . PHP_EOL; ?>
-                <label class='optional'>First Name:
-                    <span class="caveat">*</span>
-                    <input type="text" name="userFName" placeholder="Please type in your First Name" value="<?= $_POST['userFName']; ?>">
+                <?= Utils::generateUIError($errMsgs['First Name']);?>
+                <label class='optional'>
+                    <div class="lft"><i class="icon-user"></i><span class="caveat">*</span></div>
+                    <input type="text" class="formField" name="userFName" placeholder="First Name" value="<?= $_POST['userFName']; ?>">
                 </label>
 
-                <? echo "<p class='error_msg'>" . $errMsgs['Last Name'] ."</p>" . PHP_EOL; ?>
-                <label class='optional'>Last Name:
-                    <span class="caveat">*</span>
-                    <input type="text" name="userLName" placeholder="Please type in your Last Name" value="<?= $_POST['userLName']; ?>"/>
+                <?= Utils::generateUIError($errMsgs['Last Name']);?>
+                <label class='optional pairsWithAbove'>
+                    <div class="lft"><span class="empty_icon"></span></div>
+                    <input type="text" class="formField" name="userLName" placeholder="Last Name" value="<?= $_POST['userLName']; ?>"/>
                 </label>
 
-                <? echo "<p class='error_msg'>" . $errMsgs['Email'] ."</p>" . PHP_EOL; ?>
-                <label>Email:
-                    <span class="caveat">*</span>
-                    <input type="email" name="userEmail" placeholder="Please type in your Email Address" value="<?= $_POST['userEmail']; ?>" required />
+                <?= Utils::generateUIError($errMsgs['Email']);?>
+                <label>
+                    <div class="lft"><i class="icon-envelope-alt"></i><span class="caveat">*</span></div>
+                    <input type="email" class="formField" name="userEmail" placeholder="Email Address" value="<?= $_POST['userEmail']; ?>" required />
                 </label>
 
-                <? echo "<p class='error_msg'>" . $errMsgs['Password'] ."</p>" . PHP_EOL;?>
-                <label>Password: 
-                    <span class="caveat">*</span>
-                    <input type="password" name="userPassword"
-                           placeholder="Please type in your password"
-                           required/>
+                <?= Utils::generateUIError($errMsgs['Password']);?>
+                <label>
+                    <div class="lft"><i class="icon-key"></i><span class="caveat">*</span></div>
+                    <input type="password" class="formField" name="userPassword" placeholder="Please type in your password" required/>
                 </label>
 
-                <label class='optional'>Confirm Password:
-                    <input type="password" placeholder="Please confirm your password"/>
+                <label class='optional pairsWithAbove'>
+                    <div class="lft"><span class="empty_icon"></span></div>
+                    <input type="password" class="formField" placeholder="Please confirm your password"/>
                 </label>
 
-                <? echo "<p class='error_msg'>" . $errMsgs['Security Question'] ."</p>" . PHP_EOL;?>
-                <label class='optional'>Security Question:
-                    <span class="caveat">*</span>
-                    <input type="text" name="secQ" value="<?= $_POST["secQ"]?>"/>
+                <?= Utils::generateUIError($errMsgs['Security Question']);?>
+                <label class='optional'>
+                    <div class="lft"><i class="icon-question"></i><span class="caveat">*</span></div>
+                    <input type="text" class="formField" name="secQ" placeholder="Security Question" value="<?= $_POST["secQ"]?>"/>
                 </label>
 
-                <? echo "<p class='error_msg'>" . $errMsgs['Security Answer'] ."</p>" . PHP_EOL;?>
-                <label class='optional'>Security Answer:
-                    <span class="caveat">*</span>
-                    <input type="text" name="secA" value="<?= $_POST["secA"]?>"/>
+                <?= Utils::generateUIError($errMsgs['Security Answer']);?>
+                <label class='optional pairsWithAbove'>
+                    <div class="lft"><span class="empty_icon"></span></div>
+                    <input type="text" class="formField" name="secA" placeholder="Security Answer" value="<?= $_POST["secA"]?>"/>
                 </label>
 
-                <input type="checkbox" name="rememberMe" <?= $_POST['rememberMe'] == "on" ? "checked" : "" ?>/>Stay Logged in?
+                <label><input type="checkbox" name="rememberMe" <?= $_POST['rememberMe'] == "on" ? "checked" : "" ?>/>Stay Logged in?</label>
+                
                 <p>
                     <a href="forgotpass.php" title="Forgot Password">Forgot Password?</a>
                 </p>
-                <input type="submit" value="submit"/>
+                <input type="submit" class="formButton" value="submit"/>
             </form>
+            </div>
         </div>
 <?php include("footer.php"); ?>

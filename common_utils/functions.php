@@ -96,4 +96,17 @@ class Utils {
         $result["uri"] = $_SERVER["REQUEST_URI"];
         return $result;
     }
+
+    /**
+     * Creates an HTML error for display.
+     * @param $msg the error message to display
+     * @return string the error string
+     */
+    function generateUIError($msg) {
+        if($msg !== null && strlen($msg) > 0) {
+            return "<h3 class='message'>Please fix the below error:
+                <span class='errmsg'>$msg</span><span class='msg_indicator'>
+                <i class='icon-li icon-minus-sign errorNotice'></i></span></h3>";
+        }
+    }
 }

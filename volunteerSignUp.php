@@ -3,6 +3,7 @@ include_once("common_utils/functions.php");
 
 define("admin", 0);
 define("norm_users", 1);
+define("acceptedUser", 1);
 $config = parse_ini_file("conf/citc_config.ini");
 define("displaySize", $config["pagination_size"]);
 
@@ -154,7 +155,7 @@ class VolunteerAppCreator {
         $pass = Utils::hashPassword($passw);
         return $this->connection->runPreparedQuery("INSERT INTO users (fname,
             lname, email, password, security_q, security_a, lastloggedin, rem_me_token)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", array($fname, $lname, $email,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array($fname, $lname, $email,
             $pass, $secQ, $secA, $now, $token));
     }
 
@@ -388,7 +389,8 @@ class VolunteerAppCreator {
         return $this->connection->runQuery("SELECT title, description,
           (SELECT COUNT(*)
               FROM volunteers
-              WHERE position = title AND volunteer_day = date) as reg_users,
+              WHERE position = title AND volunteer_day = date
+              AND accepted = " . acceptedUser . ") as reg_users,
           max_users
           FROM (SELECT title, description, max_users, date
               FROM volunteers
@@ -571,13 +573,13 @@ class VolunteerAppCreator {
         $date = $this->connection->cleanSQLInputs($date);
 
         return $this->connection->runQuery("SELECT fname as 'First Name',
-        lname as 'Last Name', email as 'Email', phone as 'Phone Number',
-        time_in as 'Check In', time_out as 'Check Out', is_group as 'Is a group?',
-        group_size as 'Group Size', position as 'Volunteer Position',
-        accepted as 'Status'
-        FROM volunteers
-        WHERE volunteer_day = '$date'
-        ORDER BY lname ASC");
+            lname as 'Last Name', email as 'Email', phone as 'Phone Number',
+            time_in as 'Check In', time_out as 'Check Out', is_group as 'Is a group?',
+            group_size as 'Group Size', position as 'Volunteer Position',
+            accepted as 'Status'
+            FROM volunteers
+            WHERE volunteer_day = '$date'
+            ORDER BY lname ASC");
     }
 
     /**
@@ -607,7 +609,7 @@ class VolunteerAppCreator {
      * @return string the HTML list of dates
      */
     function displayAvailVolDateOptions() {
-        $result = "";
+        $result = "<option>-- Which Day works best?</option>";
         $row = $this->retrieveAvailEventDates(date("Y"));
         while ($ans = $row->fetch_row()) {
             $evtDate = strtotime($ans[0]);
@@ -624,7 +626,7 @@ class VolunteerAppCreator {
      * @return string the HTML representation for all the positions
      */
     function displayActiveVolPositions($date) {
-        $result = "<ul>";
+        $result = "<ul id='positionList'>";
         $row = $this->retrieveAvailableVolPositions($date);
 
         if ($row->num_rows < 1) {
@@ -646,18 +648,19 @@ class VolunteerAppCreator {
      * @return string the HTML content
      */
     function displayPositionsCreated() {
-        $result = "";
+        $result = "<ul id='positionsCreated'>";
 
         $rows = $this->connection->runQuery("SELECT DISTINCT title, description
         FROM volunteer_positions");
 
         while($ans = $rows->fetch_row()) {
-            $result .= "<input class='gen_field' name='ptitle[]' type=checkbox
-            value='$ans[0]' />$ans[0]<input type=text
+            $result .= "<li><input class='gen_field'
+                    name='ptitle[]' type=radio value='$ans[0]'/><i class='icon-time'>
+                    &nbsp;</i>$ans[0]<input type=text
             value='$ans[1]' name='pdescription[]' style='display:none'
-             disabled/>";
+             disabled/></li>";
         }
-        return $result;
+        return $result . "</ul>";
     }
 
     /**
@@ -675,7 +678,7 @@ class VolunteerAppCreator {
         }
 
         $result = "<table class='vol_table'><tr class='def_cursor'>
-            <th colspan='3'>Volunteer Positions</th></tr><tr class='def_cursor'>
+            <th colspan='3'>Positions</th></tr><tr class='def_cursor'>
             <td>Title</td><td>Description</td><td>Registered</td></tr>";
 
         while ($ans = $row->fetch_row()) {
@@ -719,8 +722,9 @@ class VolunteerAppCreator {
         }
 
         while ($ans = $row->fetch_row()) {
-            $result .= "<li data-date='$ans[0]'>" . date("l -- F jS, Y",
-                    strtotime($ans[0])) . "</li>";
+            $result .= "<li data-date='$ans[0]'>"
+                . "<i class='icon-calendar'>&nbsp;</i> "
+                . date("l, F jS, Y", strtotime($ans[0])) . "</li>";
         }
 
         $result .= "</ul>";
@@ -742,6 +746,7 @@ class VolunteerAppCreator {
 
         while ($ans = $row->fetch_row()) {
             $result .= "<li data-date='$ans[0]'>"
+                . "<i class='icon-calendar'>&nbsp;</i> "
                 . date("l F jS, Y", strtotime($ans[0])) . "</li>";
         }
 
@@ -761,8 +766,8 @@ class VolunteerAppCreator {
         $date = $this->connection->cleanSQLInputs($date);
 
         $count = $this->connection->runQuery("SELECT count(*)
-            FROM volunteers
-            WHERE volunteer_day = '$date'")->num_rows;
+            FROM volunteers as total
+            WHERE volunteer_day = '$date'")->fetch_row()[0];
 
         if ($count < 1) {
             return $this->displayNotice("No registrants.");
@@ -771,9 +776,8 @@ class VolunteerAppCreator {
         $resultTable = "<a href='downloads.php?specificDate=$date'
         target='_blank' style='float: right; margin-bottom: 10px;'
         class='bbutton'><i class='icon-download-alt icon'></i>Download CSV</a><table
-        id='vol_spec_date' class='selectable vol_table'><tr class='def_cursor'><th colspan='9'>"
-            . date("l jS \of F Y", strtotime($date)) . " &middot;
-            Volunteers</th></tr><tr class='def_cursor'><td>Name</td><td>Email</td>
+        id='vol_spec_date' class='selectable vol_table'><tr class='def_cursor'><th colspan='9'>
+        Volunteers</th></tr><tr class='def_cursor'><td>Name</td><td>Email</td>
             <td>Phone</td><td>Time in</td><td>Time Out</td><td>Is Group?</td>
             <td>Group Size</td><td>Position</td><td>Status</td></tr>";
 

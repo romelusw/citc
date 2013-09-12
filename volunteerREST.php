@@ -4,13 +4,14 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE);
 include_once("common_utils/functions.php");
 include_once("volunteerSignUp.php");
 include_once("common_utils/email.php");
+include_once("common_utils/HTTPMethods.php");
 
 $config = parse_ini_file("conf/citc_config.ini");
 define("displaySize", $config["pagination_size"]);
 $reqInfo = Utils::retrieveRequestInfo();
 
 switch($reqInfo["method"]) {
-    case "POST":
+    case HTTPMethods::POST:
         // Ensure user is valid
         require("verifyUser.php");
 
@@ -36,7 +37,7 @@ switch($reqInfo["method"]) {
         }
     break;
 
-    case "DELETE":
+    case HTTPMethods::DELETE:
         // Ensure user is valid
         require("verifyUser.php");
 
@@ -58,7 +59,7 @@ switch($reqInfo["method"]) {
         }
     break;
 
-    case "GET":
+    case HTTPMethods::GET:
         $app = new VolunteerAppCreator();
         if (isset($_GET["specificDate"])) {
             $dateTime = strtotime($_GET["specificDate"]);

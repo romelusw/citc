@@ -45,6 +45,12 @@ class DatabaseConnector {
      * or the error for the statement
      */
     public function runPreparedQuery($query, $params) {
+        // Check if we do not have the right amount of params for the query
+        if(substr_count($query, "?") != count($params)) {
+            throw new Exception("Incorrect number of arguments to
+            'runPreparedQuery'.");
+        }
+
         // Create Prepared Statement
         $pStatement = $this->connection->prepare($query);
 

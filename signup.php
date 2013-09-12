@@ -67,76 +67,75 @@ if ($_POST) {
     <?php $pageTitle = "Volunteer Sign Up Form"; include("header.php"); ?>
 
     <body>
+        <div class="centerForm">
         <? switch($show) { case "form": ?>
-        <form class="card" id="signupForm" action="<? $_SERVER["PHP_SELF"] ?>"
-    method="post">
+            <h1>Sign up to be a Volunteer!</h1>
+            <form class="card" id="signupForm" action="<? $_SERVER["PHP_SELF"] ?>" method="post">
             <fieldset id="f1">
-                <?php echo "<p class='error_msg'>" . $errMsgs['First Name'] ."</p>" . PHP_EOL; ?>
-                <label>First Name
-                    <span class="caveat">*</span>
-                    <input type="text" name="vol_firstName" value="<?= $_POST["vol_firstName"]; ?>"/>
+                <?= Utils::generateUIError($errorMessages['First Name']);?>
+                <label for="vol_firstName">
+                    <div class="lft"><i class="icon-user"></i><span class="caveat">*</span></div>
+                    <input type="text" class="formField" name="vol_firstName" placeholder="First Name" value="<?= $_POST["vol_firstName"]; ?>"/>
                 </label>
 
-                <?php echo "<p class='error_msg'>" . $errMsgs['Last Name'] ."</p>" . PHP_EOL; ?>
-                <label>Last Name
-                    <span class="caveat">*</span>
-                    <input type="text" name="vol_lastName" value="<?= $_POST["vol_lastName"] ?>"/>
+                <?= Utils::generateUIError($errorMessages['Last Name']);?>
+                <label class="pairsWithAbove">
+                    <div class="lft"><span class="empty_icon"></span></div>
+                    <input type="text" class="formField" name="vol_lastName" placeholder="Last Name" value="<?= $_POST["vol_lastName"] ?>"/>
                 </label>
 
-                <?php echo "<p class='error_msg'>" . $errMsgs['Email'] ."</p>" . PHP_EOL; ?>
-                <label>Email
-                    <span class="caveat">*</span>
-                    <input type="email" name="vol_email" value="<?= $_POST["vol_email"] ?>"/>
+                <?= Utils::generateUIError($errorMessages['Email']);?>
+                <label>
+                    <div class="lft"><i class="icon-envelope-alt"></i><span class="caveat">*</span></div>
+                    <input type="email" class="formField" name="vol_email" placeholder="Email Address" value="<?= $_POST["vol_email"] ?>"/>
                 </label>
 
-                <label>Telephone
-                    <span class="caveat">*</span>
-                    <input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" name="vol_Phone" title="888-888-8888"/>
+                <label>
+                    <div class="lft"><i class="icon-phone"></i><span class="caveat">*</span></div>
+                    <input type="tel" class="formField" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="888-888-8888" name="vol_Phone" title="888-888-8888"/>
                 </label>
             </fieldset>
 
             <fieldset id="f2">
-                <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Day'] ."</p>" . PHP_EOL; ?>
-                <label>Volunteer Day
-                    <span class="caveat">*</span>
-                    <select name="volDay" id="volunteerDay">
-                        <option>--</option>
+                <?= Utils::generateUIError($errorMessages['Volunteer Day']);?>
+                <label><i class="icon-calendar"></i> Volunteer Day<span class="caveat">*</span></label>
+                <div id="signUpSelect">
+                    <select name="volDay" id="volunteerDay" placeholder="Choose a Position">
                         <?= $app->displayAvailVolDateOptions(); ?>
                     </select>
-                </label>
+                </div>
             </fieldset>
 
             <fieldset id="f3">
-                <?php echo "<p class='error_msg'>" . $errMsgs['Volunteer Position'] ."</p>" . PHP_EOL; ?>
-                <label id="volunteerPosition">Volunteer Position
-                    <span class="caveat">*</span>
-                    <input type="hidden" id="chosen" name="vol_position"/>
-                    <ul></ul>
-                </label>
+                <?= Utils::generateUIError($errorMessages['Volunteer Position']);?>
+                <label><i class="icon-suitcase"></i> Position<span class="caveat">*</span></label>
+                <input type="hidden" id="chosen" name="vol_position"/>
+                <ul id="volunteerPosition"></ul>
             </fieldset>
 
             <fieldset id="f4">
-                <label>Coming as a group?
-                    <input type="checkbox" name="vol_isGroup" <?= $_POST['vol_isGroup'] == 'on' ? 'checked' : ''?>/>
-                </label>
+                <label>Coming as a group?</label>
+                <input type="checkbox" name="vol_isGroup" <?= $_POST['vol_isGroup'] == 'on' ? 'checked' : ''?>/>
 
-                <label>Number of volunteers within the group:
-                    <input type="number" name="vol_groupSize" value="<?= $_POST["vol_groupSize"]; ?>"/>
-                </label>
+                <label>Number of volunteers within the group:</label>
+                <div class="counter">
+                    <button class="subCount" data-increment=-1><i class="icon-minus"></i></button>
+                    <input name="vol_groupSize" type="text" value="<?= $_POST["vol_groupSize"]; ?>"/>
+                    <button class="addCount" data-increment=1><i class="icon-plus"></i></button>
+                </div>
 
-                <label>Check In
-                    <span class="caveat">*</span>
-                    <input type="time" name="checkIn"/>
-                </label>
+                <label>Check In</label>
+                <span class="caveat">*</span>
+                <input type="time" class="formField" name="checkIn"/>
 
-                <label>Check Out
-                    <span class="caveat">*</span>
-                    <input type="time" name="checkOut"/>
-                </label>
-                <input type="submit" value="submit"/>
+                <label>Check Out</label>
+                <span class="caveat">*</span>
+                <input type="time" class="formField" name="checkOut"/>
+                <input type="submit" class="formButton" value="submit"/>
             </fieldset>
-<!--            <button class="arrow">Next</button>-->
-        </form>
+            </form>
+            <div class="clear"></div>
+        </div>
         <? break; case "spaceAvailable": ?>
         <p class='disclaimer'>Thank you for signing up! We will be getting back to
             you shortly informing you whether you have been chosen as a volunteer
@@ -156,7 +155,4 @@ if ($_POST) {
                 thank you for your support and hope to have you retry for next year</p>
         </div>
         <? break; } ?>
-        <script type="text/javascript">
-            $("#signupForm").formWizard({allowBack: true});
-        </script>
 <?php include("footer.php"); ?>
