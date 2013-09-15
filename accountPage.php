@@ -112,14 +112,14 @@ require("verifyUser.php");
         <div id="overlay">
             <script type="text/javascript">
                 $(function () {
-                    var disabledDays = "<?= $app->getThisYearsEvents(); ?>".split(" ");
+                    // var disabledDays = "<?= $app->getThisYearsEvents(); ?>".split(" ");
                     $("#dateAltCal").datepicker({
                         altFormat: "yy-mm-dd",
                         dateFormat: "DD MM dd, yy",
                         altField: "#dateCal",
                         minDate: 0,
-                        constrainInput: true,
-                        beforeShowDay: undefinedEventDay
+                        constrainInput: true
+                        // beforeShowDay: undefinedEventDay
                     });
 
                     /**

@@ -75,24 +75,24 @@ if ($_POST) {
                 <?= Utils::generateUIError($errorMessages['First Name']);?>
                 <label for="vol_firstName">
                     <div class="lft"><i class="icon-user"></i><span class="caveat">*</span></div>
-                    <input type="text" class="formField" name="vol_firstName" placeholder="First Name" value="<?= $_POST["vol_firstName"]; ?>"/>
+                    <input type="text" class="formField validate" name="vol_firstName" placeholder="First Name" value="<?= $_POST["vol_firstName"]; ?>"/>
                 </label>
 
                 <?= Utils::generateUIError($errorMessages['Last Name']);?>
                 <label class="pairsWithAbove">
                     <div class="lft"><span class="empty_icon"></span></div>
-                    <input type="text" class="formField" name="vol_lastName" placeholder="Last Name" value="<?= $_POST["vol_lastName"] ?>"/>
+                    <input type="text" class="formField validate" name="vol_lastName" placeholder="Last Name" value="<?= $_POST["vol_lastName"] ?>"/>
                 </label>
 
                 <?= Utils::generateUIError($errorMessages['Email']);?>
                 <label>
                     <div class="lft"><i class="icon-envelope-alt"></i><span class="caveat">*</span></div>
-                    <input type="email" class="formField" name="vol_email" placeholder="Email Address" value="<?= $_POST["vol_email"] ?>"/>
+                    <input type="email" class="formField validate" name="vol_email" placeholder="Email Address" value="<?= $_POST["vol_email"] ?>"/>
                 </label>
 
                 <label>
                     <div class="lft"><i class="icon-phone"></i><span class="caveat">*</span></div>
-                    <input type="tel" class="formField" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="888-888-8888" name="vol_Phone" title="888-888-8888"/>
+                    <input type="tel" class="formField validate" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="888-888-8888" name="vol_Phone" title="888-888-8888"/>
                 </label>
             </fieldset>
 
@@ -100,7 +100,7 @@ if ($_POST) {
                 <?= Utils::generateUIError($errorMessages['Volunteer Day']);?>
                 <label><i class="icon-calendar"></i> Volunteer Day<span class="caveat">*</span></label>
                 <div id="signUpSelect">
-                    <select name="volDay" id="volunteerDay" placeholder="Choose a Position">
+                    <select name="volDay" id="volunteerDay" class="validate">
                         <?= $app->displayAvailVolDateOptions(); ?>
                     </select>
                 </div>

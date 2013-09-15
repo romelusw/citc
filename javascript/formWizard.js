@@ -3,12 +3,10 @@
  * Takes a HTML form element looks for all occurrences of 'fieldset' acting as
  * the dividing element to create individual 'steps' within the wizard.
  *
- * Validates form elements within each fieldset according to its type. Elements
- * requiring validation will have a class of 'required'. Which disallows
- * progression of the wizard if the required fields are not filled and/or valid.
- *
  * @author Woody Romelus
- */;
+ * @dependency formValidator.js
+ */
+;
 (function ($, window, document, undefined) {
     // Be a good programmer now :p
     "use strict";
@@ -73,39 +71,81 @@
         _updateStepButtons(formCtx);
 
         // Bind Event handler for click events onto the button(s)
-        $(formCtx).find(".formWizard button.fw_transition").click(function(evt) {
+        $(formCtx).find(".formWizard button.fw_transition").click(function (evt) {
             evt.preventDefault();
             var data = $(formCtx).data();
             var currStep = data.currStep;
             var numSteps = data.numSteps;
             var childElms = $(formCtx).children($.fn.formWizard.options.transitionField);
             var direction = parseInt($(this).attr("data-dir"));
+            var sectionIsValid = true;
 
             // Validate form elements
-            if ($.fn.formWizard.options.ignoreValidation) {
-                // Validates form input types that contain 'validateClass'
-                // Checks for empty
-                // Verifies by the type
-                // TODO: Add Validation to form fields
+            if ($.fn.formWizard.options.validate) {
+
+                // Instantiate Validator if non-existant
+                if ($.fn.formWizard.validator === undefined) {
+                    var scriptFile = $("script[src *='formWizard.js']");
+                    var basePath = scriptFile.attr("src").split(/[0-9a-z]+\.js/i)[0];
+
+                    // Load the script then create new validator instance.
+                    // Do this synchronously to ensure we have loaded the script
+                    $.ajax({
+                        url: basePath + "formValidator.js",
+                        async: false,
+                        dataType: "script",
+                        success: function () {
+                            $.fn.formWizard.validator = new FormValidator();
+                        }
+                    });
+                }
+
+                // Validate all elements within the section
+                sectionIsValid = _validateSection($(childElms).eq(currStep),
+                $.fn.formWizard.validator);
             }
 
-            // Update Step
-            if ($.fn.formWizard.options.cycleSteps) {
-                var newStep = (Math.abs(currStep) + direction) % (numSteps + 1);
-                $(formCtx).data("currStep", newStep);
+            if (sectionIsValid) {
+                // Update Step
+                if ($.fn.formWizard.options.cycleSteps) {
+                    var newStep = (Math.abs(currStep) + direction) % (numSteps + 1);
+                    $(formCtx).data("currStep", newStep);
 
-                childElms.eq(currStep).fadeOut(function () {
-                    childElms.eq(newStep).fadeIn();
-                });
-            } else {
-                $(formCtx).data("currStep", currStep + direction);
+                    childElms.eq(currStep).fadeOut(function () {
+                        childElms.eq(newStep).fadeIn();
+                    });
+                } else {
+                    $(formCtx).data("currStep", currStep + direction);
 
-                childElms.eq(currStep).fadeOut(function () {
-                    childElms.eq(currStep + direction).fadeIn();
-                });
-                _updateStepButtons(formCtx);
+                    childElms.eq(currStep).fadeOut(function () {
+                        childElms.eq(currStep + direction).fadeIn();
+                    });
+                    _updateStepButtons(formCtx);
+                }
             }
         });
+    }
+
+    /**
+     * Loops through all the form elements validating each. If one form element
+     * is not valid we stop as the section does not pass validation.
+     *
+     * @param section the object containing the elements to validate
+     * @param validator the object responsible for validation
+     * @return boolean indicating if the section is clear from errors
+     */
+    function _validateSection(section, validator) {
+        var fields = section.find("input");
+        var retVal = true;
+
+        for (var i = 0; i < fields.length; i++) {
+            if (!validator.validate(fields[i])) {
+                retVal = false;
+                $("." + $.fn.formWizard.options.validateClass).css("border", "1px solid red");
+                // break;
+            }
+        }
+        return retVal;
     }
 
     /**
@@ -128,7 +168,7 @@
                 nxtBtn.prop("disabled", true);
                 if ($.fn.formWizard.options.hideDisabledStep) $(nxtBtn).hide();
                 break;
-            // The first transition field
+                // The first transition field
             case 0:
                 bckBtn.prop("disabled", true);
                 if ($.fn.formWizard.options.hideDisabledStep) $(bckBtn).hide();
@@ -165,18 +205,17 @@
      * Default settings for the plugin.
      *
      * @type {{allowBack: boolean, cycleSteps: boolean,
-     *         displayStepPosition: boolean, ignoreValidation: boolean,
-     *         requiredClass: string, showErrors: boolean,
-     *         validateSteps: boolean}}
+     *         transitionField: string, validate: boolean,
+     *         hideDisabledStep: boolean, validateClass: string,
+     *         showErrors: boolean}}
      */
     $.fn.formWizard.options = {
         allowBack: false,
         cycleSteps: false,
         transitionField: "fieldset",
-        ignoreValidation: false,
+        validate: true,
         hideDisabledStep: true,
         validateClass: "validate",
-        showBreadCrumb: true,
         showErrors: true
     };
 }(jQuery, window, document));

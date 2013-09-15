@@ -1,10 +1,10 @@
 <?php
 /**
- * A psuedo "enum" class for HTTP methods.
+ * A psuedo "enum" interface for HTTP methods.
  * 
  * @author Woody Romelus
  */
-class HTTPMethods {
+interface HTTPMethods {
     /**
      * The HTTP GET constant.
      */
@@ -25,4 +25,3 @@ class HTTPMethods {
      */
     const DELETE = "DELETE";
 }
-?>
