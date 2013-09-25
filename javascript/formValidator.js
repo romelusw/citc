@@ -7,36 +7,45 @@ function FormValidator() {
     // Be a good programmer now :p
     "use strict";
 
-    FormValidator.prototype.supportedTypes = ["text", "email", "tel"];
-};
+    FormValidator.prototype.validate = validateField;
+}
 
 /**
  * Function description
  *
- * @param (Type) Paramater description
+ * @param field Parameter description
  * @return (Type) Return description
  */
-FormValidator.prototype.validate = function(field) {
+function validateField(field) {
     var retVal;
-    var fieldType = $(field).attr("type");
+    var htmlTag = $(field).get(0).tagName.toLowerCase();
 
     // Limit validation to supported types
-    if(FormValidator.prototype.supportedTypes.indexOf(fieldType) != -1) {
+    if (htmlTag == "input") {
+        var fieldType = $(field).attr("type");
 
         // Validate appropriately by type
-        switch(fieldType) {
+        switch (fieldType) {
             case "text":
+            case "hidden":
                 retVal = validateTextField($(field).val());
-            break;
+                break;
 
             case "email":
                 retVal = validateEmailField($(field).val());
-            break;
+                break;
 
             case "tel":
-                retVal = validatePhoneField($(field).val());
-            break;
+                retVal = validatePhoneField($(field).val(),
+                    $(field).attr("pattern"));
+                break;
+
+            default:
+                throw "Unsupported form input field type. [" + fieldType + "]";
+                break;
         }
+    } else if (htmlTag == "select") {
+        retVal = validateSelectField(field);
     }
     return retVal;
 }
@@ -44,7 +53,7 @@ FormValidator.prototype.validate = function(field) {
 /**
  * Verifies the correctness of form text fields
  *
- * @param (string) the text input value
+ * @param fieldValue the text input value
  * @return (boolean) indicating if the field qualifies
  */
 function validateTextField(fieldValue) {
@@ -54,21 +63,33 @@ function validateTextField(fieldValue) {
 /**
  * Verifies the correctness of form email fields
  *
- * @param (string) the email field input value
+ * @param fieldValue the email field input value
  * @return (boolean) indicating if the field qualifies
  */
 function validateEmailField(fieldValue) {
-    return isNonEmpty(fieldValue);
+    var regExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return isNonEmpty(fieldValue) && fieldValue.match(regExp);
 }
 
 /**
  * Verifies the correctness of form phone fields
  *
- * @param (string) the phone field input value
+ * @param fieldValue the phone field input value
+ * @param phonePattern the phone pattern to search match against
  * @return (boolean) indicating if the field qualifies
  */
-function validatePhoneField(fieldValue) {
-    return isNonEmpty(fieldValue);
+function validatePhoneField(fieldValue, phonePattern) {
+    return isNonEmpty(fieldValue) && fieldValue.match(phonePattern);
+}
+
+/**
+ * Verifies that an option from a select field has been chosen
+ *
+ * @param selectedField the select html element
+ * @return (boolean) indicating if the field qualifies
+ */
+function validateSelectField(selectedField) {
+    return $(selectedField).find("option:not(:disabled)").filter(":selected").size() == 1;
 }
 
 /**

@@ -3,7 +3,8 @@
  *
  * @author Woody Romelus
  */
-;(function($, window, document, undefined) {
+;
+(function ($, window, document, undefined) {
     // Be a good programmer now :p
     "use strict";
 
@@ -13,7 +14,7 @@
      * @param args the user options to configure to use within the plugin
      * @returns {*} result from the method invoked for the arguments given
      */
-    $.cookie = function(args) {
+    $.cookie = function (args) {
         return Object.create(Cookie).init(args);
     };
 
@@ -41,7 +42,7 @@
          * @param args the user options
          * @returns {*} result from the method invoked for the arguments given
          */
-        init: function(args) {
+        init: function (args) {
             var result;
 
             switch (typeof(args)) {
@@ -49,16 +50,16 @@
                     // Merge the user options with defaults
                     $.cookie.options = $.extend({}, $.cookie.options, args);
                     result = this._createCookie();
-                break;
+                    break;
                 case "undefined":
                     result = this._displayCookies();
-                break;
+                    break;
                 case "string":
                     result = this._getCookieValue(args);
-                break;
+                    break;
                 default:
                     $.error("Argument not supported!");
-                break;
+                    break;
             }
             return result;
         },
@@ -66,7 +67,7 @@
         /**
          * Creates a browser cookie.
          */
-        _createCookie: function() {
+        _createCookie: function () {
             document.cookie = $.cookie.options.name
                 + "=" + $.cookie.options.value
                 + "; expires=" + $.cookie.options.expires
@@ -78,14 +79,14 @@
          *
          * @returns {string} representation of all the cookies
          */
-        _displayCookies: function() {
+        _displayCookies: function () {
             var retVal = "";
             var cookies = this._getCookies();
 
-            if(cookies == "") {
+            if (cookies == "") {
                 retVal = "No cookies set.";
             } else {
-                cookies.forEach(function(elem) {
+                cookies.forEach(function (elem) {
                     retVal += elem.split("=");
                 });
             }
@@ -98,19 +99,19 @@
          * @param cookieName the name to lookup
          * @return {String} the value of the cookie
          */
-        _getCookieValue: function(cookieName) {
+        _getCookieValue: function (cookieName) {
             var retVal = "";
 
-            if(this._exists(cookieName)) {
+            if (this._exists(cookieName)) {
                 var cookies = this._getCookies();
 
                 // Find the cookie we want if it exists
-                for(var i = 0; i < cookies.length; i++) {
+                for (var i = 0; i < cookies.length; i++) {
                     var elem = cookies[i].split("=");
                     var key = elem[0].trim();
                     var value = elem[1].trim();
 
-                    if(key == cookieName){
+                    if (key == cookieName) {
                         retVal = value;
                     }
                 }
@@ -124,24 +125,24 @@
          * @param name the cookie name to look for
          * @returns {boolean} indicating if the cookie exists
          */
-        _exists: function(name) {
+        _exists: function (name) {
             var cookies = this._getCookies();
             var cookieElements = {};
 
-            cookies.forEach(function(elem) {
+            cookies.forEach(function (elem) {
                 var parts = elem.trim().split("=");
                 cookieElements[parts[0]] = parts[1];
             });
             return (name in cookieElements);
         },
-        
+
         /**
          * Retrieves all the cookies for the domain.
-         * 
+         *
          * @return {Array} of cookies as strings
          */
-        _getCookies: function() {
-           return document.cookie.split(";");
+        _getCookies: function () {
+            return document.cookie.split(";");
         }
     };
 }(jQuery, window, document));

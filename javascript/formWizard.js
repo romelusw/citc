@@ -83,7 +83,7 @@
             // Validate form elements
             if ($.fn.formWizard.options.validate) {
 
-                // Instantiate Validator if non-existant
+                // Instantiate Validator if non-existent
                 if ($.fn.formWizard.validator === undefined) {
                     var scriptFile = $("script[src *='formWizard.js']");
                     var basePath = scriptFile.attr("src").split(/[0-9a-z]+\.js/i)[0];
@@ -100,9 +100,11 @@
                     });
                 }
 
-                // Validate all elements within the section
-                sectionIsValid = _validateSection($(childElms).eq(currStep),
-                $.fn.formWizard.validator);
+                // Validate all elements within the section when progressing
+                if (!$(this).is($(formCtx).find($("button.fw_back")))) {
+                    sectionIsValid = _validateSection($(childElms).eq(currStep),
+                        $.fn.formWizard.validator);
+                }
             }
 
             if (sectionIsValid) {
@@ -135,14 +137,16 @@
      * @return boolean indicating if the section is clear from errors
      */
     function _validateSection(section, validator) {
-        var fields = section.find("input");
+        var fields = section.find("." + $.fn.formWizard.options.validateClass);
         var retVal = true;
 
         for (var i = 0; i < fields.length; i++) {
+            $(fields[i]).focus().css("border", "");
             if (!validator.validate(fields[i])) {
                 retVal = false;
-                $("." + $.fn.formWizard.options.validateClass).css("border", "1px solid red");
-                // break;
+                alert("Please fill out the fields properly.");
+                $(fields[i]).css("border", "1px solid red");
+                break;
             }
         }
         return retVal;
@@ -150,7 +154,7 @@
 
     /**
      * Changes the state of the transition buttons based on the current step
-     * 
+     *
      * @param formCtx the form context
      */
     function _updateStepButtons(formCtx) {
@@ -168,7 +172,7 @@
                 nxtBtn.prop("disabled", true);
                 if ($.fn.formWizard.options.hideDisabledStep) $(nxtBtn).hide();
                 break;
-                // The first transition field
+            // The first transition field
             case 0:
                 bckBtn.prop("disabled", true);
                 if ($.fn.formWizard.options.hideDisabledStep) $(bckBtn).hide();
@@ -206,16 +210,14 @@
      *
      * @type {{allowBack: boolean, cycleSteps: boolean,
      *         transitionField: string, validate: boolean,
-     *         hideDisabledStep: boolean, validateClass: string,
-     *         showErrors: boolean}}
+     *         hideDisabledStep: boolean, validateClass: string}}
      */
     $.fn.formWizard.options = {
         allowBack: false,
         cycleSteps: false,
         transitionField: "fieldset",
         validate: true,
-        hideDisabledStep: true,
-        validateClass: "validate",
-        showErrors: true
+        hideDisabledStep: false,
+        validateClass: "validate"
     };
 }(jQuery, window, document));

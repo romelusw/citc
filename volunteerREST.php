@@ -10,7 +10,7 @@ $config = parse_ini_file("conf/citc_config.ini");
 define("displaySize", $config["pagination_size"]);
 $reqInfo = Utils::retrieveRequestInfo();
 
-switch($reqInfo["method"]) {
+switch ($reqInfo["method"]) {
     case HTTPMethods::POST:
         // Ensure user is valid
         require("verifyUser.php");
@@ -35,7 +35,7 @@ switch($reqInfo["method"]) {
                     $_POST["volPos"], $_POST["volDay"]);
             }
         }
-    break;
+        break;
 
     case HTTPMethods::DELETE:
         // Ensure user is valid
@@ -57,7 +57,7 @@ switch($reqInfo["method"]) {
             echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
                 $currPage * displaySize);
         }
-    break;
+        break;
 
     case HTTPMethods::GET:
         $app = new VolunteerAppCreator();
@@ -84,13 +84,13 @@ switch($reqInfo["method"]) {
             $result .= $app->displayVolPositions(date("Y-m-d", $dateTime));
             $result .= "</div>";
             echo $result;
-        } else if(isset($_GET["positionDate"])) {
+        } else if (isset($_GET["positionDate"])) {
             echo $app->displayActiveVolPositions($_GET["positionDate"]);
         }
-    break;
+        break;
 
     // The requested method is not supported.
     default:
         http_response_code(405);
-    break;
+        break;
 }

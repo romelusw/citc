@@ -1,7 +1,7 @@
 <?php
 /**
- * A psuedo "enum" interface for HTTP methods.
- * 
+ * A pseudo "enum" interface for HTTP methods.
+ *
  * @author Woody Romelus
  */
 interface HTTPMethods {

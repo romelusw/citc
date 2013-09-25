@@ -22,7 +22,7 @@ class FormValidator {
      * @return bool indicating if any errors were found
      */
     public function validate($fields) {
-        foreach($fields as $fieldName => $fieldValue) {
+        foreach ($fields as $fieldName => $fieldValue) {
             $this->validateField($fieldName, $fieldValue);
         }
         return count($this->errorMessages) == 0;
@@ -44,7 +44,7 @@ class FormValidator {
             case "pass":
             case "password":
                 $this->validatePassword($fieldTitle, $fieldValue[$key]);
-                break;  
+                break;
             case "non_empty_text":
             case "net":
                 $this->validateNonEmptyText($fieldTitle, $fieldValue[$key]);
@@ -61,7 +61,7 @@ class FormValidator {
      * @param $data the data of the field
      */
     private function validateNonEmptyText($field, $data) {
-        if(strlen($data) == 0) {
+        if (strlen($data) == 0) {
             $this->setErrorMessages($field, sprintf(constant("EMPTY"), $field));
         }
     }
@@ -77,20 +77,20 @@ class FormValidator {
      */
     private function validatePassword($field, $pass) {
         // Check for length requirements
-        if(strlen($pass) == 0 || strlen($pass) < 8) {
+        if (strlen($pass) == 0 || strlen($pass) < 8) {
             $this->setErrorMessages($field, sprintf(constant("LENGTH"), $field));
         }
 
         // Check for a numeric
-        if(!preg_match('@[0-9]@', $pass)) {
+        if (!preg_match('@[0-9]@', $pass)) {
             $this->setErrorMessages($field, $this->errorMessages[$field]
-                                            . constant("NUMBER"));
+                . constant("NUMBER"));
         }
 
         // Check for symbols
-        if(!preg_match("/[^A-Za-z0-9]+/", $pass)) {
+        if (!preg_match("/[^A-Za-z0-9]+/", $pass)) {
             $this->setErrorMessages($field, $this->errorMessages[$field]
-                                            . constant("SYMBOL"));
+                . constant("SYMBOL"));
         }
     }
 
@@ -103,9 +103,9 @@ class FormValidator {
     private function validateEmail($field, $email) {
         $emailRegex = "/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,6}$/i";
 
-        if(strlen($email) == 0) {
+        if (strlen($email) == 0) {
             $this->setErrorMessages($field, sprintf(constant("EMPTY"), $field));
-        } else if(!preg_match($emailRegex, $email)) {
+        } else if (!preg_match($emailRegex, $email)) {
             $this->setErrorMessages($field, "Invalid Email Address");
         }
     }

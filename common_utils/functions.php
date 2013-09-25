@@ -18,7 +18,7 @@ class Utils {
      * @param string $logFilePath location where log file should exist
      */
     public static function logMessage($message, $logFilePath = "romelus_debug.log") {
-        if(!file_exists($logFilePath)) {
+        if (!file_exists($logFilePath)) {
             fopen($logFilePath, "a");
             fclose($logFilePath);
         }
@@ -61,7 +61,7 @@ class Utils {
      * @return string the unique key
      */
     public static function generateUniqueKey($content) {
-        return md5($content ."_". uniqid() ."_". salt);
+        return md5($content . "_" . uniqid() . "_" . salt);
     }
 
     /**
@@ -103,10 +103,12 @@ class Utils {
      * @return string the error string
      */
     function generateUIError($msg) {
-        if($msg !== null && strlen($msg) > 0) {
-            return "<h3 class='message'>Please fix the below error:
+        $retVal = "";
+        if ($msg !== null && strlen($msg) > 0) {
+            $retVal = "<h3 class='message'>Please fix the below error:
                 <span class='errmsg'>$msg</span><span class='msg_indicator'>
                 <i class='icon-li icon-minus-sign errorNotice'></i></span></h3>";
         }
+        return $retVal;
     }
 }

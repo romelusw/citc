@@ -2,10 +2,10 @@
 include("volunteerSignUp.php");
 $exportDate = $_GET["specificDate"];
 
-if(isset($exportDate)) {
+if (isset($exportDate)) {
     $app = new VolunteerAppCreator();
     $fileName = "Volunteers_" . date("d-m-Y_", strtotime($exportDate))
-        . microtime(true) .".csv";
+        . microtime(true) . ".csv";
 
     // Prepare headers
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
@@ -21,19 +21,19 @@ if(isset($exportDate)) {
 
     // Add column headers
     $columnNames = array();
-    while($finfo = $data->fetch_field()) {
+    while ($finfo = $data->fetch_field()) {
         array_push($columnNames, $finfo->name);
     }
     fputcsv($fh, $columnNames);
 
     // Convert certain values to human readable text
-    while($result = $data->fetch_assoc()) {
+    while ($result = $data->fetch_assoc()) {
 
-        if($result["Is a group?"] == 0) {
+        if ($result["Is a group?"] == 0) {
             $result["Is a group?"] = "Not a group";
         }
 
-        switch($result["Status"]) {
+        switch ($result["Status"]) {
             case -1:
                 $result["Status"] = "Pending";
                 break;

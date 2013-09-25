@@ -51,9 +51,9 @@ class EmailTransport {
      */
     public function getHeaders() {
         return "From: " . $this->from . PHP_EOL .
-               "CC: " . $this->cc . PHP_EOL .
-               "BCC: " . $this->bcc . PHP_EOL .
-               "Date: " . date("d M y");
+        "CC: " . $this->cc . PHP_EOL .
+        "BCC: " . $this->bcc . PHP_EOL .
+        "Date: " . date("d M y");
     }
 
     /**

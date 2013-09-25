@@ -29,6 +29,7 @@ class VolunteerAppCreator {
             $this->buildVolunteerMgmtTables();
         }
     }
+
     /**
      * .........................................................................
      * ......................... Functional Methods ............................
@@ -56,8 +57,6 @@ class VolunteerAppCreator {
            email varchar(254) NOT NULL,
            phone varchar(10) NOT NULL,
            volunteer_day date NOT NULL,
-           time_in time NOT NULL,
-           time_out time NOT NULL,
            accepted tinyint NOT NULL DEFAULT -1,
            is_group tinyint NOT NULL DEFAULT 0,
            group_size int NOT NULL DEFAULT 0,
@@ -261,7 +260,7 @@ class VolunteerAppCreator {
     function updateUserLastLogin($uemail) {
         return $this->connection->runPreparedQuery("UPDATE users
                SET lastloggedin = '" . date("Y-m-d H:i:s")
-               . "' WHERE  email = ? LIMIT 1", array($uemail));
+        . "' WHERE  email = ? LIMIT 1", array($uemail));
     }
 
     /**
@@ -355,7 +354,8 @@ class VolunteerAppCreator {
         return $this->connection->runQuery("SELECT DISTINCT vol_day
             FROM volunteer_audit
             WHERE Year(vol_day) = '$year'
-            AND curr_registered < max_registered");
+            AND curr_registered < max_registered
+            ORDER BY vol_day DESC");
     }
 
     /**
@@ -372,7 +372,7 @@ class VolunteerAppCreator {
         $udate = $this->connection->cleanSQLInputs($udate);
 
         return $this->connection->runQuery("SELECT fname, lname, email,
-            phone, time_in, time_out, is_group, group_size, position, accepted
+            phone, is_group, group_size, position, accepted
             FROM volunteers
             WHERE volunteer_day = '$udate'
             ORDER BY lname LIMIT $strtIndex, $numItemsToDisplay");
@@ -474,8 +474,6 @@ class VolunteerAppCreator {
      * @param $email the user's email
      * @param $phone the user's phone number
      * @param $v_day the volunteer date
-     * @param $tin the time in
-     * @param $tout the time out
      * @param $isGrp the group to reference
      * @param $grpSize the group size to reference
      * @param $pos the position to reference
@@ -485,10 +483,10 @@ class VolunteerAppCreator {
     function createVolunteer($fname, $lname, $email, $phone, $v_day, $tin,
                              $tout, $isGrp, $grpSize, $pos) {
         return $this->connection->runPreparedQuery("INSERT INTO volunteers
-            (fname, lname, email, phone, volunteer_day, time_in, time_out,
-            is_group, group_size, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?)", array($fname, $lname, $email, $phone, $v_day, $tin,
-            $tout, $isGrp, $grpSize, $pos));
+            (fname, lname, email, phone, volunteer_day, is_group, group_size,
+             position) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            array($fname, $lname, $email, $phone, $v_day, $isGrp, $grpSize,
+                $pos));
     }
 
     /**
@@ -574,9 +572,8 @@ class VolunteerAppCreator {
 
         return $this->connection->runQuery("SELECT fname as 'First Name',
             lname as 'Last Name', email as 'Email', phone as 'Phone Number',
-            time_in as 'Check In', time_out as 'Check Out', is_group as 'Is a group?',
-            group_size as 'Group Size', position as 'Volunteer Position',
-            accepted as 'Status'
+            is_group as 'Is a group?', group_size as 'Group Size',
+            position as 'Volunteer Position', accepted as 'Status'
             FROM volunteers
             WHERE volunteer_day = '$date'
             ORDER BY lname ASC");
@@ -598,6 +595,7 @@ class VolunteerAppCreator {
             WHERE title = ?
             AND date = ?", array($updText, $title, $date));
     }
+
     /**
      * .........................................................................
      * ........................... Display Methods .............................
@@ -609,7 +607,7 @@ class VolunteerAppCreator {
      * @return string the HTML list of dates
      */
     function displayAvailVolDateOptions() {
-        $result = "<option>-- Which Day works best?</option>";
+        $result = "<option value='' disabled selected>-- Which Day works best?</option>";
         $row = $this->retrieveAvailEventDates(date("Y"));
         while ($ans = $row->fetch_row()) {
             $evtDate = strtotime($ans[0]);
@@ -636,7 +634,8 @@ class VolunteerAppCreator {
         while ($ans = $row->fetch_row()) {
             $result .= "<li class='pos_li'>"
                 . "<h4>" . $ans[0] . "</h4>" . "<span style='color:#53a93f;
-                float:right'>" . (intval($ans[3]) - intval($ans[2])) . " spots
+                float:right'><span style=font-weight:bold>" . (intval($ans[3])
+                    - intval($ans[2])) . "</span> spots
                 left!</span><p class='small_font'>" . $ans[1] . "</p></li>";
         }
         return $result . "</ul>";
@@ -653,10 +652,9 @@ class VolunteerAppCreator {
         $rows = $this->connection->runQuery("SELECT DISTINCT title, description
         FROM volunteer_positions");
 
-        while($ans = $rows->fetch_row()) {
+        while ($ans = $rows->fetch_row()) {
             $result .= "<li><input class='gen_field'
-                    name='ptitle[]' type=radio value='$ans[0]'/><i class='icon-time'>
-                    &nbsp;</i>$ans[0]<input type=text
+                    name='ptitle[]' type=radio value='$ans[0]'/>$ans[0]<input type=text
             value='$ans[1]' name='pdescription[]' style='display:none'
              disabled/></li>";
         }
@@ -778,8 +776,8 @@ class VolunteerAppCreator {
         class='bbutton'><i class='icon-download-alt icon'></i>Download CSV</a><table
         id='vol_spec_date' class='selectable vol_table'><tr class='def_cursor'><th colspan='9'>
         Volunteers</th></tr><tr class='def_cursor'><td>Name</td><td>Email</td>
-            <td>Phone</td><td>Time in</td><td>Time Out</td><td>Is Group?</td>
-            <td>Group Size</td><td>Position</td><td>Status</td></tr>";
+            <td>Phone</td><td>Is Group?</td><td>Group Size</td><td>Position</td>
+            <td>Status</td></tr>";
 
         $result = $this->paginateRegisteredVolunteers($date, $startIndex, displaySize);
         while ($row = $result->fetch_row()) {

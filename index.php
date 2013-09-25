@@ -13,8 +13,8 @@ $errMsgs = array();
 $config = parse_ini_file("conf/citc_config.ini");
 
 // If there is a cookie stating you are already identified, redirect
-if(isset($_COOKIE["citc_rem"]) || $_SESSION["recognized"]) {
-    Utils::redirect("accountPage.php"); 
+if (isset($_COOKIE["citc_rem"]) || $_SESSION["recognized"]) {
+    Utils::redirect("accountPage.php");
 }
 
 // Handle submissions
@@ -45,7 +45,7 @@ if ($_POST) {
     if ($rememberMe && $isValidUser) {
         $token = md5(uniqid());
         $app->updateUserToken($u_email, $token);
-        setcookie("citc_rem", $u_email ."_". $token, strtotime($config["rem_me_token_exp"]), "/", "", false, true);
+        setcookie("citc_rem", $u_email . "_" . $token, strtotime($config["rem_me_token_exp"]), "/", "", false, true);
     }
 
     // Show Accounts page
@@ -65,9 +65,9 @@ if ($_POST) {
 
 function establishConnection() {
     global $app;
-    if(isset($app)){
+    if (isset($app)) {
         return $app;
-    }else{
+    } else {
         return new VolunteerAppCreator();
     }
 }
@@ -82,15 +82,15 @@ function logInRegisteredUser() {
 
     if ($validator->validate($fields)) {
         $app = establishConnection();
-        if(!$app->userIsValid($u_email, $u_pass)) {
+        if (!$app->userIsValid($u_email, $u_pass)) {
             $GLOBALS["errMsgs"]["exists"] = "Email/Passphrase incorrect please try again.";
             return false;
         } else {
             $app->updateUserLastLogin($u_email, $token);
-            return true; 
+            return true;
         }
     } else {
-        $GLOBALS["errMsgs"] = $validator->getErrors(); 
+        $GLOBALS["errMsgs"] = $validator->getErrors();
         return false;
     }
 }
@@ -117,64 +117,101 @@ function createNewAcct() {
         return false;
     }
 }
+
 ?>
-    <?php $pageTitle = "Volunteer Admin Sign In"; include("header.php"); ?>
-    <body>
-        <div class="centerForm">
-            <h1>CITC Volunteer App</h1>
-            <div class="loginForm">
-            <?= Utils::generateUIError($errMsgs['exists']);?>
-            <form class="card animate" method="post" action="<?= $_SERVER['PHP_SELF']?>">
-                <input type="checkbox" id="box" name="isNewUser" <?= $_POST['isNewUser'] == "on" ? "checked" : ""?>/>Create an Account
+<?php $pageTitle = "Volunteer Admin Sign In";
+include("header.php"); ?>
+<body>
+<div class="centerForm">
+    <img style="display:block; margin:0px auto"
+         src="http://christmasinthecity.org/wp-content/uploads/CITC-Logo.png"/>
 
-                <?= Utils::generateUIError($errMsgs['First Name']);?>
-                <label class='optional'>
-                    <div class="lft"><i class="icon-user"></i><span class="caveat">*</span></div>
-                    <input type="text" class="formField" name="userFName" placeholder="First Name" value="<?= $_POST['userFName']; ?>">
-                </label>
+    <h1>CITC Volunteer App</h1>
 
-                <?= Utils::generateUIError($errMsgs['Last Name']);?>
-                <label class='optional pairsWithAbove'>
-                    <div class="lft"><span class="empty_icon"></span></div>
-                    <input type="text" class="formField" name="userLName" placeholder="Last Name" value="<?= $_POST['userLName']; ?>"/>
-                </label>
-
-                <?= Utils::generateUIError($errMsgs['Email']);?>
-                <label>
-                    <div class="lft"><i class="icon-envelope-alt"></i><span class="caveat">*</span></div>
-                    <input type="email" class="formField" name="userEmail" placeholder="Email Address" value="<?= $_POST['userEmail']; ?>" required />
-                </label>
-
-                <?= Utils::generateUIError($errMsgs['Password']);?>
-                <label>
-                    <div class="lft"><i class="icon-key"></i><span class="caveat">*</span></div>
-                    <input type="password" class="formField" name="userPassword" placeholder="Please type in your password" required/>
-                </label>
-
-                <label class='optional pairsWithAbove'>
-                    <div class="lft"><span class="empty_icon"></span></div>
-                    <input type="password" class="formField" placeholder="Please confirm your password"/>
-                </label>
-
-                <?= Utils::generateUIError($errMsgs['Security Question']);?>
-                <label class='optional'>
-                    <div class="lft"><i class="icon-question"></i><span class="caveat">*</span></div>
-                    <input type="text" class="formField" name="secQ" placeholder="Security Question" value="<?= $_POST["secQ"]?>"/>
-                </label>
-
-                <?= Utils::generateUIError($errMsgs['Security Answer']);?>
-                <label class='optional pairsWithAbove'>
-                    <div class="lft"><span class="empty_icon"></span></div>
-                    <input type="text" class="formField" name="secA" placeholder="Security Answer" value="<?= $_POST["secA"]?>"/>
-                </label>
-
-                <label><input type="checkbox" name="rememberMe" <?= $_POST['rememberMe'] == "on" ? "checked" : "" ?>/>Stay Logged in?</label>
-                
-                <p>
-                    <a href="forgotpass.php" title="Forgot Password">Forgot Password?</a>
-                </p>
-                <input type="submit" class="formButton" value="submit"/>
-            </form>
+    <div class="loginForm">
+        <?= Utils::generateUIError($errMsgs['exists']); ?>
+        <form class="card animate" method="post"
+              action="<?= $_SERVER['PHP_SELF'] ?>">
+            <div class="formFieldSection">
+                <input type="checkbox" id="new-acct-create"
+                       name="isNewUser" <?= $_POST['isNewUser'] == "on" ? "checked" : "" ?>/>
+                <label for="new-acct-create">Create an Account</label>
             </div>
-        </div>
+
+            <div class="formFieldSection optional">
+                <?= Utils::generateUIError($errMsgs['First Name']); ?>
+                <label for="userFName">
+                    <i class="icon-user"></i>
+                    <span class="caveat">*</span>
+                </label>
+                <input type="text" id="new-acct-fname" class="formField"
+                       name="userFName" placeholder="First Name"
+                       value="<?= $_POST['userFName']; ?>">
+
+                <?= Utils::generateUIError($errMsgs['Last Name']); ?>
+                <label for="new-acct-lname"></label>
+                <input type="text" id="new-acct-lname" class="formField"
+                       name="userLName" placeholder="Last Name"
+                       value="<?= $_POST['userLName']; ?>"/>
+            </div>
+
+            <div class="formFieldSection">
+                <?= Utils::generateUIError($errMsgs['Email']); ?>
+                <label for="acct-email">
+                    <i class="icon-envelope-alt"></i>
+                    <span class="caveat">*</span>
+                </label>
+                <input type="email" id="acct-email" class="formField"
+                       name="userEmail" placeholder="Email Address"
+                       value="<?= $_POST['userEmail']; ?>" required/>
+            </div>
+
+            <div class="formFieldSection">
+                <?= Utils::generateUIError($errMsgs['Password']); ?>
+                <label for="acct-pass">
+                    <i class="icon-key"></i>
+                    <span class="caveat">*</span>
+                </label>
+                <input type="password" id="acct-pass" class="formField"
+                       name="userPassword"
+                       placeholder="Please type in your password" required/>
+
+                <div class="optional">
+                    <label for="new-acct-pass2"></label>
+                    <input type="password" id="new-acct-pass2" class="formField"
+                           placeholder="Please confirm your password"/>
+                </div>
+            </div>
+
+            <div class="formFieldSection optional">
+                <label for="new-acct-sans">
+                    <i class="icon-question"></i>
+                    <span class="caveat">*</span>
+                </label>
+                <input type="text" id="new-acct-sans" class="formField"
+                       name="secQ" placeholder="Security Question"
+                       value="<?= $_POST["secQ"] ?>"/>
+
+                <label for="new-acct-sans2"></label>
+                <input type="text" id="new-acct-sans2" class="formField"
+                       name="secA" placeholder="Security Answer"
+                       value="<?= $_POST["secA"] ?>"/>
+            </div>
+
+
+            <div class="formFieldSection">
+                <a href="forgotpass.php" class="right" title="Forgot Password">Forgot
+                    Password&nbsp;?</a>
+            </div>
+
+            <div class="formFieldSection">
+                <input type="checkbox" id="rememberme"
+                       name="rememberMe" <?= $_POST['rememberMe'] == "on" ? "checked" : "" ?>/>
+                <label for="rememberme">Stay Logged in?</label>
+                <input type="submit" class="formButton right" value="submit"/>
+            </div>
+            <div class="clear"></div>
+        </form>
+    </div>
+</div>
 <?php include("footer.php"); ?>

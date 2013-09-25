@@ -43,10 +43,11 @@ class DatabaseConnector {
      * @param $params the parameters to bind within the query
      * @return mixed either a flag indicating if the statement was successful
      * or the error for the statement
+     * @throws Exception when the number of required arguments are not met
      */
     public function runPreparedQuery($query, $params) {
         // Check if we do not have the right amount of params for the query
-        if(substr_count($query, "?") != count($params)) {
+        if (substr_count($query, "?") != count($params)) {
             throw new Exception("Incorrect number of arguments to
             'runPreparedQuery'.");
         }
@@ -64,7 +65,7 @@ class DatabaseConnector {
         $result = $pStatement->execute();
 
         // Handle errors after statement execution
-        if($result == false) {
+        if ($result == false) {
             $result = $pStatement->error_list;
         }
 
