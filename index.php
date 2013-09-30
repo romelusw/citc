@@ -76,8 +76,8 @@ function logInRegisteredUser() {
     global $u_email, $u_pass, $app, $token;
     $validator = new FormValidator();
     $fields = array(
-        "Email" => array("email" => $u_email)
-        #"Password" => array("pass" => $u_pass)
+        "Email" => array("non_empty_text" => $u_email),
+        "Password" => array("non_empty_text" => $u_pass)
     );
 
     if ($validator->validate($fields)) {
@@ -102,7 +102,7 @@ function createNewAcct() {
         "First Name" => array("non_empty_text" => $u_firstName),
         "Last Name" => array("non_empty_text" => $u_lastName),
         "Email" => array("email" => $u_email),
-        #"Password" => array("pass" => $u_pass),
+        "Password" => array("pass" => $u_pass),
         "Security Question" => array("non_empty_text" => $u_secQ),
         "Security Answer" => array("non_empty_text" => $u_secA)
     );
@@ -119,96 +119,92 @@ function createNewAcct() {
 }
 
 ?>
-<?php $pageTitle = "Volunteer Admin Sign In";
-include("header.php"); ?>
-<body>
-<div class="centerForm">
-    <img style="display:block; margin:0px auto"
-         src="http://christmasinthecity.org/wp-content/uploads/CITC-Logo.png"/>
-
+<?php $pageTitle = "Volunteer Admin Sign In"; include("header.php"); ?>
+<div class="generic-form center">
+    <img class="center" src="http://christmasinthecity.org/wp-content/uploads/CITC-Logo.png"/>
     <h1>CITC Volunteer App</h1>
 
     <div class="loginForm">
         <?= Utils::generateUIError($errMsgs['exists']); ?>
-        <form class="card animate" method="post"
-              action="<?= $_SERVER['PHP_SELF'] ?>">
-            <div class="formFieldSection">
+        <form class="card" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+            <div class="form-field-section">
                 <input type="checkbox" id="new-acct-create"
+                       onclick="$('.hidden').toggle();"
                        name="isNewUser" <?= $_POST['isNewUser'] == "on" ? "checked" : "" ?>/>
                 <label for="new-acct-create">Create an Account</label>
             </div>
 
-            <div class="formFieldSection optional">
+            <div class="form-field-section hidden">
                 <?= Utils::generateUIError($errMsgs['First Name']); ?>
                 <label for="userFName">
                     <i class="icon-user"></i>
-                    <span class="caveat">*</span>
+                    <span class="require-icon">*</span>
                 </label>
-                <input type="text" id="new-acct-fname" class="formField"
+                <input type="text" id="new-acct-fname" class="form-field"
                        name="userFName" placeholder="First Name"
                        value="<?= $_POST['userFName']; ?>">
 
                 <?= Utils::generateUIError($errMsgs['Last Name']); ?>
                 <label for="new-acct-lname"></label>
-                <input type="text" id="new-acct-lname" class="formField"
+                <input type="text" id="new-acct-lname" class="form-field"
                        name="userLName" placeholder="Last Name"
                        value="<?= $_POST['userLName']; ?>"/>
             </div>
 
-            <div class="formFieldSection">
+            <div class="form-field-section">
                 <?= Utils::generateUIError($errMsgs['Email']); ?>
                 <label for="acct-email">
                     <i class="icon-envelope-alt"></i>
-                    <span class="caveat">*</span>
+                    <span class="require-icon">*</span>
                 </label>
-                <input type="email" id="acct-email" class="formField"
+                <input type="email" id="acct-email" class="form-field"
                        name="userEmail" placeholder="Email Address"
                        value="<?= $_POST['userEmail']; ?>" required/>
             </div>
 
-            <div class="formFieldSection">
+            <div class="form-field-section">
                 <?= Utils::generateUIError($errMsgs['Password']); ?>
                 <label for="acct-pass">
                     <i class="icon-key"></i>
-                    <span class="caveat">*</span>
+                    <span class="require-icon">*</span>
                 </label>
-                <input type="password" id="acct-pass" class="formField"
+                <input type="password" id="acct-pass" class="form-field"
                        name="userPassword"
                        placeholder="Please type in your password" required/>
 
-                <div class="optional">
+                <div class="hidden">
                     <label for="new-acct-pass2"></label>
-                    <input type="password" id="new-acct-pass2" class="formField"
+                    <input type="password" id="new-acct-pass2" class="form-field"
                            placeholder="Please confirm your password"/>
                 </div>
             </div>
 
-            <div class="formFieldSection optional">
+            <div class="form-field-section hidden">
                 <label for="new-acct-sans">
                     <i class="icon-question"></i>
-                    <span class="caveat">*</span>
+                    <span class="require-icon">*</span>
                 </label>
-                <input type="text" id="new-acct-sans" class="formField"
+                <input type="text" id="new-acct-sans" class="form-field"
                        name="secQ" placeholder="Security Question"
                        value="<?= $_POST["secQ"] ?>"/>
 
                 <label for="new-acct-sans2"></label>
-                <input type="text" id="new-acct-sans2" class="formField"
+                <input type="text" id="new-acct-sans2" class="form-field"
                        name="secA" placeholder="Security Answer"
                        value="<?= $_POST["secA"] ?>"/>
             </div>
 
 
-            <div class="formFieldSection">
+            <div class="form-field-section">
                 <a href="forgotpass.php" class="right" title="Forgot Password">Forgot
                     Password&nbsp;?</a>
             </div>
 
-            <div class="formFieldSection">
+            <div class="form-field-section">
                 <input type="checkbox" id="rememberme"
                        name="rememberMe" <?= $_POST['rememberMe'] == "on" ? "checked" : "" ?>/>
                 <label for="rememberme">Stay Logged in?</label>
-                <input type="submit" class="formButton right" value="submit"/>
+                <input type="submit" class="form-button right" value="submit"/>
             </div>
             <div class="clear"></div>
         </form>

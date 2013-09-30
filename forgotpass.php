@@ -7,7 +7,12 @@ $app;
 $errorMessages = array();
 $userLink;
 
-// Handle GET requests
+if($_SERVER['REQUEST_METHOD'] === 'GET') {
+//    setcookie("citc_rec", "", time() - 3600);
+//    session_destroy();
+}
+
+// Handle GET requests (Clicked recovery email or link)
 if (isset($_GET["u_email"]) && isset($_GET["rec_key"])) {
     include_once("volunteerSignUp.php");
     $app = new VolunteerAppCreator();
@@ -18,12 +23,22 @@ if (isset($_GET["u_email"]) && isset($_GET["rec_key"])) {
         $step = 3;
         $session->step = 3;
     } else {
-        echo "The URL user/key is invalid. Or the url has expired please try again";
+        echo "<div class='notification center'>
+                <h3 class='red-color'>Recovery Failure.</h3>
+                <p>
+                    Could not process your request.
+                </p>
+                <div class='notification-action'>
+                    The URL user/key is invalid. Or the recovery key has
+                     expired please try again.
+                </div>
+            </div>";
     }
 }
 
 // Handle POST requests
-if ($_POST) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Utils::printCode(print_r($_SESSION));
     include_once("common_utils/formValidator.php");
     include_once("volunteerSignUp.php");
 
@@ -66,7 +81,8 @@ if ($_POST) {
                 if (Utils::equalIgnoreCase($u_answer, $userQA["security_a"])) {
                     $app = new VolunteerAppCreator();
                     $key = Utils::generateUniqueKey($userEmail);
-                    $app->createPasswordRecoveryEntry($userEmail, $key, date("Y-m-d h:i:s", strtotime("+1 hours")));
+                    $app->createPasswordRecoveryEntry($userEmail, $key,
+                        date("Y-m-d h:i:s", strtotime("+1 hours")));
                     $userLink = "?u_email=$userEmail&rec_key=$key";
                     $session->rec_link = $userLink;
 
@@ -75,8 +91,9 @@ if ($_POST) {
                     if (!isset($_SESSION["emailsent"]) || $_SESSION["emailsent"] == false) {
                         // Send email
                         include_once("common_utils/email.php");
-                        $emailer = new EmailTransport("Forgotten Password",
-                            "Hello World", "webmaster@christmasinthecity.org");
+                        $emailer = new EmailTransport("CITC Forgotten Password",
+                            "Please click the link to recover your password:",
+                            "webmaster@christmasinthecity.org");
                         $retVal = $emailer->sendMail($userEmail);
                         $session->emailsent = $retVal;
                         $step = 2;
@@ -124,102 +141,96 @@ function validateFields($fields) {
     }
     return $results;
 }
-
 ?>
 
-<?php $pageTitle = "Volunteer Forgot Password";
-include("header.php"); ?>
+<?php $pageTitle = "Volunteer Forgot Password"; include("header.php"); ?>
 
-<body>
-<div class="centerForm">
+<div class="generic-form center">
     <?php switch ($step) {
-        case 0:
-            ?>
-            <img style="display:block; margin:0px auto"
-                 src="http://christmasinthecity.org/wp-content/uploads/CITC-Logo.png"/>
+        case 0: ?>
+            <img class="center" src="http://christmasinthecity.org/wp-content/uploads/CITC-Logo.png"/>
             <h1>Forgot Your Password eh?</h1>
             <form class="card" method="post"
                   action="<?= $_SERVER["PHP_SELF"]; ?>">
                 <p>Let me know your email address to help you reset your
                     password.</p>
 
-                <div class="formFieldSection">
+                <div class="form-field-section">
                     <?= Utils::generateUIError($errorMessages['User Email']); ?>
                     <label for="forgot-pass-email">
                         <i class="icon-envelope-alt"></i>
-                        <span class="caveat">*</span>
+                        <span class="require-icon">*</span>
                     </label>
-                    <input type="text" id="forgot-pass-email" class="formField"
+                    <input type="text" id="forgot-pass-email" class="form-field"
                            name="u_email" placeholder="Email Address"/>
 
-                    <input type="submit" class="formButton right"
+                    <input type="submit" class="form-button right"
                            value="Submit"/>
                 </div>
                 <div class="clear"></div>
             </form>
             <?php break;
-        case 1:
-            ?>
-            <img style="display:block; margin:0px auto"
-                 src="http://christmasinthecity.org/wp-content/uploads/CITC-Logo.png"/>
+        case 1: ?>
+            <img class="center" src="http://christmasinthecity.org/wp-content/uploads/CITC-Logo.png"/>
             <h1>Lets find out if you are <br/> who you say you are.</h1>
-            <form class="card" method="post"
-                  action="<?= $_SERVER["PHP_SELF"]; ?>">
-                <p>Please answer the security question: <span
-                        class="sec_q"><?= ucwords($userQA["security_q"]); ?></span>
+            <form class="card" method="post" action="<?= $_SERVER["PHP_SELF"]; ?>">
+                <p>Please answer the security question:
+                    <span class="sec_q">
+                        <?= ucwords($userQA["security_q"]); ?>
+                    </span>
                 </p>
 
-                <div class="formFieldSection">
+                <div class="form-field-section">
                     <?= Utils::generateUIError($errorMessages['Answer']); ?>
                     <label for="sec_a">
                         <i class="icon-lightbulb"></i>
-                        <span class="caveat">*</span>
+                        <span class="require-icon">*</span>
                     </label>
-                    <input type="text" id="sec_a" class="formField" name="sec_a"
+                    <input type="text" id="sec_a" class="form-field" name="sec_a"
                            placeholder="Security Answer"/>
 
-                    <input type="submit" class="formButton right"
-                           value="Submit"/>
+                    <input type="submit" class="form-button right" value="Submit"/>
                 </div>
                 <div class="clear"></div>
             </form>
             <?php break;
-        case 2:
-            ?>
-            <div class="message">
-                <p>Password reset email has been sent to
-                    <span
-                        style="font-weight:bold; text-align: center; color:#4678bd">'<?= $userEmail ?>
-                        '</span>.
+        case 2: ?>
+            <div class='notification center'>
+                <h3>Password has been reset!</h3>
+                <p>
+                    Check the inbox @
+                    <span class="bold">'<?= $userEmail ?>'</span>
+                    to restore your password.
                 </p>
-
-                <p>Or you can always reset the password now <i
-                        class="icon-long-arrow-right"></i>
-                    <a href="<?= $userLink ?>"
-                       title="Click to reset your password">Reset Password</a>
-                </p>
+                <div class="notification-action">
+                    <i class="icon-reply"></i>
+                    <span>
+                        Or you can reset the password now
+                        <a href="<?= $userLink ?>" title="Click to reset your password">
+                            Reset Password.
+                        </a>
+                    </span>
+                </div>
             </div>
             <?php break;
-        case 3:
-            ?>
-            <h1>Reset your password with a new one. Dont Forget it this
-                time!</h1>
+        case 3: ?>
+            <h1>Reset your password. Don't Forget it this time!</h1>
             <form class="card" method="post"
                   action="<?= $_SERVER["PHP_SELF"]; ?>">
                 <p>Create a new password for your account.</p>
 
-                <div class="formFieldSection">
+                <div class="form-field-section">
                     <?= Utils::generateUIError($errorMessages['Password']); ?>
                     <label for="n_pass">
                         <i class="icon-key"></i>
-                        <span class="caveat">*</span>
+                        <span class="require-icon">*</span>
                     </label>
-                    <input type="password" id="n_pass" class="formField"
+                    <input type="password" id="n_pass" class="form-field"
                            placeholder="New Password" name="n_pass"/>
-                    <input type="password" id="n_pass2" class="formField"
+                    <input type="password" id="n_pass2" class="form-field"
                            placeholder="Confirm New Password"/>
 
-                    <input type="submit" class="formButton right"
+                    <input type="submit" class="form-button right"
                            value="Submit"/>
                 </div>
                 <div class="clear"></div>

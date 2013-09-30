@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
 // A Salt value for hashing
 define("salt", "li:1or9_em8ip(s6um");
 
@@ -102,12 +104,26 @@ class Utils {
      * @param $msg the error message to display
      * @return string the error string
      */
-    function generateUIError($msg) {
+    public static function generateUIError($msg) {
         $retVal = "";
         if ($msg !== null && strlen($msg) > 0) {
-            $retVal = "<h3 class='message'>Please fix the below error:
+            $retVal = "<h2 class='message clear'>Please fix the below error:
                 <span class='errmsg'>$msg</span><span class='msg_indicator'>
-                <i class='icon-li icon-minus-sign errorNotice'></i></span></h3>";
+                <i class='icon-li icon-minus-sign errorNotice'></i></span></h2>";
+        }
+        return $retVal;
+    }
+
+    /**
+     * Replaces all occurrences of a token string with a replacement string.
+     * @param $token the token being searched for
+     * @param $replace the replacement string array
+     * @param $subject the string being searched on
+     */
+    public static function replaceTokens($token, $replace, $subject) {
+        $retVal = $subject;
+        for($i = 0; $i < count($replace); $i++) {
+            $retVal = preg_replace("/$token/", $replace[$i], $retVal, 1);
         }
         return $retVal;
     }

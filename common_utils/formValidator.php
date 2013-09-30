@@ -1,5 +1,6 @@
 <?php
 define("EMPTY", "%s cannot be empty. Please fill in.");
+define("INVALIDTEL", "%s is not a valid telephone number.");
 define("LENGTH", "Password must be at least '8' characters long.");
 define("NUMBER", "Password must contain at least one numeric value.");
 define("SYMBOL", "Password must contain at least one symbol.");
@@ -48,6 +49,11 @@ class FormValidator {
             case "non_empty_text":
             case "net":
                 $this->validateNonEmptyText($fieldTitle, $fieldValue[$key]);
+                break;
+            case "tel":
+            case "telephone":
+            case "cell":
+                $this->validatePhoneNumber($fieldTitle, $fieldValue[$key]);
                 break;
             default:
                 error_log(sprintf(constant("unsupported"), $key));
@@ -107,6 +113,23 @@ class FormValidator {
             $this->setErrorMessages($field, sprintf(constant("EMPTY"), $field));
         } else if (!preg_match($emailRegex, $email)) {
             $this->setErrorMessages($field, "Invalid Email Address");
+        }
+    }
+
+    /**
+     * Verifies/validates phone numbers.
+     *
+     * @param $field the field title
+     * @param $number the number to validate
+     */
+    private function validatePhoneNumber($field, $number) {
+        // Remove dashes
+        $number = str_replace("-", "", $number);
+        // Remove spaces
+        $number = str_replace(" ", "", $number);
+
+        if(strlen($number) != 10) {
+            $this->setErrorMessages($field, sprintf(constant("INVALIDTEL"), $field));
         }
     }
 

@@ -3,8 +3,7 @@
  *
  * @author Woody Romelus
  */
-;
-(function ($, window, document, undefined) {
+;(function ($, window, document, undefined) {
     // Be a good programmer now :p
     "use strict";
 

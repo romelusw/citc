@@ -31,6 +31,14 @@ if (isset($exportDate)) {
 
         if ($result["Is a group?"] == 0) {
             $result["Is a group?"] = "Not a group";
+        } else{
+            $result["Is a group?"] = "Is a group";
+        }
+
+        if ($result["Is a Youth group?"] == 0) {
+            $result["Is a Youth group?"] = "Not a group";
+        } else{
+            $result["Is a Youth group?"] = "Is a group";
         }
 
         switch ($result["Status"]) {

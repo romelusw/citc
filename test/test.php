@@ -43,6 +43,7 @@ for ($i = 1; $i <= 100; $i++) {
         "pdate" => "$year-06-$day",
         "pmaxreg" => createNArray(30),
         "ptitle" => createNArray(30, "Title "),
+        "pstarttime[]" =>  (rand(1, 23) . ":" . rand(1, 55) . ":00"),
         "pdescription" => createNArray(30, "Blah Blah")
     );
     $r->post($postData);
@@ -55,7 +56,7 @@ for ($i = 1; $i <= 100; $i++) {
         "vol_firstName" => "Volunteer $i",
         "vol_lastName" => "Volunteer $i",
         "vol_email" => "vol$i@gmail.com",
-        "vol_Phone" => "7777777777",
+        "vol_phone" => "7777777777",
         "volDay" => "$year-06-$day",
         "vol_position" => "Title $t"
     );

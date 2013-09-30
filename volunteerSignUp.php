@@ -59,6 +59,9 @@ class VolunteerAppCreator {
            volunteer_day date NOT NULL,
            accepted tinyint NOT NULL DEFAULT -1,
            is_group tinyint NOT NULL DEFAULT 0,
+           is_youth_group tinyint NOT NULL DEFAULT 0,
+           num_chaperones int NOT NULL DEFAULT 0,
+           group_name varchar (100) NOT NULL DEFAULT 'N/A',
            group_size int NOT NULL DEFAULT 0,
            position varchar(100) NOT NULL,
            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -92,10 +95,11 @@ class VolunteerAppCreator {
         $this->connection->runQuery("CREATE TABLE IF NOT EXISTS volunteer_positions (
            pid int NOT NULL AUTO_INCREMENT,
            title varchar(100) NOT NULL,
-           description varchar(700) NOT NULL DEFAULT '',
+           description varchar(700) NOT NULL DEFAULT 'N/A',
            max_users int NOT NULL DEFAULT '0',
            date date NOT NULL,
            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+           starttime time NOT NULL,
            PRIMARY KEY (pid),
            UNIQUE KEY distinct_positions (title, date))");
 
@@ -355,7 +359,7 @@ class VolunteerAppCreator {
             FROM volunteer_audit
             WHERE Year(vol_day) = '$year'
             AND curr_registered < max_registered
-            ORDER BY vol_day DESC");
+            ORDER BY vol_day ASC");
     }
 
     /**
@@ -372,7 +376,8 @@ class VolunteerAppCreator {
         $udate = $this->connection->cleanSQLInputs($udate);
 
         return $this->connection->runQuery("SELECT fname, lname, email,
-            phone, is_group, group_size, position, accepted
+            phone, is_group, is_youth_group, num_chaperones, group_name,
+            group_size, position, accepted
             FROM volunteers
             WHERE volunteer_day = '$udate'
             ORDER BY lname LIMIT $strtIndex, $numItemsToDisplay");
@@ -410,7 +415,7 @@ class VolunteerAppCreator {
      */
     function retrieveAvailableVolPositions($date) {
         return $this->connection->runQuery("SELECT title, description, reg_num,
-          max_users
+          max_users, starttime
           FROM
               (SELECT title, description,
                 (SELECT Count(*)
@@ -418,14 +423,15 @@ class VolunteerAppCreator {
                    WHERE POSITION = title
                    AND volunteer_day = date) AS reg_num,
                    max_users,
-                   date
+                   date,
+                   starttime
               FROM volunteer_positions
               LEFT JOIN (volunteers)
               ON volunteer_positions.date = volunteers.volunteer_day
               AND volunteer_positions.title = volunteers.POSITION) AS t1
           WHERE reg_num < max_users
           AND date = '$date'
-          ORDER BY title");
+          ORDER BY starttime, title");
     }
 
     /**
@@ -447,11 +453,12 @@ class VolunteerAppCreator {
      * @param $description the description for the position
      * @param $max the maximum allowed number of volunteers
      * @param $date the date to associate the position to
+     * @param $strttime the time the position is available
      */
-    function createNewPosition($title, $description, $max, $date) {
+    function createNewPosition($title, $description, $max, $date, $strttime) {
         $this->connection->runPreparedQuery("INSERT INTO volunteer_positions
-           (title, description, max_users, date) VALUES (?, ?, ?, ?)",
-            array($title, $description, $max, $date));
+           (title, description, max_users, date, starttime) VALUES (?, ?, ?, ?, ?)",
+            array($title, $description, $max, $date, $strttime));
     }
 
     /**
@@ -475,18 +482,22 @@ class VolunteerAppCreator {
      * @param $phone the user's phone number
      * @param $v_day the volunteer date
      * @param $isGrp the group to reference
+     * @param $isYthGrp the youth group to reference
+     * @param $chaperoneSize the chaperone size to reference
      * @param $grpSize the group size to reference
+     * @param $grpName the group name to reference
      * @param $pos the position to reference
      * @return mixed flag indicating the query was executed successfully,
      * or the error that was propagated from the prepared statement
      */
-    function createVolunteer($fname, $lname, $email, $phone, $v_day, $tin,
-                             $tout, $isGrp, $grpSize, $pos) {
+    function createVolunteer($fname, $lname, $email, $phone, $v_day, $isGrp,
+        $isYthGrp, $chaperoneSize, $grpSize, $grpName, $pos) {
         return $this->connection->runPreparedQuery("INSERT INTO volunteers
-            (fname, lname, email, phone, volunteer_day, is_group, group_size,
-             position) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            array($fname, $lname, $email, $phone, $v_day, $isGrp, $grpSize,
-                $pos));
+            (fname, lname, email, phone, volunteer_day, is_group, is_youth_group,
+            num_chaperones, group_size, group_name, position)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            array($fname, $lname, $email, $phone, $v_day, $isGrp, $isYthGrp,
+                $chaperoneSize, $grpSize, $grpName, $pos));
     }
 
     /**
@@ -573,7 +584,9 @@ class VolunteerAppCreator {
         return $this->connection->runQuery("SELECT fname as 'First Name',
             lname as 'Last Name', email as 'Email', phone as 'Phone Number',
             is_group as 'Is a group?', group_size as 'Group Size',
-            position as 'Volunteer Position', accepted as 'Status'
+            is_youth_group as 'Is a Youth group?', num_chaperones as '# of Chaperones',
+            group_name as 'Group/Org Name', position as 'Volunteer Position',
+            accepted as 'Status'
             FROM volunteers
             WHERE volunteer_day = '$date'
             ORDER BY lname ASC");
@@ -642,26 +655,6 @@ class VolunteerAppCreator {
     }
 
     /**
-     * Displays a set of input fields that represent all the positions created.
-     *
-     * @return string the HTML content
-     */
-    function displayPositionsCreated() {
-        $result = "<ul id='positionsCreated'>";
-
-        $rows = $this->connection->runQuery("SELECT DISTINCT title, description
-        FROM volunteer_positions");
-
-        while ($ans = $rows->fetch_row()) {
-            $result .= "<li><input class='gen_field'
-                    name='ptitle[]' type=radio value='$ans[0]'/>$ans[0]<input type=text
-            value='$ans[1]' name='pdescription[]' style='display:none'
-             disabled/></li>";
-        }
-        return $result . "</ul>";
-    }
-
-    /**
      * Displays the volunteer positions registered to a specific date.
      *
      * @param $date the date to reference
@@ -677,7 +670,8 @@ class VolunteerAppCreator {
 
         $result = "<table class='vol_table'><tr class='def_cursor'>
             <th colspan='3'>Positions</th></tr><tr class='def_cursor'>
-            <td>Title</td><td>Description</td><td>Registered</td></tr>";
+            <td style='width: 25%;'>Title</td><td>Description</td><td
+            >Registered</td></tr>";
 
         while ($ans = $row->fetch_row()) {
             $title = $ans[0];
@@ -701,7 +695,7 @@ class VolunteerAppCreator {
      */
     function displayNotice($body) {
         return "<p class='message'>
-                   <span class='caveat'>*</span>
+                   <span class='require-icon'>*</span>
                    $body
                </p>";
     }
@@ -772,18 +766,20 @@ class VolunteerAppCreator {
         }
 
         $resultTable = "<a href='downloads.php?specificDate=$date'
-        target='_blank' style='float: right; margin-bottom: 10px;'
-        class='bbutton'><i class='icon-download-alt icon'></i>Download CSV</a><table
-        id='vol_spec_date' class='selectable vol_table'><tr class='def_cursor'><th colspan='9'>
-        Volunteers</th></tr><tr class='def_cursor'><td>Name</td><td>Email</td>
-            <td>Phone</td><td>Is Group?</td><td>Group Size</td><td>Position</td>
-            <td>Status</td></tr>";
+        target='_blank' class='right form-button'><i class='icon-download-alt
+        icon'>&nbsp;</i>Download CSV</a><table id='vol_spec_date' class='selectable vol_table'>
+        <tr class='def_cursor'><th colspan='10'>Volunteers</th></tr>
+        <tr class='def_cursor'><td>Name</td><td>Email</td><td>Phone</td>
+        <td width='20px'>Group?</td><td width='20px'>Youth Group?</td>
+        <td width='20px'># of Chaperones</td>
+        <td>Group/Org Name</td><td width='5%'>Group Size</td>
+        <td>Position</td><td>Status</td></tr>";
 
         $result = $this->paginateRegisteredVolunteers($date, $startIndex, displaySize);
-        while ($row = $result->fetch_row()) {
+        while ($row = $result->fetch_assoc()) {
             $volunteerAccepted = "";
             $class = "";
-            switch ($row[9]) {
+            switch ($row["accepted"]) {
                 case -1:
                     $volunteerAccepted = "Pending ...";
                     break;
@@ -797,15 +793,16 @@ class VolunteerAppCreator {
                     break;
             }
 
-            $resultTable .= "<tr $class data-dataElem='$row[2]'
-            data-box='vol_itemsToModify' data-dateVol='$date'>
-            <td class='special'>" . ucwords($row[0]) . " " . ucwords($row[1])
-                . "</td><td>" . $row[2] . "</td><td>(" . substr($row[3], 0, 3) . ") "
-                . substr($row[3], 3, 3) . "-" . substr($row[3], 6, 4) . "</td><td>"
-                . date("g:i A", strtotime($row[4])) . "</td><td>"
-                . date("g:i A", strtotime($row[5])) . "</td><td>"
-                . (empty($row[6]) ? "False" : "True") . "</td><td>" . $row[7]
-                . "</td><td>" . $row[8] . "</td><td>"
+            $resultTable .= "<tr $class data-dataElem='" . $row['email']
+                . "'data-box='vol_itemsToModify' data-dateVol='$date'>
+                <td class='special'>" . ucwords($row["fname"]) . " " . ucwords($row["lname"])
+                . "</td><td>" . $row["email"] . "</td><td>(" . substr($row["phone"], 0, 3) . ") "
+                . substr($row["phone"], 3, 3) . "-" . substr($row["phone"], 6, 4) . "</td><td>"
+                . (empty($row['is_group']) ? "False" : "True") . "</td><td>"
+                . (empty($row['is_youth_group']) ? "False" : "True")
+                . "</td><td>" . $row['num_chaperones'] . "</td><td>"
+                . $row['group_name'] . "</td><td>" . $row['group_size']
+                . "</td><td>" . $row['position'] . "</td><td>"
                 . $volunteerAccepted . "</td></tr>";
         }
 

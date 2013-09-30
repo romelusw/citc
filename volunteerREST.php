@@ -22,8 +22,12 @@ switch ($reqInfo["method"]) {
             foreach ($users as $uemail) {
                 // Send Email
                 include_once("common_utils/email.php");
-                $emailer = new EmailTransport("You have been accepted!",
-                    "Hello World", "webmaster@christmasinthecity.org");
+                $emailer = new EmailTransport("VolunteerCITC You have been accepted!",
+                    file_get_contents("emailers/acceptance_noncustom.html"),
+                    "volunteer@christmasinthecity.org");
+//                    Utils::replaceTokens("{%}", array(),
+//                        file_get_contents("emailers/acceptance.html")),
+//                        "webmaster@christmasinthecity.org");
                 $retVal = $emailer->sendMail($uemail);
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 1);
             }
@@ -46,12 +50,6 @@ switch ($reqInfo["method"]) {
             $volDay = strtotime($reqInfo["volunteerDate"]);
             $currPage = $reqInfo["page"];
             foreach ($users as $uemail) {
-                // Send Email
-                include_once("common_utils/email.php");
-                $emailer = new EmailTransport("Unfortunately we could not
-                fit you in this event!",
-                    "Hello World", "webmaster@christmasinthecity.org");
-                $retVal = $emailer->sendMail($uemail);
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 0);
             }
             echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
@@ -64,7 +62,7 @@ switch ($reqInfo["method"]) {
         if (isset($_GET["specificDate"])) {
             $dateTime = strtotime($_GET["specificDate"]);
 
-            $result = "<div id='volCalendar'><h3>Manage Volunteers</h3>";
+            $result = "<div id='volCalendar'><h2>Manage Volunteers</h2>";
             $result .= $app->displayEventCalendar(date("m", $dateTime),
                 date("Y", $dateTime));
             $result .= "</div>";
@@ -80,7 +78,7 @@ switch ($reqInfo["method"]) {
             class='actionButton'>Deny</button></li></ul><span class='clear'>
             </span></div></div>";
 
-            $result .= "<div id='volunteerDates'><h3>Volunteer Positions</h3>";
+            $result .= "<div id='volunteerDates'><h2>Volunteer Positions</h2>";
             $result .= $app->displayVolPositions(date("Y-m-d", $dateTime));
             $result .= "</div>";
             echo $result;

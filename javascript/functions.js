@@ -93,8 +93,8 @@ $(document).ready(function () {
     });
 
     // Handle Sign up form interactions
-    $("#volunteerDay").change(function () {
-        var option = $("#volunteerDay").find("option").filter(":selected");
+    $("#volunteer-day").change(function () {
+        var option = $("#volunteer-day").find("option").filter(":selected");
         if (option.text().indexOf("--") == -1) {
             $.ajax({
                 url: "volunteerREST.php?positionDate=" + option.val(),
@@ -241,37 +241,37 @@ $(document).ready(function () {
         }
     });
 
-    // TODO: clean this up
     if ($("#new-acct-create").is(":checked")) {
-        $(".optional").toggle("true");
+        $(".hidden").toggle("true");
     }
-    $("#new-acct-create").change(function () {
-        $(".optional").toggle("false");
-//        if($(this).is(":checked")) {
-//            $(".optional").show();
-//        } else {
-//            $(".optional").hide();
-//        }
-    });
+
+    if ($("#vol_isGroup").is(":checked")) {
+        $("#group-form").toggle("true");
+    }
+
+    if ($("#vol_isYthGroup").is(":checked")) {
+        $("#youth-group-form").toggle("true");
+    }
 
     $(".close_form").on("click", function () {
-        $("#newPositionForm").fadeOut();
-        $("#newPartyForm").fadeOut();
+        $("#new-event-form").fadeOut();
         $("#overlay").fadeOut();
     });
 
     $("#add_event").on("click", function () {
-        $("#newPartyForm").fadeIn();
+        $("#new-event-form").fadeIn();
         $("#overlay").fadeIn();
     });
 
-    $("#add_position").on("click", function (e) {
+    $("#add_position").on("click", function(e) {
         e.preventDefault();
         var fieldset = $("#vol_pos").clone()
             .append("<a href='#' class='removeset'>Remove Entry</a>")
             .removeAttr("id");
         fieldset.find('input[type=text]').val('');
+        fieldset.find(".ui-autocomplete-input").timeAutocomplete();
         $(this).before(fieldset);
+        bindCounterClick();
     });
 
     $(document).on("blur", ".vol_table .modifiable_desc", function () {
@@ -289,23 +289,22 @@ $(document).ready(function () {
 
     $("#overlay").click(function () {
         var thiz = this;
-        $("#newPartyForm").fadeOut(function () {
+        $("#new-event-form").fadeOut(function () {
             $(thiz).fadeOut();
         });
     });
 
     // Form Wizard
     $.fn.formWizard.validator = new FormValidator();
-    $("#signupForm").formWizard({
+    $("#signup-form").formWizard({
         allowBack: true,
-        hideDisabledStep: true,
-        validate: false
+        hideDisabledStep: true
     });
 
     // Attach JavaScript form validator to all submit triggers
     $("input[type=submit]").on("click", function () {
         var formCtx = $(this).find("form");
-        var elemToValidate = formCtx.find(".formField").not(":hidden");
+        var elemToValidate = formCtx.find(".form-field").not(":hidden");
         var validator = new FormValidator();
 
         elemToValidate.each(function () {
@@ -313,26 +312,37 @@ $(document).ready(function () {
         });
     });
 
+    bindCounterClick();
     // Counter
-    $(".addCount, .subCount").on("click", function (evt) {
-        evt.preventDefault();
-        var parent = $(this).parents(".counter");
-        var inputField = parent.find("input[type=text]").first();
-        var inputFieldVal = parseInt(inputField.val());
-        var subButton = $(parent).find(".subCount");
+    function bindCounterClick() {
+        $(".addCount, .subCount").on("click", function(){
+            var parent = $(this).parents(".counter");
+            var inputField = parent.find("input[type=text]").first();
+            var inputFieldVal = parseInt(inputField.val());
+            var subButton = $(parent).find(".subCount");
 
-        // Invalid numeric entered
-        if (isNaN(inputFieldVal)) {
-            $(subButton).attr("disabled", "disabled");
-            $(inputField).val(0);
-        } else {
-            var newVal = inputFieldVal += parseInt($(this).attr("data-increment"));
-            if (newVal == 0) {
+            // Invalid numeric entered
+            if (isNaN(inputFieldVal)) {
                 $(subButton).attr("disabled", "disabled");
+                $(inputField).val(0);
             } else {
-                $(subButton).removeAttr("disabled");
+                var newVal = inputFieldVal += parseInt($(this).attr("data-increment"));
+                if (newVal == 0) {
+                    $(subButton).attr("disabled", "disabled");
+                } else {
+                    $(subButton).removeAttr("disabled");
+                }
+                inputField.val(newVal);
             }
-            inputField.val(newVal);
-        }
+        });
+    }
+
+    $("#shift-start-time").timeAutocomplete();
+
+    $("#dateAltCal").datepicker({
+        altFormat: "yy-mm-dd",
+        dateFormat: "DD MM dd, yy",
+        altField: "#dateCal",
+        minDate: 0
     });
 });

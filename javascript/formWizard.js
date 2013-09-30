@@ -6,8 +6,7 @@
  * @author Woody Romelus
  * @dependency formValidator.js
  */
-;
-(function ($, window, document, undefined) {
+;(function ($, window, document, undefined) {
     // Be a good programmer now :p
     "use strict";
 
@@ -144,8 +143,8 @@
             $(fields[i]).focus().css("border", "");
             if (!validator.validate(fields[i])) {
                 retVal = false;
-                alert("Please fill out the fields properly.");
-                $(fields[i]).css("border", "1px solid red");
+                alert("Please fill out the fields appropriately.");
+                $(fields[i]).css("border", "2px solid red");
                 break;
             }
         }
