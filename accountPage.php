@@ -21,7 +21,7 @@ require("verifyUser.php");
         </p>
         <p style='float:right; padding-right:15px;'>
             <?php echo "Hello <span class='bold'>$u_email</span>"; ?>
-            <a href='logout.php' title='Logout' class='insetButton'>
+            <a href='logout' title='Logout' class='insetButton'>
                 <i class='icon-off'>&nbsp;</i>Logout
             </a>
         </p>

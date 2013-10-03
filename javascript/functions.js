@@ -156,7 +156,7 @@ $(document).ready(function () {
             });
 
             // Make ajax request
-            var page = parseInt($("button.active").text()) - 1;
+            var page = parseInt($("button.active").text());
             var sendUrl = "volunteerREST.php?" +
                 encodeURIComponent(action + "=" + actionItems + "&volunteerDate="
                     + dayVol + "&page=" + page);

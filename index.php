@@ -196,7 +196,7 @@ function createNewAcct() {
 
 
             <div class="form-field-section">
-                <a href="forgotpass.php" class="right" title="Forgot Password">Forgot
+                <a href="forgotpass" class="right" title="Forgot Password">Forgot
                     Password&nbsp;?</a>
             </div>
 

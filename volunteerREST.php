@@ -18,21 +18,33 @@ switch ($reqInfo["method"]) {
         if (isset($reqInfo["acceptUsers"])) {
             $users = explode("|", $reqInfo["acceptUsers"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
+            $volDate = date("Y-m-d", $volDay);
             $currPage = $reqInfo["page"];
             foreach ($users as $uemail) {
                 // Send Email
                 include_once("common_utils/email.php");
-                $emailer = new EmailTransport("VolunteerCITC You have been accepted!",
-                    file_get_contents("emailers/acceptance_noncustom.html"),
+                $emailInfo = $app->retrieveVolunteerEmailInfo($volDate, $uemail)->fetch_assoc();
+                $noValue = "~~~~";
+                $grpSize = intval($emailInfo["group_size"]) > 1 ? ($emailInfo["group_size"] . " volunteers") : "this year";
+                $position = strlen($emailInfo["position"]) > 0 ? $emailInfo["position"] : $noValue;
+                $starttime = strlen($emailInfo["starttime"]) > 0 ? date("g:i a", strtotime($emailInfo["starttime"])) : $noValue;
+                $groupname = strlen($emailInfo["group_name"]) > 0 ? "," . $emailInfo["group_name"] : "";
+
+                $emailer = new EmailTransport(
+                    "VolunteerCITC You have been accepted!",
+                    Utils::replaceTokens("{%}", array($grpSize, $position,
+                            date("l F jS, Y", $volDate), $starttime, $groupname),
+                        file_get_contents("emailers/acceptance.html")),
                     "volunteer@christmasinthecity.org");
-//                    Utils::replaceTokens("{%}", array(),
-//                        file_get_contents("emailers/acceptance.html")),
-//                        "webmaster@christmasinthecity.org");
+
+                error_log(Utils::replaceTokens("{%}", array($grpSize, $position,
+                        date("l F jS, Y", $volDay), $starttime, $groupname),
+                    file_get_contents("emailers/acceptance.html")));
+
                 $retVal = $emailer->sendMail($uemail);
-                $app->processVolunteer($uemail, date("Y-m-d", $volDay), 1);
+                $app->processVolunteer($uemail, $volDate, 1);
             }
-            echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
-                $currPage * displaySize);
+            echo $app->displayRegisteredVolunteers($volDate, $currPage * displaySize);
         } else {
             if (isset($reqInfo["modifyDesc"])) {
                 $app->updatePositionTitle(trim($_POST["updateTxt"]),
@@ -52,8 +64,7 @@ switch ($reqInfo["method"]) {
             foreach ($users as $uemail) {
                 $app->processVolunteer($uemail, date("Y-m-d", $volDay), 0);
             }
-            echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay),
-                $currPage * displaySize);
+            echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay), $currPage * displaySize);
         }
         break;
 

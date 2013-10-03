@@ -610,6 +610,28 @@ class VolunteerAppCreator {
     }
 
     /**
+     * Retrieves the information used within emailing the volunteer.
+     *
+     * @param $date the date the user is registered for
+     * @param $useremail the user identifier
+     * @return mysqli_result the results of the query
+     */
+    function retrieveVolunteerEmailInfo($date, $useremail) {
+        // Sanitize the input values
+        $date = $this->connection->cleanSQLInputs($date);
+        $useremail = $this->connection->cleanSQLInputs($useremail);
+
+        return $this->connection->runQuery("SELECT position, starttime,
+            group_name, group_size
+            FROM volunteers
+            RIGHT JOIN (volunteer_positions)
+            ON volunteers.position = volunteer_positions.title
+            WHERE volunteer_day = '$date'
+            AND email = '$useremail'
+            LIMIT 1");
+    }
+
+    /**
      * .........................................................................
      * ........................... Display Methods .............................
      * .........................................................................
@@ -765,7 +787,7 @@ class VolunteerAppCreator {
             return $this->displayNotice("No registrants.");
         }
 
-        $resultTable = "<a href='downloads.php?specificDate=$date'
+        $resultTable = "<a href='downloads?specificDate=$date'
         target='_blank' class='right form-button'><i class='icon-download-alt
         icon'>&nbsp;</i>Download CSV</a><table id='vol_spec_date' class='selectable vol_table'>
         <tr class='def_cursor'><th colspan='10'>Volunteers</th></tr>
@@ -808,11 +830,11 @@ class VolunteerAppCreator {
 
         $resultTable .= "</table>";
         $resultTable .= "<div id='pagination'><ul>";
-        for ($i = 0; $i < floor($count / displaySize); $i++) {
+        for ($i = 0; $i < ceil($count / displaySize); $i++) {
             $q = "?specificDate=$date&page=$i";
-            $class = ($startIndex / displaySize) == $i ? " class='active'" : "";
+            $class = floor(($startIndex / displaySize)) == $i ? " class='active'" : "";
             $resultTable .= "<li><button type='button' $class data-link="
-                . $_SERVER['PHP_SELF'] . "$q>" . ($i + 1) . "</button></li>";
+                . $_SERVER['PHP_SELF'] . "$q>" . $i . "</button></li>";
         }
         return $resultTable .= "</span></ul><span class='clear'></div>";
     }
