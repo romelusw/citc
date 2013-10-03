@@ -37,10 +37,6 @@ switch ($reqInfo["method"]) {
                         file_get_contents("emailers/acceptance.html")),
                     "volunteer@christmasinthecity.org");
 
-                error_log(Utils::replaceTokens("{%}", array($grpSize, $position,
-                        date("l F jS, Y", $volDay), $starttime, $groupname),
-                    file_get_contents("emailers/acceptance.html")));
-
                 $retVal = $emailer->sendMail($uemail);
                 $app->processVolunteer($uemail, $volDate, 1);
             }
