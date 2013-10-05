@@ -127,12 +127,12 @@ function createNewAcct() {
     <div class="loginForm">
         <?= Utils::generateUIError($errMsgs['exists']); ?>
         <form class="card" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-            <div class="form-field-section">
+            <?php /*<div class="form-field-section">
                 <input type="checkbox" id="new-acct-create"
                        onclick="$('.hidden').toggle();"
                        name="isNewUser" <?= $_POST['isNewUser'] == "on" ? "checked" : "" ?>/>
                 <label for="new-acct-create">Create an Account</label>
-            </div>
+            </div>*/?>
 
             <div class="form-field-section hidden">
                 <?= Utils::generateUIError($errMsgs['First Name']); ?>

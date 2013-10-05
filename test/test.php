@@ -1,6 +1,7 @@
 <?php
 include_once("../common_utils/HTTPRequest.php");
 $year = 2013;
+$baseDir = "localhost/citc/";
 
 /**
  * Creates an array of n length
@@ -24,7 +25,7 @@ function createNArray($length, $prepend = null) {
 // Create a bunch of users
 for ($i = 1; $i <= 100; $i++) {
     $r = new HTTPRequest();
-    $r->url = "localhost/index.php";
+    $r->url = $baseDir . "index.php";
     $postData = array(
         "isNewUser" => "on",
         "userFName" => "User $i First Name",
@@ -37,7 +38,7 @@ for ($i = 1; $i <= 100; $i++) {
     $r->post($postData);
 
     // Create a bunch of volunteers dates w/ positions
-    $r->url = "localhost/accountPage.php";
+    $r->url = $baseDir . "accountPage.php";
     $day = rand(1, 3);
     $postData = array(
         "pdate" => "$year-06-$day",
@@ -49,7 +50,7 @@ for ($i = 1; $i <= 100; $i++) {
     $r->post($postData);
 
     // Create a bunch of volunteers for the event
-    $r->url = "localhost/signup.php";
+    $r->url = $baseDir . "signup.php";
     $day = rand(1, 3);
     $t = $i % 30;
     $postData = array(

@@ -380,7 +380,7 @@ class VolunteerAppCreator {
             group_size, position, accepted
             FROM volunteers
             WHERE volunteer_day = '$udate'
-            ORDER BY lname LIMIT $strtIndex, $numItemsToDisplay");
+            ORDER BY accepted ASC, lname ASC LIMIT $strtIndex, $numItemsToDisplay");
     }
 
     /**
@@ -416,22 +416,15 @@ class VolunteerAppCreator {
     function retrieveAvailableVolPositions($date) {
         return $this->connection->runQuery("SELECT title, description, reg_num,
           max_users, starttime
-          FROM
-              (SELECT title, description,
-                (SELECT Count(*)
-                   FROM volunteers
-                   WHERE POSITION = title
-                   AND volunteer_day = date) AS reg_num,
-                   max_users,
-                   date,
-                   starttime
-              FROM volunteer_positions
-              LEFT JOIN (volunteers)
-              ON volunteer_positions.date = volunteers.volunteer_day
-              AND volunteer_positions.title = volunteers.POSITION) AS t1
-          WHERE reg_num < max_users
-          AND date = '$date'
-          ORDER BY starttime, title");
+            FROM volunteer_positions,
+                (SELECT volunteer_day, position, COUNT(position) AS reg_num
+                    FROM volunteers
+                    WHERE volunteer_day = '$date'
+                    GROUP BY position) AS reg_pos_tally
+            WHERE date = '$date'
+            AND reg_num < max_users
+            AND title = position
+            ORDER BY starttime, title ASC");
     }
 
     /**
@@ -668,10 +661,10 @@ class VolunteerAppCreator {
 
         while ($ans = $row->fetch_row()) {
             $result .= "<li class='pos_li'>"
-                . "<h4>" . $ans[0] . "</h4>" . "<span style='color:#53a93f;
-                float:right'><span style=font-weight:bold>" . (intval($ans[3])
-                    - intval($ans[2])) . "</span> spots
-                left!</span><p class='small_font'>" . $ans[1] . "</p></li>";
+                . "<h4>" . $ans[0] . "</h4>"
+                . "<span class='remaining'><span class='bold'>"
+                . (intval($ans[3])  - intval($ans[2]))
+                . "</span> left</span><p>" . $ans[1] . "</p></li>";
         }
         return $result . "</ul>";
     }

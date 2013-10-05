@@ -33,7 +33,7 @@ switch ($reqInfo["method"]) {
                 $emailer = new EmailTransport(
                     "VolunteerCITC You have been accepted!",
                     Utils::replaceTokens("{%}", array($grpSize, $position,
-                            date("l F jS, Y", $volDate), $starttime, $groupname),
+                            date("l F jS, Y", $volDay), $starttime, $groupname),
                         file_get_contents("emailers/acceptance.html")),
                     "volunteer@christmasinthecity.org");
 
