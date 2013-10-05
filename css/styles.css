@@ -226,7 +226,7 @@ fieldset {
     float: right;
     width: 30%;
     max-height: 375px;
-    overflow: scroll;
+    overflow-y: auto;
     margin-bottom: 10px;
 }
 
