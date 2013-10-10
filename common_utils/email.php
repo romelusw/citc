@@ -50,10 +50,12 @@ class EmailTransport {
      * @return string the email headers
      */
     public function getHeaders() {
-        return "From: " . $this->from . PHP_EOL .
-        "CC: " . $this->cc . PHP_EOL .
-        "BCC: " . $this->bcc . PHP_EOL .
-        "Date: " . date("d M y");
+        $headers = "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        $headers .= "From: " . $this->from . PHP_EOL;
+        $headers .= "CC: " . $this->cc . PHP_EOL;
+        $headers .= "BCC: " . $this->bcc . PHP_EOL;
+        $headers .= "Date: " . date("d M y");
+        return $headers;
     }
 
     /**

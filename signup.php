@@ -54,16 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
             default:
                 $show = "spaceAvailable";
-                // Send email
-//                include_once("common_utils/email.php");
-//                $emailBody = file_get_contents();
-//                if($emailBody) {
-//                    $emailer = new EmailTransport("Volunteer Registration",
-//                        $emailBody, "webmaster@christmasinthecity.org");
-//                    $retVal = $emailer->sendMail($vol_email);
-//                } else {
-//                    throw new Exception("Could'nt read contents of email file.");
-//                }
                 break;
         }
     } else {
@@ -144,6 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </a>
                                  on the CITC website for complete position
                                 descriptions.</p>
+                            <p style='text-align:center' class="bold">Click on
+                                a position of interest.</p>
                         </label>
                         <input type="hidden" id="signup-pos" name="vol_position"
                                class="validate"/>
@@ -154,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="checkbox" id="vol_isGroup" name="vol_isGroup"
                            onclick="$('#group-form').toggle();"
                         <?= $_POST['vol_isGroup'] == 'on' ? 'checked' : '' ?>/>
-                    <label for="vol_isGroup">Coming with Others or a Group?</label>
+                    <label for="vol_isGroup">Are you registering for others?</label>
 
                     <!-- GROUP -->
                     <div id="group-form" class="hidden">
@@ -195,7 +187,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="text" id="group_name" name="group_name"
                                placeholder="Name of Group" class="form-field"/>
 
-                        <label class="block" style="margin-top:4px;" for="num_volunteers">Number of Volunteers</label>
+                        <label class="block" style="margin-top:4px;" for="num_volunteers">
+                            Number of Volunteers <i>(including yourself)</i>
+                        </label>
                         <div class="counter">
                             <input name="num_volunteers" class="form-field"
                                    type="text" placeholder="0" id="num_volunteers"
@@ -244,12 +238,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <? break; case "spaceNotAvailable": ?>
         <div class='notification center'>
             <h3 class="red-color">
-                Unfortunately we have no openings for volunteers at this time.
+                Unfortunately we do not have enough openings for the number
+                of volunteers you specified.
             </h3>
             <p>
                 We appreciate you attempting to help serve the families and
-                children that really need your help. Please try again at a
-                later time.
+                children that really need your help. Please try again with a
+                different number of volunteers.
             </p>
             <div class="notification-action">
                 <i class="icon-reply"></i>

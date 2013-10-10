@@ -63,16 +63,17 @@ class VolunteerAppCreator {
            num_chaperones int NOT NULL DEFAULT 0,
            group_name varchar (100) NOT NULL DEFAULT 'N/A',
            group_size int NOT NULL DEFAULT 0,
-           position varchar(100) NOT NULL,
+           position varchar(100) NOT NULL DEFAULT 'N/A',
            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-           UNIQUE KEY distinct_users_key (email, volunteer_day),
+           UNIQUE KEY distinct_users_key (email, volunteer_day, position),
            PRIMARY KEY (vol_id))");
 
         $this->connection->runQuery("CREATE TABLE IF NOT EXISTS volunteer_audit (
            aud_id int NOT NULL AUTO_INCREMENT,
            vol_day date NOT NULL,
            curr_registered int NOT NULL DEFAULT 0,
-           max_registered int NOT NULL DEFAULT 100,
+           curr_accepted int NOT NULL DEFAULT 0,
+           max_registered int NOT NULL DEFAULT 0,
            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
            PRIMARY KEY (aud_id),
            UNIQUE KEY vol_day (vol_day))");
@@ -109,33 +110,81 @@ class VolunteerAppCreator {
         $this->connection->runQuery("DROP TRIGGER IF EXISTS vol_insert_trigger;");
         $this->connection->runQuery("CREATE TRIGGER vol_insert_trigger BEFORE INSERT ON volunteers
            FOR EACH ROW BEGIN
-               DECLARE curr_reg INT; 
-               DECLARE max_reg INT; 
+               DECLARE curr_regstd INT;
+               DECLARE curr_aceptd INT;
+               DECLARE max_reg INT;
 
-               IF ((SELECT (SELECT vol_day FROM volunteer_audit WHERE vol_day = NEW.volunteer_day) as validDates) IS NULL) THEN
+               IF ((SELECT (SELECT vol_day FROM volunteer_audit
+                      WHERE vol_day = NEW.volunteer_day) as validDates) IS NULL) THEN
                    SIGNAL SQLSTATE '70000'
                    SET MESSAGE_TEXT = 'The specified party date is not a registered party date.';
                END IF;
 
-               SET curr_reg = (SELECT curr_registered FROM volunteer_audit WHERE vol_day = new.volunteer_day);
-               SET max_reg = (SELECT max_registered FROM volunteer_audit WHERE vol_day = new.volunteer_day);
+               SET curr_aceptd = (SELECT COUNT(*)
+                                    FROM volunteers
+                                    WHERE volunteer_day = new.volunteer_day
+                                    AND accepted = 1);
+               SET max_reg = (SELECT max_users
+                                    FROM volunteer_positions
+                                    WHERE date = new.volunteer_day
+                                    AND title = new.position);
+               SET curr_regstd = (SELECT COALESCE(GREATEST(SUM(group_size), 1), 0)
+                                    FROM volunteers
+                                    WHERE position = new.position
+                                    AND volunteer_day = new.volunteer_day);
 
-               IF( (curr_reg + 1) <= max_reg) THEN 
-                   UPDATE volunteer_audit 
-                   SET    curr_registered = curr_registered + 1 
+               IF( (curr_aceptd + GREATEST(new.group_size, 1)) <= max_reg) THEN
+                   UPDATE volunteer_audit
+                   SET    curr_registered = curr_registered + GREATEST(new.group_size, 1)
                    WHERE  vol_day = new.volunteer_day;
                ELSE
                    SIGNAL SQLSTATE '70001'
-                   SET MESSAGE_TEXT = 'Party is Full of volunteers.';
+                   SET MESSAGE_TEXT = 'Not enough openings to fulfill the
+                   number of volunteers requested.';
                END IF;
            END;");
 
         $this->connection->runQuery("DROP TRIGGER IF EXISTS vol_delete_trigger;");
         $this->connection->runQuery("CREATE TRIGGER vol_delete_trigger BEFORE DELETE ON volunteers
-           FOR EACH row BEGIN
+           FOR EACH ROW BEGIN
                UPDATE volunteer_audit 
-               SET    curr_registered = curr_registered - 1 
-               WHERE  vol_day = old.volunteer_day; 
+               SET    curr_registered = curr_registered - GREATEST(old.group_size, 1),
+                      curr_accepted = CASE WHEN old.accepted = 1 THEN (curr_accepted - GREATEST(old.group_size, 1))
+                                           ELSE curr_accepted
+                                      END
+               WHERE  vol_day = old.volunteer_day;
+           END;");
+
+        $this->connection->runQuery("DROP TRIGGER IF EXISTS vol_update_trigger;");
+        $this->connection->runQuery("CREATE TRIGGER vol_update_trigger AFTER UPDATE ON volunteers
+           FOR EACH ROW BEGIN
+               IF new.accepted = " . acceptedUser . " THEN
+                   UPDATE volunteer_audit
+                   SET    curr_accepted = curr_accepted + GREATEST(new.group_size, 1)
+                   WHERE  vol_day = old.volunteer_day;
+               END IF;
+           END;");
+
+        $this->connection->runQuery("DROP TRIGGER IF EXISTS volpos_insert_trigger;");
+        $this->connection->runQuery("CREATE TRIGGER volpos_insert_trigger AFTER INSERT ON volunteer_positions
+           FOR EACH ROW BEGIN
+               DECLARE numpos_for_date INT;
+
+               SET numpos_for_date = (SELECT COUNT(*) FROM volunteer_positions WHERE date = new.date);
+
+               IF (numpos_for_date > 0) THEN
+                  UPDATE volunteer_audit
+                  SET max_registered = max_registered + new.max_users
+                  WHERE vol_day = new.date;
+               END IF;
+           END;");
+
+        $this->connection->runQuery("DROP TRIGGER IF EXISTS volpos_delete_trigger;");
+        $this->connection->runQuery("CREATE TRIGGER volpos_delete_trigger AFTER DELETE ON volunteer_positions
+           FOR EACH ROW BEGIN
+               UPDATE volunteer_audit
+               SET max_registered = max_registered - old.max_users
+               WHERE vol_day = old.date;
            END;");
     }
 
@@ -392,9 +441,10 @@ class VolunteerAppCreator {
      */
     function retrieveVolPositionsTally($date) {
         return $this->connection->runQuery("SELECT title, description,
-          (SELECT COUNT(*)
+          (SELECT COALESCE(SUM(GREATEST(group_size, 1)), 0)
               FROM volunteers
-              WHERE position = title AND volunteer_day = date
+              WHERE position = title
+              AND volunteer_day = date
               AND accepted = " . acceptedUser . ") as reg_users,
           max_users
           FROM (SELECT title, description, max_users, date
@@ -414,16 +464,18 @@ class VolunteerAppCreator {
      * @return mysqli_result the result of the query
      */
     function retrieveAvailableVolPositions($date) {
-        return $this->connection->runQuery("SELECT title, description, reg_num,
-          max_users, starttime
-            FROM volunteer_positions,
-                (SELECT volunteer_day, position, COUNT(position) AS reg_num
+        return $this->connection->runQuery("SELECT *
+            FROM
+                (SELECT title, description,
+                    (SELECT COALESCE(SUM(GREATEST(group_size, 1)), 0)
                     FROM volunteers
-                    WHERE volunteer_day = '$date'
-                    GROUP BY position) AS reg_pos_tally
-            WHERE date = '$date'
-            AND reg_num < max_users
-            AND title = position
+                    WHERE position = title
+                    AND volunteer_day = date
+                    AND accepted = 1) as reg_num,
+                    max_users, starttime
+                FROM volunteer_positions
+                WHERE date = '$date') t
+            WHERE reg_num < max_users
             ORDER BY starttime, title ASC");
     }
 
@@ -431,12 +483,10 @@ class VolunteerAppCreator {
      * Creates a new event along with the maximum volunteer count.
      *
      * @param $eventDate the date to add
-     * @param $maxNumVol the maximum number of registered volunteers
      */
-    function createNewEvent($eventDate, $maxNumVol) {
+    function createNewEvent($eventDate) {
         $this->connection->runPreparedQuery("INSERT INTO volunteer_audit 
-            (vol_day, max_registered) 
-            VALUES (?, ?)", array($eventDate, $maxNumVol));
+            (vol_day) VALUES (?)", array($eventDate));
     }
 
     /**
@@ -462,7 +512,7 @@ class VolunteerAppCreator {
     function eventsFull() {
         return $this->connection->runQuery("SELECT vol_day
             FROM volunteer_audit
-            WHERE curr_registered < max_registered
+            WHERE curr_accepted < max_registered
             AND Year(vol_day) = Year(NOW())")->num_rows == 0;
     }
 
@@ -686,7 +736,7 @@ class VolunteerAppCreator {
         $result = "<table class='vol_table'><tr class='def_cursor'>
             <th colspan='3'>Positions</th></tr><tr class='def_cursor'>
             <td style='width: 25%;'>Title</td><td>Description</td><td
-            >Registered</td></tr>";
+            >Accepted</td></tr>";
 
         while ($ans = $row->fetch_row()) {
             $title = $ans[0];

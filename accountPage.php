@@ -66,10 +66,10 @@ require("verifyUser.php");
             <?
             // Handle Post
             if (isset($_POST["pdate"]) && isset($_POST["ptitle"])) {
-                $app->createNewEvent($_POST["pdate"], array_sum($_POST["pmaxreg"]));
+                $app->createNewEvent($_POST["pdate"]);
                 for ($i = 0; $i < count($_POST["ptitle"]); $i++) {
                     $app->createNewPosition($_POST["ptitle"][$i],
-                        $_POST["pdescription"][$i], $_POST["pmaxreg"][$i],
+                        $_POST["pdescription"][$i], abs($_POST["pmaxreg"][$i]),
                         $_POST["pdate"], date("H:i:s", strtotime($_POST["pstarttime"][$i])));
                 }
             }
@@ -131,7 +131,7 @@ require("verifyUser.php");
                             </label>
                             <div class="counter">
                                 <input name="pmaxreg[]" class="form-field"
-                                       type="text" placeholder="0"/>
+                                       id="pmaxreg[]" type="text" placeholder="0"/>
 
                                 <div class="counter-incrementers">
                                     <button class="subCount" data-increment="-1" onclick="return false;">

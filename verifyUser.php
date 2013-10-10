@@ -19,10 +19,11 @@ if (isset($_SESSION["recognized"])) {
         $token = md5(uniqid());
         $isAdmin = $app->isUserAdmin($u_email);
         $app->updateUserToken($u_email, $token);
+        $app->updateUserLastLogin($u_email);
         setcookie("citc_rem", $u_email . "_" . $token,
             strtotime($config["rem_me_token_exp"]), "/", "", false, true);
     } else {
-        error_log($_SERVER["REMOTE_ADDR"] . " Potential Hacker!");
+        error_log($_SERVER["REMOTE_ADDR"] . " Token is invalid for $u_email | Potential Hacker!");
     }
 } else {
     Utils::redirect("index.php");

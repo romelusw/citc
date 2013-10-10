@@ -25,15 +25,15 @@ switch ($reqInfo["method"]) {
                 include_once("common_utils/email.php");
                 $emailInfo = $app->retrieveVolunteerEmailInfo($volDate, $uemail)->fetch_assoc();
                 $noValue = "~~~~";
-                $grpSize = intval($emailInfo["group_size"]) > 1 ? ($emailInfo["group_size"] . " volunteers") : "this year";
-                $position = strlen($emailInfo["position"]) > 0 ? $emailInfo["position"] : $noValue;
-                $starttime = strlen($emailInfo["starttime"]) > 0 ? date("g:i a", strtotime($emailInfo["starttime"])) : $noValue;
-                $groupname = strlen($emailInfo["group_name"]) > 0 ? "," . $emailInfo["group_name"] : "";
+                $grpSize = intval($emailInfo["group_size"]) > 1 ? "<b>". ($emailInfo["group_size"] . "</b> volunteers") : "this year";
+                $position = strlen($emailInfo["position"]) > 0 ? "<b>". $emailInfo["position"] . "</b>" : $noValue;
+                $starttime = strlen($emailInfo["starttime"]) > 0 ? "<b>". date("g:i a", strtotime($emailInfo["starttime"])) . "</b>" : $noValue;
+                $groupname = strlen($emailInfo["group_name"]) > 0 ? "," . "<b>". $emailInfo["group_name"] . "</b>" : "";
 
                 $emailer = new EmailTransport(
                     "VolunteerCITC You have been accepted!",
                     Utils::replaceTokens("{%}", array($grpSize, $position,
-                            date("l F jS, Y", $volDay), $starttime, $groupname),
+                            "<b>". date("l F jS, Y", $volDay) . "</b>", $starttime, $groupname),
                         file_get_contents("emailers/acceptance.html")),
                     "volunteer@christmasinthecity.org");
 
