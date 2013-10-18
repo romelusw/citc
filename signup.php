@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     volunteer tab
                                 </a>
                                  on the CITC website for complete position
-                                descriptions.</p>
+                                descriptions. (Scroll down for more positions)</p>
                             <p style='text-align:center' class="bold">Click on
                                 a position of interest.</p>
                         </label>
@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                placeholder="Name of Group" class="form-field"/>
 
                         <label class="block" style="margin-top:4px;" for="num_volunteers">
-                            Number of Volunteers <i>(including yourself)</i>
+                            Number of volunteers including yourself (if this is a youth group add in number of chaperones)
                         </label>
                         <div class="counter">
                             <input name="num_volunteers" class="form-field"
@@ -290,8 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </h3>
         <p>
             We appreciate you attempting to help serve the families and
-            children that really need your help. Please try again at a
-            later time.
+            children that really need your help. Please try again at a later time.
         </p>
         <div class="notification-action">
             <i class="icon-reply"></i>

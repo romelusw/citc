@@ -145,21 +145,23 @@ $(document).ready(function () {
             var parent = $(this).parents(".actionContainer");
             var itemsToModify = $(parent).children(".itemsToModify").children("li");
             var actionItems = "";
+            var positions = "";
             var action = $(this).attr("data-action");
             var reqType = $(this).attr("data-reqType");
-            var dayVol;
+            var dayVol = $(this).attr("data-volday");
 
             $(itemsToModify).each(function (i, val) {
-                dayVol = $(this).attr("data-dayvol");
                 var elem = $.trim($(val).text());
+                var position = $(val).attr("data-pos");
                 actionItems += (i == itemsToModify.length - 1) ? elem : elem + "|";
+                positions += (i == itemsToModify.length - 1) ? position : position + "|";
             });
 
             // Make ajax request
             var page = parseInt($("button.active").text());
             var sendUrl = "volunteerREST.php?" +
                 encodeURIComponent(action + "=" + actionItems + "&volunteerDate="
-                    + dayVol + "&page=" + page);
+                    + dayVol + "&positions=" + positions + "&page=" + page);
             $.ajax({
                 url: sendUrl,
                 context: $(parent),
@@ -186,6 +188,7 @@ $(document).ready(function () {
                 var dataBox = $(this).attr("data-box");
                 var data = $(this).attr("data-dataElem");
                 var dayVol = $(this).attr("data-datevol");
+                var volPos = $(this).attr("data-pos");
 
                 // Add/Remove element
                 if ($(this).hasClass("highlight")) {
@@ -195,8 +198,10 @@ $(document).ready(function () {
                         $("#" + dataBox).trigger("modified");
                     }, 250);
                 } else {
-                    $("#" + dataBox).append("<li data-dayvol='" + dayVol
-                        + "' class='popout'>" + data + "</li>").trigger("modified");
+                    $("#" + dataBox).append($("<li/>", {"data-dayvol" : dayVol,
+                                                        "data-pos": volPos,
+                                                        "class" : "popin"}).text(data))
+                        .trigger("modified");
                 }
                 $(this).toggleClass('highlight');
             });

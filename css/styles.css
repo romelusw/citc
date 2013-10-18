@@ -766,6 +766,7 @@ table.vol_table th {
     overflow: hidden;
     margin-bottom: 1px;
     font-size: small;
+    text-overflow: ellipsis;
     -webkit-animation:pop-in 0.5s;
     -moz-animation:pop-in 0.5s;
     -ms-animation:pop-in 0.5s;

@@ -407,7 +407,7 @@ class VolunteerAppCreator {
         return $this->connection->runQuery("SELECT DISTINCT vol_day
             FROM volunteer_audit
             WHERE Year(vol_day) = '$year'
-            AND curr_registered < max_registered
+            AND curr_accepted < max_registered
             ORDER BY vol_day ASC");
     }
 
@@ -440,20 +440,20 @@ class VolunteerAppCreator {
      * @return mysqli_result the result of the query
      */
     function retrieveVolPositionsTally($date) {
-        return $this->connection->runQuery("SELECT title, description,
+        return $this->connection->runQuery("SELECT title, description, starttime,
           (SELECT COALESCE(SUM(GREATEST(group_size, 1)), 0)
               FROM volunteers
               WHERE position = title
               AND volunteer_day = date
               AND accepted = " . acceptedUser . ") as reg_users,
           max_users
-          FROM (SELECT title, description, max_users, date
+          FROM (SELECT title, description, max_users, date, starttime
               FROM volunteers
               RIGHT JOIN (volunteer_positions)
               ON volunteers.volunteer_day = volunteer_positions.date) AS t1
               WHERE date = '$date'
           GROUP BY date, title
-          ORDER BY title");
+          ORDER BY starttime");
     }
 
     /**
@@ -548,15 +548,18 @@ class VolunteerAppCreator {
      *
      * @param $uemail the user's email address
      * @param $vday volunteers volunteer day
+     * @param $position the position the user signed up for
      * @param $flag indicating to accept or reject the volunteer
      * @return mixed flag indicating the query was executed successfully,
      * or the error that was propagated from the prepared statement
      */
-    function processVolunteer($uemail, $vday, $flag) {
+    function processVolunteer($uemail, $vday, $position, $flag) {
+        error_log("Processing for: $uemail");
         return $this->connection->runPreparedQuery("UPDATE volunteers
             SET accepted = ?
             WHERE email = ?
-            AND volunteer_day = ?", array($flag, $uemail, $vday));
+            AND volunteer_day = ?
+            AND position = ?", array($flag, $uemail, $vday, $position));
     }
 
     /**
@@ -653,24 +656,26 @@ class VolunteerAppCreator {
     }
 
     /**
-     * Retrieves the information used within emailing the volunteer.
+     * Retrieves detailed information about the volunteer.
      *
      * @param $date the date the user is registered for
      * @param $useremail the user identifier
+     * @param $position the user position
      * @return mysqli_result the results of the query
      */
-    function retrieveVolunteerEmailInfo($date, $useremail) {
+    function retrieveVolunteerDetails($date, $useremail, $position) {
         // Sanitize the input values
         $date = $this->connection->cleanSQLInputs($date);
         $useremail = $this->connection->cleanSQLInputs($useremail);
+        $position = $this->connection->cleanSQLInputs($position);
 
-        return $this->connection->runQuery("SELECT position, starttime,
-            group_name, group_size
+        return $this->connection->runQuery("SELECT starttime, group_name, group_size
             FROM volunteers
             RIGHT JOIN (volunteer_positions)
             ON volunteers.position = volunteer_positions.title
             WHERE volunteer_day = '$date'
             AND email = '$useremail'
+            AND position = '$position'
             LIMIT 1");
     }
 
@@ -711,7 +716,7 @@ class VolunteerAppCreator {
 
         while ($ans = $row->fetch_row()) {
             $result .= "<li class='pos_li'>"
-                . "<h4>" . $ans[0] . "</h4>"
+                . "<h4 style='width:270px'>" . $ans[0] . "</h4>"
                 . "<span class='remaining'><span class='bold'>"
                 . (intval($ans[3])  - intval($ans[2]))
                 . "</span> left</span><p>" . $ans[1] . "</p></li>";
@@ -741,8 +746,8 @@ class VolunteerAppCreator {
         while ($ans = $row->fetch_row()) {
             $title = $ans[0];
             $desc = $ans[1];
-            $divisor = $ans[2];
-            $dividend = $ans[3];
+            $divisor = $ans[3];
+            $dividend = $ans[4];
             $result .= "<tr><td class='special'>$title</td><td class='modifiable_desc'
  contenteditable=true>$desc</td>
             <td>$divisor / $dividend</td></tr>";
@@ -859,7 +864,8 @@ class VolunteerAppCreator {
             }
 
             $resultTable .= "<tr $class data-dataElem='" . $row['email']
-                . "'data-box='vol_itemsToModify' data-dateVol='$date'>
+                . "'data-box='vol_itemsToModify' data-dateVol='$date'
+                data-pos='" . htmlspecialchars($row['position'], ENT_QUOTES) . "'>
                 <td class='special'>" . ucwords($row["fname"]) . " " . ucwords($row["lname"])
                 . "</td><td>" . $row["email"] . "</td><td>(" . substr($row["phone"], 0, 3) . ") "
                 . substr($row["phone"], 3, 3) . "-" . substr($row["phone"], 6, 4) . "</td><td>"

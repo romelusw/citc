@@ -16,29 +16,34 @@ switch ($reqInfo["method"]) {
         require("verifyUser.php");
 
         if (isset($reqInfo["acceptUsers"])) {
-            $users = explode("|", $reqInfo["acceptUsers"]);
+            $uemails = explode("|", $reqInfo["acceptUsers"]);
+            $positions = explode("|", $reqInfo["positions"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
             $volDate = date("Y-m-d", $volDay);
             $currPage = $reqInfo["page"];
-            foreach ($users as $uemail) {
+
+            if(sizeof($uemails) != sizeof($positions)) {
+                throw new LengthException("Length mismatch between emails and positions");
+            }
+
+            for ($i = 0; $i < sizeof($uemails); $i++) {
                 // Send Email
                 include_once("common_utils/email.php");
-                $emailInfo = $app->retrieveVolunteerEmailInfo($volDate, $uemail)->fetch_assoc();
+                $volDetails = $app->retrieveVolunteerDetails($volDate, $uemails[$i], $positions[$i])->fetch_assoc();
                 $noValue = "~~~~";
-                $grpSize = intval($emailInfo["group_size"]) > 1 ? "<b>". ($emailInfo["group_size"] . "</b> volunteers") : "this year";
-                $position = strlen($emailInfo["position"]) > 0 ? "<b>". $emailInfo["position"] . "</b>" : $noValue;
-                $starttime = strlen($emailInfo["starttime"]) > 0 ? "<b>". date("g:i a", strtotime($emailInfo["starttime"])) . "</b>" : $noValue;
-                $groupname = strlen($emailInfo["group_name"]) > 0 ? "," . "<b>". $emailInfo["group_name"] . "</b>" : "";
+                $grpSize = intval($volDetails["group_size"]) > 1 ? "<b>". ($volDetails["group_size"] . "</b> volunteers") : "this year";
+                $starttime = strlen($volDetails["starttime"]) > 0 ? "<b>". date("g:i a", strtotime($volDetails["starttime"])) . "</b>" : $noValue;
+                $groupname = strlen($volDetails["group_name"]) > 0 ? "," . "<b>". $volDetails["group_name"] . "</b>" : $noValue;
 
                 $emailer = new EmailTransport(
                     "VolunteerCITC You have been accepted!",
-                    Utils::replaceTokens("{%}", array($grpSize, $position,
+                    Utils::replaceTokens("{%}", array($grpSize, $positions[$i],
                             "<b>". date("l F jS, Y", $volDay) . "</b>", $starttime, $groupname),
-                        file_get_contents("emailers/acceptance.html")),
-                    "volunteer@christmasinthecity.org");
+                        file_get_contents("emailers/acceptance.html")), "volunteer@christmasinthecity.org");
 
-                $retVal = $emailer->sendMail($uemail);
-                $app->processVolunteer($uemail, $volDate, 1);
+                $app->processVolunteer($uemails[$i], $volDate, $positions[$i], 1);
+                $retVal = $emailer->sendMail($uemails[$i]);
+                error_log("Accepting " . $positions[$i]);
             }
             echo $app->displayRegisteredVolunteers($volDate, $currPage * displaySize);
         } else {
@@ -54,11 +59,18 @@ switch ($reqInfo["method"]) {
         require("verifyUser.php");
 
         if (isset($reqInfo["denyUsers"])) {
-            $users = explode("|", $reqInfo["denyUsers"]);
+            $uemails = explode("|", $reqInfo["denyUsers"]);
+            $positions = explode("|", $reqInfo["positions"]);
             $volDay = strtotime($reqInfo["volunteerDate"]);
             $currPage = $reqInfo["page"];
-            foreach ($users as $uemail) {
-                $app->processVolunteer($uemail, date("Y-m-d", $volDay), 0);
+
+            if(sizeof($uemails) != sizeof($positions)) {
+                throw new LengthException("Length mismatch between emails and positions");
+            }
+
+            for ($i = 0; $i < sizeof($uemails); $i++) {
+                $app->processVolunteer($uemails[$i], date("Y-m-d", $volDay), $positions[$i], 0);
+                error_log("Denying " . $positions[$i]);
             }
             echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay), $currPage * displaySize);
         }
@@ -68,6 +80,7 @@ switch ($reqInfo["method"]) {
         $app = new VolunteerAppCreator();
         if (isset($_GET["specificDate"])) {
             $dateTime = strtotime($_GET["specificDate"]);
+            $volDay = date("Y-m-d", $dateTime);
 
             $result = "<div id='volCalendar'><h2>Manage Volunteers</h2>";
             $result .= $app->displayEventCalendar(date("m", $dateTime),
@@ -75,18 +88,18 @@ switch ($reqInfo["method"]) {
             $result .= "</div>";
 
             $result .= "<div id='specificDate'>";
-            $result .= $app->displayRegisteredVolunteers(date("Y-m-d", $dateTime),
+            $result .= $app->displayRegisteredVolunteers($volDay,
                 (isset($reqInfo["page"]) ? $reqInfo["page"] * displaySize : 0));
             $result .= "<div class='actionContainer' id='volList'><ol 
             class='itemsToModify list' id='vol_itemsToModify'></ol><ul 
-            class='actions'><li><button data-reqType='post' 
-            data-action='acceptUsers' class='actionButton'>Accept</button>
-            <button data-reqType='delete' data-action='denyUsers' 
-            class='actionButton'>Deny</button></li></ul><span class='clear'>
-            </span></div></div>";
+            class='actions'><li><button data-reqType='post' data-action='acceptUsers'
+            data-volDay='" . $volDay . "'class='actionButton'>Accept</button>
+            <button data-reqType='delete' data-action='denyUsers' data-volDay='"
+            . $volDay . "' class='actionButton'>Deny</button></li></ul><span
+            class='clear'></span></div></div>";
 
             $result .= "<div id='volunteerDates'><h2>Volunteer Positions</h2>";
-            $result .= $app->displayVolPositions(date("Y-m-d", $dateTime));
+            $result .= $app->displayVolPositions($volDay);
             $result .= "</div>";
             echo $result;
         } else if (isset($_GET["positionDate"])) {
