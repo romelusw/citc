@@ -123,7 +123,8 @@ class VolunteerAppCreator {
                SET curr_aceptd = (SELECT COUNT(*)
                                     FROM volunteers
                                     WHERE volunteer_day = new.volunteer_day
-                                    AND accepted = 1);
+                                    AND accepted = 1
+                                    AND position = new.position);
                SET max_reg = (SELECT max_users
                                     FROM volunteer_positions
                                     WHERE date = new.volunteer_day
@@ -554,7 +555,6 @@ class VolunteerAppCreator {
      * or the error that was propagated from the prepared statement
      */
     function processVolunteer($uemail, $vday, $position, $flag) {
-        error_log("Processing for: $uemail");
         return $this->connection->runPreparedQuery("UPDATE volunteers
             SET accepted = ?
             WHERE email = ?

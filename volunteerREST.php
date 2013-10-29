@@ -43,7 +43,6 @@ switch ($reqInfo["method"]) {
 
                 $app->processVolunteer($uemails[$i], $volDate, $positions[$i], 1);
                 $retVal = $emailer->sendMail($uemails[$i]);
-                error_log("Accepting " . $positions[$i]);
             }
             echo $app->displayRegisteredVolunteers($volDate, $currPage * displaySize);
         } else {
@@ -70,7 +69,6 @@ switch ($reqInfo["method"]) {
 
             for ($i = 0; $i < sizeof($uemails); $i++) {
                 $app->processVolunteer($uemails[$i], date("Y-m-d", $volDay), $positions[$i], 0);
-                error_log("Denying " . $positions[$i]);
             }
             echo $app->displayRegisteredVolunteers(date("Y-m-d", $volDay), $currPage * displaySize);
         }
