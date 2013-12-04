@@ -75,6 +75,7 @@ class VolunteerAppCreator {
            curr_accepted int NOT NULL DEFAULT 0,
            max_registered int NOT NULL DEFAULT 0,
            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+           make_available tinyint NOT NULL DEFAULT 1,
            PRIMARY KEY (aud_id),
            UNIQUE KEY vol_day (vol_day))");
 
@@ -409,6 +410,7 @@ class VolunteerAppCreator {
             FROM volunteer_audit
             WHERE Year(vol_day) = '$year'
             AND curr_accepted < max_registered
+            AND make_available = 1
             ORDER BY vol_day ASC");
     }
 
@@ -514,6 +516,7 @@ class VolunteerAppCreator {
         return $this->connection->runQuery("SELECT vol_day
             FROM volunteer_audit
             WHERE curr_accepted < max_registered
+            AND make_available = 1
             AND Year(vol_day) = Year(NOW())")->num_rows == 0;
     }
 
