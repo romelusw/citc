@@ -14,3 +14,13 @@ Clean up Interface into a consistent and intuitive view
 Write email logic
 Finish formWizard plugin
 Cleanup AJAX requests, do not send data that doesn't change
+
+### Version History
+
+**1.1.0** (July 14, 2014)
+
+* Modfied a bunch of crap soon to be noted.
+
+**1.0.0** (July 8, 2013)
+
+* Initial release of WebApp
