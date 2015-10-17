@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-import http.client, os.path, urllib.parse
+import http.client, os.path, urllib.parse, time
 
 '''
 Build Script that automates the necessary actions before committing the code.
@@ -17,7 +16,7 @@ def compressJavaScript(filePath):
             ('output_format', 'text'),
             ('output_info', 'compiled_code'),
         ]
-        sendPOST("closure-compiler.appspot.com", "/compile", params)
+        return sendPOST("closure-compiler.appspot.com", "/compile", params)
 
 '''
 Compresses css files using CSS minifier service
@@ -50,11 +49,17 @@ def overwriteFile(filePath, text):
         f = open(filePath, "w")
         f.write(text.decode("utf-8"))
         f.close()
+    else:
+        raise IOError("%s does not exist" % filePath)
 
-'''
-================================ TASKS ===============================
-'''
-# Compress CSS files
-print(compressCSS("/Applications/MAMP/htdocs/citc/css/styles.css"))
-# Compress JavaScript files
-#overwriteFile("/Applications/MAMP/htdocs/citc/javascript/min/functions-min.js", compressJavaScript("/Applications/MAMP/htdocs/citc/javascript/functions.js"))
+if __name__ == "__main__":
+    start = time.time()
+    # Compress CSS files
+    overwriteFile("/Applications/MAMP/htdocs/citc/develop/css/min/styles-min.css", compressCSS("/Applications/MAMP/htdocs/citc/develop/css/styles.css"))
+    print("Compressing CSS files %.2f seconds" % (time.time() - start))
+
+    start = time.time()
+    # Compress JavaScript files
+    overwriteFile("/Applications/MAMP/htdocs/citc/develop/javascript/min/functions-min.js", compressJavaScript("/Applications/MAMP/htdocs/citc/develop/javascript/functions.js"))
+    print("Compressing Javascript files %.2f seconds" % (time.time() - start))
+    print("... Complete ...")

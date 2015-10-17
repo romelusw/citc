@@ -6,6 +6,7 @@
     <script type="text/javascript" src="javascript/min/formValidator-min.js"></script>
     <script type="text/javascript" src="javascript/min/formWizaed-min.js"></script>
     <script type="text/javascript" src="javascript/min/functions-min.js"></script>
+    <script type="text/javascript" src="javascript/responsive-tables.js"></script>
     
     <script type="text/javascript">
         var _gaq = _gaq || [];

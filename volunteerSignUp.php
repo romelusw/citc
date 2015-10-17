@@ -751,8 +751,7 @@ class VolunteerAppCreator {
             $desc = $ans[1];
             $divisor = $ans[3];
             $dividend = $ans[4];
-            $result .= "<tr><td class='special'>$title</td><td class='modifiable_desc'
- contenteditable=true>$desc</td>
+            $result .= "<tr><td class='special'>$title</td><td class='modifiable_desc'>$desc</td>
             <td>$divisor / $dividend</td></tr>";
         }
 
@@ -840,7 +839,7 @@ class VolunteerAppCreator {
 
         $resultTable = "<a href='downloads?specificDate=$date'
         target='_blank' class='right form-button'><i class='icon-download-alt
-        icon'>&nbsp;</i>Download CSV</a><table id='vol_spec_date' class='selectable vol_table'>
+        icon'>&nbsp;</i>Download CSV</a><table id='vol_spec_date' class='selectable vol_table responsive'>
         <tr class='def_cursor'><th colspan='10'>Volunteers</th></tr>
         <tr class='def_cursor'><td>Name</td><td>Email</td><td>Phone</td>
         <td width='20px'>Group?</td><td width='20px'>Youth Group?</td>

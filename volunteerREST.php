@@ -45,11 +45,6 @@ switch ($reqInfo["method"]) {
                 $retVal = $emailer->sendMail($uemails[$i]);
             }
             echo $app->displayRegisteredVolunteers($volDate, $currPage * displaySize);
-        } else {
-            if (isset($reqInfo["modifyDesc"])) {
-                $app->updatePositionTitle(trim($_POST["updateTxt"]),
-                    $_POST["volPos"], $_POST["volDay"]);
-            }
         }
         break;
 

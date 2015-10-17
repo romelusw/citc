@@ -279,15 +279,6 @@ $(document).ready(function () {
         bindCounterClick();
     });
 
-    $(document).on("blur", ".vol_table .modifiable_desc", function () {
-        $.ajax({
-            url: "volunteerREST.php?modifyDesc",
-            type: "POST",
-            data: {volDay: $(".sidebar_list li.clicked").attr("data-date"),
-                volPos: $(this).prev().text(), updateTxt: $(this).text()}
-        });
-    });
-
     $(document).on("click", "a.removeset", function () {
         $(this).parent("fieldset").remove();
     });
