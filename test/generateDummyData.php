@@ -1,7 +1,7 @@
 <?php
 include_once("../common_utils/HTTPRequest.php");
 $year = 2013;
-$baseDir = "localhost/citc/";
+$baseDir = "localhost/citc/master/";
 
 /**
  * Creates an array of n length
@@ -31,7 +31,7 @@ for ($i = 1; $i <= 100; $i++) {
         "userFName" => "User $i First Name",
         "userLName" => "User $i Last Name",
         "userEmail" => "user$i@gmail.com",
-        "userPassword" => "$i",
+        "userPassword" => "UserPassw%rd$i",
         "secQ" => "Number?",
         "secA" => "$i",
     );

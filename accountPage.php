@@ -66,12 +66,15 @@ require("verifyUser.php");
             <?
             // Handle Post
             if (isset($_POST["pdate"]) && isset($_POST["ptitle"])) {
+                echo "Requirements met";
                 $app->createNewEvent($_POST["pdate"]);
                 for ($i = 0; $i < count($_POST["ptitle"]); $i++) {
                     $app->createNewPosition($_POST["ptitle"][$i],
                         $_POST["pdescription"][$i], abs($_POST["pmaxreg"][$i]),
                         $_POST["pdate"], date("H:i:s", strtotime($_POST["pstarttime"][$i])));
                 }
+            } else {
+                echo "False";
             }
             ?>
 
