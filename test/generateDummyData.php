@@ -1,7 +1,7 @@
 <?php
 include_once("../common_utils/HTTPRequest.php");
 $year = 2013;
-$baseDir = "localhost/citc/master/";
+$baseDir = "localhost/citc/volunteer_signup/";
 
 /**
  * Creates an array of n length

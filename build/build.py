@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import http.client, os.path, urllib.parse, time
 
+BASE_PATH = "/Applications/MAMP/htdocs/citc/volunteer_signup/"
+
 '''
 Build Script that automates the necessary actions before committing the code.
 '''
@@ -55,11 +57,10 @@ def overwriteFile(filePath, text):
 if __name__ == "__main__":
     start = time.time()
     # Compress CSS files
-    overwriteFile("/Applications/MAMP/htdocs/citc/develop/css/min/styles-min.css", compressCSS("/Applications/MAMP/htdocs/citc/develop/css/styles.css"))
+    overwriteFile(BASE_PATH + "css/min/styles-min.css", compressCSS(BASE_PATH + "css/styles.css"))
     print("Compressing CSS files %.2f seconds" % (time.time() - start))
 
     start = time.time()
     # Compress JavaScript files
-    overwriteFile("/Applications/MAMP/htdocs/citc/develop/javascript/min/functions-min.js", compressJavaScript("/Applications/MAMP/htdocs/citc/develop/javascript/functions.js"))
+    overwriteFile(BASE_PATH + "javascript/min/functions-min.js", compressJavaScript(BASE_PATH + "javascript/functions.js"))
     print("Compressing Javascript files %.2f seconds" % (time.time() - start))
-    print("... Complete ...")

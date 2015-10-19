@@ -5,6 +5,20 @@ include_once("common_utils/functions.php");
 
 // Ensure user is valid
 require("verifyUser.php");
+
+// Handle Post
+if (isset($_POST["pdate"]) && isset($_POST["ptitle"])) {
+    $app->createNewEvent($_POST["pdate"]);
+    for ($i = 0; $i < count($_POST["ptitle"]); $i++) {
+        $app->createNewPosition($_POST["ptitle"][$i],
+            $_POST["pdescription"][$i], abs($_POST["pmaxreg"][$i]),
+            $_POST["pdate"], date("H:i:s", strtotime($_POST["pstarttime"][$i])));
+    }
+} else if(isset($_GET["toggleRegistration"]) && isset($_GET["flag"])) {
+    $app->toggleShiftAvailability($_GET["toggleRegistration"], $_GET["flag"]);
+} else if(isset($_POST["pid"]) && isset($_POST["ptitle"]) && isset($_POST["pdescription"]) && isset($_POST["pmaxreg"])) {
+    $app->updatePositionshift($_POST["pid"], $_POST["ptitle"], $_POST["pdescription"], $_POST["pmaxreg"]);
+}
 ?>
 
 <?php $pageTitle = "Volunteer Administration"; include("header.php"); ?>
@@ -37,7 +51,7 @@ require("verifyUser.php");
             </p>
             <button data-step="0" data-next="1" data-tipcontext="#tip1"
                     class="form-button right">Next <i
-                    class="icon-chevron-right"></i></button>
+                    class="fa fa-chevron-circle-right"></i></button>
         </div>
         <div class="tooltip">
             <span class="tip_arrow"></span>
@@ -47,7 +61,7 @@ require("verifyUser.php");
             </p>
             <button data-step="1" data-next="-1" data-tipcontext="#tip2"
                     class="form-button right">Next <i
-                    class="icon-chevron-right"></i></button>
+                    class="fa fa-chevron-circle-right"></i></button>
         </div>
         <div class="tooltip">
             <span class="tip_arrow"></span>
@@ -63,21 +77,6 @@ require("verifyUser.php");
         <div id="overlay"></div>
 
         <div id="new-event-form" class="hidden">
-            <?
-            // Handle Post
-            if (isset($_POST["pdate"]) && isset($_POST["ptitle"])) {
-                echo "Requirements met";
-                $app->createNewEvent($_POST["pdate"]);
-                for ($i = 0; $i < count($_POST["ptitle"]); $i++) {
-                    $app->createNewPosition($_POST["ptitle"][$i],
-                        $_POST["pdescription"][$i], abs($_POST["pmaxreg"][$i]),
-                        $_POST["pdate"], date("H:i:s", strtotime($_POST["pstarttime"][$i])));
-                }
-            } else {
-                echo "False";
-            }
-            ?>
-
             <form class="card" action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
                 <section>
                     <div class="directions">
@@ -113,13 +112,13 @@ require("verifyUser.php");
                         <fieldset id="vol_pos">
                             <label class="block" for="ptitle[]">Name of the Shift</label>
                             <input type="text" class="form-field" name="ptitle[]"
-                                   placeholder="Shift Title" id="ptitle[]"/>
+                                   placeholder="Shift Title" id="ptitle"/>
 
                             <label class="block" for="pdescription[]">A brief
                                 description of the activities involved.
                             </label>
                             <textarea maxlength="700" name="pdescription[]"
-                                      class="form-field" id="pdescription[]"
+                                      class="form-field" id="pdescription"
                                       placeholder="Description"></textarea>
 
                             <label class="block" for="shift-start-time">
@@ -134,25 +133,54 @@ require("verifyUser.php");
                             </label>
                             <div class="counter">
                                 <input name="pmaxreg[]" class="form-field"
-                                       id="pmaxreg[]" type="text" placeholder="0"/>
+                                       id="pmaxreg" type="text" placeholder="0"/>
 
                                 <div class="counter-incrementers">
                                     <button class="subCount" data-increment="-1" onclick="return false;">
-                                        <i class="icon-minus"></i>
+                                        <i class="fa fa-minus"></i>
                                     </button>
                                     <button class="addCount" data-increment="1" onclick="return false;">
-                                        <i class="icon-plus"></i>
+                                        <i class="fa fa-plus"></i>
                                     </button>
                                 </div>
                             </div>
                         </fieldset>
-                        <button id="add_position" style="float:right"
-                                class="form-button">
-                            <i class='icon-plus-sign'>&nbsp;</i>Add
+                        <button id="add_position" style="float:right" class="form-button">
+                            <i class='fa fa-plus'>&nbsp;</i>Add
                         </button>
                     </div>
                 </section>
 
+                <input type="submit" class="form-button right" value="submit"/>
+                <div class="clear"></div>
+            </form>
+            <div class="clear"></div>
+        </div>
+
+        <div id="edit-event-form" class="hidden">
+            <form class="card" action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
+                <h2 id="tip1">Edit Shift</h2>
+                <label class="block" for="ptitle">Name of the Shift</label>
+                <input type="text" class="form-field" name="ptitle" placeholder="Shift Title" id="ptitle"/>
+                <label class="block" for="pdescription">A brief description of the activities involved.</label>
+                <textarea maxlength="700" name="pdescription" class="form-field" id="pdescription" placeholder="Description"></textarea>
+                <label class="block" for="pmaxreg">
+                                Number of volunteers
+                            </label>
+                            <div class="counter">
+                                <input name="pmaxreg" class="form-field"
+                                       id="pmaxreg" type="text" placeholder="0"/>
+
+                                <div class="counter-incrementers">
+                                    <button class="subCount" data-increment="-1" onclick="return false;">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                    <button class="addCount" data-increment="1" onclick="return false;">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                <input type="hidden" name="pid" id="pid"/>
                 <input type="submit" class="form-button right" value="submit"/>
                 <div class="clear"></div>
             </form>

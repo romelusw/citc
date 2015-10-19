@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                name="vol_firstName" placeholder="First Name"
                                value="<?= $_POST["vol_firstName"]; ?>"/>
                         <label for="signup-fname">
-                            <i class="icon-user"></i>
+                            <i class="fa fa-user"></i>
                             <span class="require-icon">*</span>
                         </label>
 
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="form-field-section">
                         <?= Utils::generateUIError($errorMessages['Email']); ?>
-                        <label for="signup-email"><i class="icon-envelope-alt"></i>
+                        <label for="signup-email"><i class="fa fa-envelope"></i>
                             <span class="require-icon">*</span>
                         </label>
                         <input type="email" id="signup-lname" class="form-field validate"
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="form-field-section">
                         <?= Utils::generateUIError($errorMessages['Telephone Number']); ?>
-                        <label for="signup-tel"><i class="icon-phone"></i><span
+                        <label for="signup-tel"><i class="fa fa-phone"></i><span
                                 class="require-icon">*</span></label>
                         <input type="tel" id="signup-tel" class="form-field validate"
                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-field-section">
                         <?= Utils::generateUIError($errorMessages['Volunteer Position']); ?>
                         <label for="signup-pos">
-                            <i class="icon-suitcase"></i> Position(s)
+                            <i class="fa fa-suitcase"></i> Position(s)
                             <span class="require-icon">*</span>
                             <p>Refer to the
                                 <a href="http://christmasinthecity.org/volunteer/"
@@ -172,11 +172,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="counter-incrementers">
                                     <button class="subCount" onclick="return false;"
                                             data-increment="-1">
-                                        <i class="icon-minus"></i>
+                                        <i class="fa fa-minus"></i>
                                     </button>
                                     <button class="addCount" onclick="return false;"
                                             data-increment="1">
-                                        <i class="icon-plus"></i>
+                                        <i class="fa fa-plus"></i>
                                     </button>
                                 </div>
                             </div>
@@ -198,11 +198,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="counter-incrementers">
                                 <button class="subCount" onclick="return false;"
                                         data-increment="-1">
-                                    <i class="icon-minus"></i>
+                                    <i class="fa fa-minus"></i>
                                 </button>
                                 <button class="addCount" onclick="return false;"
                                         data-increment="1">
-                                    <i class="icon-plus"></i>
+                                    <i class="fa fa-plus"></i>
                                 </button>
                             </div>
                             <div class="clear"></div>
