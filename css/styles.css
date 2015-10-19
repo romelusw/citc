@@ -17,6 +17,10 @@ html {
     color: white;
 }
 
+button:focus{
+    outline: none;
+}
+
 body {
     font-family: 'Oxygen', sans-serif;
     font-size: 14px;
@@ -72,6 +76,26 @@ fieldset {
     border: none;
     padding: 0;
 }
+
+button.round{
+    margin:0;
+    padding: 0;
+    font-size: 14px;
+    background-color: transparent;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    border-style: none;
+    vertical-align: middle;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    color: #446DB2;
+}
+button.round:hover{
+    background-color: #446DB2;
+    color: white;
+}
+
 /*..... End Base Elements .....*/
 
 #content{
@@ -218,13 +242,13 @@ fieldset {
 
 #mainbody #left{
     float: left;
-    width: 67%;
+    width: 49%;
     margin-bottom: 10px;
 }
 
 #mainbody #right{
     float: right;
-    width: 30%;
+    width: 50%;
     max-height: 375px;
     overflow-y: auto;
     margin-bottom: 10px;
@@ -232,13 +256,13 @@ fieldset {
 
 #mainbody #center {
     float: left;
-    width: 78%;
+    width: 81%;
     margin: 0 5px 0 0;
 }
 
 #sidebar {
     float: left;
-    width: 18%;
+    width: 15%;
     margin: 0 20px 0 0;
 }
 
@@ -480,11 +504,10 @@ input[type='email'], input[type='tel'] {
 }
 
 .card {
-    border: 1px solid #cecec8;
     border-radius: 2px;
     padding: 20px;
     background: #fff;
-    box-shadow: 0 0 13px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 2px 1px -1px rgba(0,0,0,.12);
     position: relative;
 }
 
@@ -531,6 +554,15 @@ input[type='email'], input[type='tel'] {
 
 .yellow-color{
     color: #e6bc12;
+}
+
+#edit-event-form{
+    z-index: 1;
+    margin-top: 40px;
+    position: absolute;
+    width: 400px;
+    left: 50%;
+    margin-left: -200px;
 }
 
 #new-event-form{
@@ -650,7 +682,7 @@ input[type='email'], input[type='tel'] {
 
 table.vol_table .active {
     background-color: #cde3b2;
-    border: 1px solid #9cc867;
+    border-bottom: 1px solid #9cc867;
     color: inherit;
     padding: 10px;
     text-align: center;
@@ -665,7 +697,7 @@ table.vol_table {
 }
 
 table.vol_table td {
-    border: 1px solid #d3d3d3;
+    border-bottom: 1px solid #d3d3d3;
     padding: 10px;
     text-align: left;
 }
@@ -673,6 +705,7 @@ table.vol_table td {
 table.vol_table td.special {
     background-color: #e7ecf1;
     border-bottom: 1px solid #cbd7e2;
+    border-right: 1px solid #cbd7e2;
     color: #446DB2;
 }
 

@@ -120,8 +120,11 @@ $(document).ready(function () {
     $(".sidebar_list").on("click", "li:not('.clicked')", function () {
         $(".sidebar_list li").removeClass("clicked");
         $(this).addClass("clicked");
+        fetchShifts($(this).attr("data-date"));
+        
+    });
 
-        var date = $(this).attr("data-date");
+    function fetchShifts(date) {
         $.ajax({
             url: "volunteerREST.php?specificDate=" + date,
             type: "GET",
@@ -135,7 +138,7 @@ $(document).ready(function () {
                 handleActionClick();
             }
         });
-    });
+    }
 
     /**
      * Binds events for the action section
@@ -263,6 +266,30 @@ $(document).ready(function () {
         $("#overlay").fadeOut();
     });
 
+    $("#right").on("click", "#volunteerDates button.round.edit", function() {
+        var parent = $(this).closest("tr");
+        var formWrap = $("#edit-event-form");
+        var form = formWrap.find("form");
+        form.find(":input#ptitle").val(parent.children("td").eq(0).text());
+        form.find(":input#pdescription").val(parent.children("td").eq(1).text());
+        form.find(":input#pmaxreg").val(parent.children("td").eq(2).text().split("/")[1]);
+        form.find(":input#pid").val(parent.data("id"));
+        $("#edit-event-form").fadeIn();
+        $("#overlay").fadeIn();
+    });
+
+     $("#right").on("click", "#volunteerDates button.round.restrict", function () {
+        var id = $(this).closest("tr").data("id");
+        var state = !$(this).children("i").hasClass("fa-lock");
+        $.ajax({
+            url: window.location.pathname + "?toggleRegistration=" + id + "&flag=" + state,
+            type: "GET",
+            success: function() {
+                fetchShifts($("li.clicked").data("date"));
+            }
+        });
+    });
+
     $("#add_event").on("click", function () {
         $("#new-event-form").fadeIn();
         $("#overlay").fadeIn();
@@ -285,7 +312,7 @@ $(document).ready(function () {
 
     $("#overlay").click(function () {
         var thiz = this;
-        $("#new-event-form").fadeOut(function () {
+        $("#new-event-form, #edit-event-form").fadeOut(function () {
             $(thiz).fadeOut();
         });
     });

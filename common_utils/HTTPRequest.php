@@ -36,12 +36,12 @@ class HTTPRequest {
      */
     function post($data) {
         $wrapperOpts = array('http' =>
-        array(
-            'method' => 'POST',
-            'header' => 'Content-type: application/x-www-form-urlencoded',
-            'content' => http_build_query($data, '', '&'),
-            'timeout' => 200
-        )
+            array(
+                'method' => 'POST',
+                'header' => 'Content-type: application/x-www-form-urlencoded',
+                'content' => http_build_query($data, '', '&'),
+                'timeout' => 200
+            )
         );
         $streamContext = stream_context_create($wrapperOpts);
         $fp = fopen("http://" . $this->url, $this->mode, 0, $streamContext);

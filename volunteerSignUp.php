@@ -75,7 +75,6 @@ class VolunteerAppCreator {
            curr_accepted int NOT NULL DEFAULT 0,
            max_registered int NOT NULL DEFAULT 0,
            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-           make_available tinyint NOT NULL DEFAULT 1,
            PRIMARY KEY (aud_id),
            UNIQUE KEY vol_day (vol_day))");
 
@@ -102,6 +101,7 @@ class VolunteerAppCreator {
            date date NOT NULL,
            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
            starttime time NOT NULL,
+           make_available tinyint(1) NOT NULL DEFAULT 1,
            PRIMARY KEY (pid),
            UNIQUE KEY distinct_positions (title, date))");
 
@@ -406,12 +406,13 @@ class VolunteerAppCreator {
         // Sanitize the user input
         $year = $this->connection->cleanSQLInputs($year);
 
-        return $this->connection->runQuery("SELECT DISTINCT vol_day
-            FROM volunteer_audit
-            WHERE Year(vol_day) = '$year'
-            AND curr_accepted < max_registered
-            AND make_available = 1
-            ORDER BY vol_day ASC");
+        return $this->connection->runQuery("SELECT DISTINCT vol_day FROM volunteer_audit AS va
+          JOIN volunteer_positions AS vp
+          ON va.vol_day = vp.date
+          AND vp.make_available = 1
+          WHERE YEAR(va.vol_day) = $year
+          AND curr_accepted < max_registered
+          ORDER BY vol_day ASC");
     }
 
     /**
@@ -449,8 +450,8 @@ class VolunteerAppCreator {
               WHERE position = title
               AND volunteer_day = date
               AND accepted = " . acceptedUser . ") as reg_users,
-          max_users
-          FROM (SELECT title, description, max_users, date, starttime
+          max_users, pid, make_available
+          FROM (SELECT title, description, max_users, date, starttime, pid, make_available
               FROM volunteers
               RIGHT JOIN (volunteer_positions)
               ON volunteers.volunteer_day = volunteer_positions.date) AS t1
@@ -477,7 +478,8 @@ class VolunteerAppCreator {
                     AND accepted = 1) as reg_num,
                     max_users, starttime
                 FROM volunteer_positions
-                WHERE date = '$date') t
+                WHERE date = '$date'
+                AND make_available = 1) t
             WHERE reg_num < max_users
             ORDER BY starttime, title ASC");
     }
@@ -513,11 +515,10 @@ class VolunteerAppCreator {
      * @return bool indicating if there are any available slots left
      */
     function eventsFull() {
-        return $this->connection->runQuery("SELECT vol_day
-            FROM volunteer_audit
-            WHERE curr_accepted < max_registered
-            AND make_available = 1
-            AND Year(vol_day) = Year(NOW())")->num_rows == 0;
+        return $this->connection->runQuery("SELECT vol_day FROM volunteer_audit AS va
+          JOIN volunteer_positions AS vp ON va.vol_day = vp.date AND vp.make_available = 1
+          WHERE curr_accepted < max_registered
+          AND Year(vol_day) = Year(NOW())")->num_rows == 0;
     }
 
     /**
@@ -642,20 +643,19 @@ class VolunteerAppCreator {
     }
 
     /**
-     * Updates the text for the volunteer position for a specific title and
-     * date combination.
+     * Updates the volunteer shift with specifics.
      *
-     * @param $updText the new content to switch the description to
-     * @param $title the title that will have its description changed
-     * @param $date the date associated to the the position
+     * @param $pid the record id
+     * @param $title the title that will change
+     * @param $desc the description that will change
+     * @param $max the max users that will change
      * @return mixed either a flag indicating if the statement was successful
      * or the error for the statement
      */
-    function updatePositionTitle($updText, $title, $date) {
+    function updatePositionshift($pid, $title, $desc, $max) {
         return $this->connection->runPreparedQuery("UPDATE volunteer_positions
-            SET description = ?
-            WHERE title = ?
-            AND date = ?", array($updText, $title, $date));
+            SET description = ?, title = ?, max_users = ?
+            WHERE pid = $pid LIMIT 1;", array($desc, $title, $max));
     }
 
     /**
@@ -680,6 +680,20 @@ class VolunteerAppCreator {
             AND email = '$useremail'
             AND position = '$position'
             LIMIT 1");
+    }
+
+    /**
+     * Toggles the state of a shift's availability.
+     *
+     * @param $pid the shift's id
+     * @param $flag the boolean flag to set
+     * @return mysqli_result of the query
+     */
+    function toggleShiftAvailability($pid, $flag) {
+        $pid = $this->connection->cleanSQLInputs($pid);
+        return $this->connection->runQuery("UPDATE volunteer_positions
+          SET make_available = $flag
+          WHERE pid = $pid LIMIT 1");
     }
 
     /**
@@ -742,17 +756,20 @@ class VolunteerAppCreator {
         }
 
         $result = "<table class='vol_table'><tr class='def_cursor'>
-            <th colspan='3'>Positions</th></tr><tr class='def_cursor'>
+            <th colspan='4'>Positions</th></tr><tr class='def_cursor'>
             <td style='width: 25%;'>Title</td><td>Description</td><td
-            >Accepted</td></tr>";
+            >Accepted</td><td>Actions</td></tr>";
 
         while ($ans = $row->fetch_row()) {
             $title = $ans[0];
             $desc = $ans[1];
             $divisor = $ans[3];
             $dividend = $ans[4];
-            $result .= "<tr><td class='special'>$title</td><td class='modifiable_desc'>$desc</td>
-            <td>$divisor / $dividend</td></tr>";
+            $id = $ans[5];
+            $flag = boolval($ans[6]) ? "lock" : "unlock";
+            $result .= "<tr data-id=\"$id\"><td class='special'>$title</td><td class='modifiable_desc'>$desc</td>
+            <td>$divisor / $dividend</td><td><button title=\"Edit Shift\" class=\"round edit\"><i class=\"fa fa-pencil\">&nbsp;</i></button>
+            <button title=\"Hide from registrants\" class=\"round restrict\"><i class=\"fa fa-$flag\"></i></button></td></tr>";
         }
 
         $result .= "</table>";
@@ -810,7 +827,7 @@ class VolunteerAppCreator {
 
         while ($ans = $row->fetch_row()) {
             $result .= "<li data-date='$ans[0]'>"
-                . "<i class='icon-calendar'>&nbsp;</i> "
+                . "<i class='fa fa-calendar'></i> "
                 . date("l F jS, Y", strtotime($ans[0])) . "</li>";
         }
 

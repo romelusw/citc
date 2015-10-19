@@ -51,10 +51,10 @@
         // Add next/back buttons
         if (wizardOpt.allowBack) {
             $(wizardHTML).append("<button data-dir='-1' class='fw_transition\
-                fw_back'><i class='icon-chevron-sign-left'></i></button>");
+                fw_back'><i class='fa fa-chevron-circle-left'></i></button>");
         }
         $(wizardHTML).append("<button data-dir='1' class='fw_transition\
-            fw_next'><i class='icon-chevron-sign-right'></i></button>");
+            fw_next'><i class='fa fa-chevron-circle-right'></i></button>");
         $(formCtx).append(wizardHTML);
 
         _bindClickHandler(formCtx);
